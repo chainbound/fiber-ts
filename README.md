@@ -33,7 +33,7 @@ const client = new Client('YOUR_API_HERE');
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const sub = client.SubscribeNewTxs();
+const sub = client.subscribeNewTxs();
 
 sub.on('tx', (tx: ethers.Transaction) => {
     handleTx(tx);
@@ -51,7 +51,7 @@ const client = new Client('YOUR_API_HERE');
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const sub = client.SubscribeNewTxs();
+const sub = client.subscribeNewBlocks();
 
 sub.on('block', (block: Block) => {
     handleBlock(block);
