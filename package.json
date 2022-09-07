@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
+    "test": "ts-node src/test.ts",
     "build": "bash ./build.sh"
   }
 }
