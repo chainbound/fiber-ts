@@ -240,7 +240,7 @@ function hexToBytes(str: string) {
 
 async function main() {
     // const client = new Client("fiber-node.fly.dev:8080")
-    const client = new Client("[2a09:8280:1::6ea1]:8080")
+    const client = new Client("localhost:8080")
     console.log('connecting')
     await client.waitForReady(10);
     console.log('ready')
@@ -253,11 +253,11 @@ async function main() {
             return
         }
 
-        console.log(newtx);
+        console.log("https://etherscan.io/tx/" + newtx.hash);
 
-        const wallet = new ethers.Wallet('4502f722688068f34416a95347ca908cee55973bd4fce6c54dc1e466744310f7')
+        const wallet = new ethers.Wallet('15bb7dd02dd8805338310f045ae9975aedb7c90285618bd2ecdc91db52170a90')
 
-        const nonce = 89;
+        const nonce = 3;
 
         let signed = await wallet.signTransaction({
             chainId: 1,
@@ -289,7 +289,7 @@ async function main() {
         try {
             const res = await client.backrunTransaction(newtx.hash!, parsed);
             // const res = await client.sendTransaction(parsed);
-            console.log(res);
+            console.log("https://etherscan.io/tx/" + res.hash);
         } catch (err) {
             console.error(err)
         }
