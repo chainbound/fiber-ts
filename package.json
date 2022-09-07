@@ -28,6 +28,6 @@
     "proto": "bash ./build.sh",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "prepublishOnly": "build"
+    "prepublishOnly": "tsc --build"
   }
 }
