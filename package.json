@@ -1,7 +1,16 @@
 {
   "name": "fiber-ts",
-  "version": "0.0.1",
-  "main": "src/index.ts",
+  "version": "1.0.0",
+  "description": "Client package for connecting to Fiber Network",
+  "repository": {
+    "url": "https://github.com/chainbound/fiber-ts"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "mempirate",
+  "keywords" :[
+    "ethereum", "mempool", "mev", "networking"
+  ],
   "license": "MIT",
   "dependencies": {
     "@grpc/grpc-js": "^1.6.12",
@@ -16,6 +25,9 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "test": "ts-node src/test.ts",
-    "build": "bash ./build.sh"
+    "proto": "bash ./build.sh",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "prepublishOnly": "build"
   }
 }
