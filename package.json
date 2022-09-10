@@ -8,11 +8,17 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "mempirate",
-  "keywords" :[
-    "ethereum", "mempool", "mev", "networking"
+  "keywords": [
+    "ethereum",
+    "mempool",
+    "mev",
+    "networking"
   ],
   "license": "MIT",
   "dependencies": {
+    "@ethereumjs/common": "^3.0.0",
+    "@ethereumjs/tx": "^4.0.0",
+    "@ethereumjs/util": "^8.0.0",
     "@grpc/grpc-js": "^1.6.12",
     "ethers": "^5.7.0"
   },
