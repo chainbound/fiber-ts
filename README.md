@@ -22,11 +22,12 @@ await client.waitForReady(10);
 The client exposes 2 subscriptions: **transactions** and **blocks**.
 They are implemented as event emitters which you can listen to.
 #### Transactions
-`fiber-ts` works with [ethers](https://docs.ethers.io/v5/) internally, and transactions are implemented as
-`ethers.Transaction`.
+`fiber-ts` works with [ethereumjs](https://github.com/ethereumjs/ethereumjs-monorepo) internally, 
+and transactions are implemented as `@ethereumjs/tx.TypedTransaction`.
+This is for a couple reasons, but most importantly performance.
 ```ts
 import { Client } from 'fiber-ts';
-import { ethers } from 'ethers';
+import { TypedTransaction } from '@ethereumjs/tx';
 
 const client = new Client('YOUR_API_HERE');
 
@@ -35,13 +36,13 @@ await client.waitForReady(10);
 
 const sub = client.subscribeNewTxs();
 
-sub.on('tx', (tx: ethers.Transaction) => {
+sub.on('tx', (tx: TypedTransaction) => {
     handleTx(tx);
 });
 ```
 
 #### Blocks
-Blocks have their own type: `fiber-ts.Block`. The list of transactions are once again `ethers.Transaction`s.
+Blocks have their own type: `fiber-ts.Block`. The list of transactions are once again `TypedTransaction`s.
 
 ```ts
 import { Client, Block } from 'fiber-ts';
@@ -63,35 +64,38 @@ sub.on('block', (block: Block) => {
 * `client.sendTransaction` for just sending a normal transaction.
 * `client.backrunTransaction` for backrunning a transaction.
 
+For constructing transactions, I recommend using `TransactionFactory`. This will automatically
+create a typed transaction from the given transaction data.
+
 #### `sendTransaction`
 ```ts
 import { Client, TransactionResponse } from 'fiber-ts';
-import { ethers } from 'ethers';
+import { TypedTransaction, TransactionFactory } from '@ethereumjs/tx';
 
 const client = new Client('YOUR_API_HERE');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const wallet = new ethers.Wallet('PRIVATE_KEY')
+const pk = Buffer.from('PRIVATE_KEY', 'hex');
 
-// Sign the transaction
-let signed = await wallet.signTransaction({
+// Build an EIP1559 TypedTransaction with ethereumjs
+const tx = TransactionFactory.fromTxData({
     chainId: 1,
     type: 2,
     to: '0x...',
     gasLimit: 21000,
     value: 0,
     nonce: 21,
-    maxFeePerGas: ethers.utils.parseUnits('20', 'gwei'),
-    maxPriorityFeePerGas: ethers.utils.parseUnits('2', 'gwei'),
+    maxFeePerGas: 20 * 1e9,
+    maxPriorityFeePerGas: 2 * 1e9,
 });
 
-// Parse the transaction to use with client
-const parsed = ethers.utils.parseTransaction(signed);
+// Sign the transaction
+const signed = tx.sign(pk);
 
 // Result contains the timestamp (unix microseconds) and hash of the transaction
-const result: TransactionResponse = await client.sendTransaction(parsed);
+const result: TransactionResponse = await client.sendTransaction(signed);
 ```
 #### `backrunTransaction`
 This endpoint is specifically for backrunning a transaction. It takes a target transaction
@@ -101,31 +105,30 @@ arrive before the target transaction at a block producer, ensuring the correct s
 
 ```ts
 import { Client, TransactionResponse } from 'fiber-ts';
-import { ethers } from 'ethers';
+import { TypedTransaction, TransactionFactory } from '@ethereumjs/tx';
 
 const client = new Client('YOUR_API_HERE');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const wallet = new ethers.Wallet('PRIVATE_KEY')
+const pk = Buffer.from('PRIVATE_KEY', 'hex');
 
-// Sign the transaction
-let signed = await wallet.signTransaction({
+// Build a TypedTransaction with ethereumjs
+const tx = TransactionFactory.fromTxData({
     chainId: 1,
     type: 2,
     to: '0x...',
     gasLimit: 21000,
     value: 0,
     nonce: 21,
-    maxFeePerGas: ethers.utils.parseUnits('20', 'gwei'),
-    maxPriorityFeePerGas: ethers.utils.parseUnits('2', 'gwei'),
+    maxFeePerGas: 20 * 1e9,
+    maxPriorityFeePerGas: 2 * 1e9,
 });
 
-// Parse the transaction to use with client
-const parsed = ethers.utils.parseTransaction(signed);
-const targetHash = '0xabcd...'
+const signed = tx.sign(pk);
+const targetHash = '0xdeadbeef...'
 
 // Result contains the timestamp (unix microseconds) and hash of the transaction
-const result: TransactionResponse = await client.backrunTransaction(targetHash, parsed);
+const result: TransactionResponse = await client.backrunTransaction(targetHash, signed);
 ```

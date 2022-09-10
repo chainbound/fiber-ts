@@ -54,6 +54,11 @@ export class Client {
         return new BlockStream(stream);
     }
 
+    /**
+     * sends a transaction 
+     * @param tx a signed! typed transaction
+     * @returns response containing hash and timestamp
+     */
     async sendTransaction(tx: TypedTransaction): Promise<TransactionResponse> {
         return new Promise((resolve, reject) => {
             this._client.sendTransaction(toProto(tx), (err, res) => {
@@ -69,6 +74,12 @@ export class Client {
         });
     }
 
+    /**
+     * 
+     * @param hash hash of target transaction
+     * @param tx a signed! typed transaction
+     * @returns response containing hash and timestamp
+     */
     async backrunTransaction(hash: string, tx: TypedTransaction): Promise<TransactionResponse> {
         const backrunMsg = new BackrunMsg();
         backrunMsg.setHash(hash);
