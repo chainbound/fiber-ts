@@ -1,8 +1,9 @@
 /// <reference types="node" />
-import eth from '../protobuf/eth_pb';
 import { ClientReadableStream } from '@grpc/grpc-js';
 import { EventEmitter } from 'events';
 import { ethers } from 'ethers';
+import { TypedTransaction } from '@ethereumjs/tx';
+import eth from '../protobuf/eth_pb';
 export interface TransactionResponse {
     hash: string;
     timestamp: number;
@@ -21,8 +22,19 @@ export declare class Client {
      * @returns {BlockStream} - emits new blocks as events
      */
     subscribeNewBlocks(): BlockStream;
-    sendTransaction(tx: ethers.Transaction): Promise<TransactionResponse>;
-    backrunTransaction(hash: string, tx: ethers.Transaction): Promise<TransactionResponse>;
+    /**
+     * sends a transaction
+     * @param tx a signed! typed transaction
+     * @returns response containing hash and timestamp
+     */
+    sendTransaction(tx: TypedTransaction): Promise<TransactionResponse>;
+    /**
+     *
+     * @param hash hash of target transaction
+     * @param tx a signed! typed transaction
+     * @returns response containing hash and timestamp
+     */
+    backrunTransaction(hash: string, tx: TypedTransaction): Promise<TransactionResponse>;
 }
 declare class TxStream extends EventEmitter {
     private _txStream;
@@ -40,7 +52,7 @@ export interface Block {
     gasUsed: ethers.BigNumber;
     coinbase: string;
     extraData: string;
-    transactions: ethers.Transaction[];
+    transactions: TypedTransaction[];
 }
 declare class BlockStream extends EventEmitter {
     private _txStream;
