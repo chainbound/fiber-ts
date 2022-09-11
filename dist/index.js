@@ -13,9 +13,11 @@ const tx_1 = require("@ethereumjs/tx");
 const eth_pb_1 = __importDefault(require("../protobuf/eth_pb"));
 const util_1 = require("@ethereumjs/util");
 class Client {
-    constructor(target) {
+    constructor(target, apiKey) {
         // this._client = new API;
         this._client = new api_grpc_pb_1.APIClient(target, grpc_js_1.credentials.createInsecure());
+        this._md = new grpc_js_1.Metadata();
+        this._md.add('x-api-key', apiKey);
     }
     waitForReady(seconds) {
         const deadline = new Date();
@@ -36,7 +38,7 @@ class Client {
      * @returns {TxStream} - emits new txs as events
      */
     subscribeNewTxs() {
-        const stream = this._client.subscribeNewTxs(new api_pb_1.TxFilter());
+        const stream = this._client.subscribeNewTxs(new api_pb_1.TxFilter(), this._md);
         return new TxStream(stream);
     }
     /**
@@ -44,7 +46,7 @@ class Client {
      * @returns {BlockStream} - emits new blocks as events
      */
     subscribeNewBlocks() {
-        const stream = this._client.subscribeNewBlocks(new api_pb_1.BlockFilter());
+        const stream = this._client.subscribeNewBlocks(new api_pb_1.BlockFilter(), this._md);
         return new BlockStream(stream);
     }
     /**
@@ -54,7 +56,7 @@ class Client {
      */
     async sendTransaction(tx) {
         return new Promise((resolve, reject) => {
-            this._client.sendTransaction(toProto(tx), (err, res) => {
+            this._client.sendTransaction(toProto(tx), this._md, (err, res) => {
                 if (err) {
                     reject(err);
                 }
@@ -78,7 +80,7 @@ class Client {
         backrunMsg.setHash(hash);
         backrunMsg.setTx(toProto(tx));
         return new Promise((resolve, reject) => {
-            this._client.backrun(backrunMsg, (err, res) => {
+            this._client.backrun(backrunMsg, this._md, (err, res) => {
                 if (err) {
                     reject(err);
                 }

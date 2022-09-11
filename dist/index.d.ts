@@ -10,7 +10,8 @@ export interface TransactionResponse {
 }
 export declare class Client {
     private _client;
-    constructor(target: string);
+    private _md;
+    constructor(target: string, apiKey: string);
     waitForReady(seconds: number): Promise<void>;
     /**
      * subscribes to the new transactions stream.

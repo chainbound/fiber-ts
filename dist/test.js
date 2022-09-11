@@ -4,7 +4,7 @@ const index_1 = require("./index");
 const tx_1 = require("@ethereumjs/tx");
 async function main() {
     // const client = new Client("fiber-node.fly.dev:8080")
-    const client = new index_1.Client("localhost:8080");
+    const client = new index_1.Client("localhost:8080", "fiber/v0.0.2-alpha/test-key-123");
     console.log('connecting');
     await client.waitForReady(10);
     console.log('ready');
