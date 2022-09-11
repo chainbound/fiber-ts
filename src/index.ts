@@ -1,5 +1,5 @@
 import { APIClient } from '../protobuf/api_grpc_pb';
-import { ClientReadableStream, credentials } from '@grpc/grpc-js';
+import { ClientReadableStream, credentials, Metadata } from '@grpc/grpc-js';
 import { BackrunMsg, BlockFilter, TxFilter } from '../protobuf/api_pb';
 import { EventEmitter } from 'events';
 import { ethers } from 'ethers';
@@ -14,10 +14,13 @@ export interface TransactionResponse {
 
 export class Client {
     private _client: APIClient;
+    private _md: Metadata;
 
-    constructor(target: string) {
+    constructor(target: string, apiKey: string) {
         // this._client = new API;
         this._client = new APIClient(target, credentials.createInsecure());
+        this._md = new Metadata();
+        this._md.add('x-api-key', apiKey)
 
     }
 
@@ -41,7 +44,7 @@ export class Client {
      * @returns {TxStream} - emits new txs as events
      */
     subscribeNewTxs(): TxStream {
-        const stream = this._client.subscribeNewTxs(new TxFilter());
+        const stream = this._client.subscribeNewTxs(new TxFilter(), this._md);
         return new TxStream(stream);
     }
 
@@ -50,7 +53,7 @@ export class Client {
      * @returns {BlockStream} - emits new blocks as events
      */
     subscribeNewBlocks(): BlockStream {
-        const stream = this._client.subscribeNewBlocks(new BlockFilter());
+        const stream = this._client.subscribeNewBlocks(new BlockFilter(), this._md);
         return new BlockStream(stream);
     }
 
@@ -61,7 +64,7 @@ export class Client {
      */
     async sendTransaction(tx: TypedTransaction): Promise<TransactionResponse> {
         return new Promise((resolve, reject) => {
-            this._client.sendTransaction(toProto(tx), (err, res) => {
+            this._client.sendTransaction(toProto(tx), this._md, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -86,7 +89,7 @@ export class Client {
         backrunMsg.setTx(toProto(tx));
 
         return new Promise((resolve, reject) => {
-            this._client.backrun(backrunMsg, (err, res) => {
+            this._client.backrun(backrunMsg, this._md, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {

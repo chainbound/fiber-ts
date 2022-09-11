@@ -12,7 +12,7 @@ yarn add fiber-ts
 ```ts
 import { Client } from 'fiber-ts';
 
-const client = new Client('YOUR_API_HERE');
+const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
@@ -47,7 +47,7 @@ Blocks have their own type: `fiber-ts.Block`. The list of transactions are once 
 ```ts
 import { Client, Block } from 'fiber-ts';
 
-const client = new Client('YOUR_API_HERE');
+const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
@@ -72,7 +72,7 @@ create a typed transaction from the given transaction data.
 import { Client, TransactionResponse } from 'fiber-ts';
 import { TypedTransaction, TransactionFactory } from '@ethereumjs/tx';
 
-const client = new Client('YOUR_API_HERE');
+const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
@@ -107,7 +107,7 @@ arrive before the target transaction at a block producer, ensuring the correct s
 import { Client, TransactionResponse } from 'fiber-ts';
 import { TypedTransaction, TransactionFactory } from '@ethereumjs/tx';
 
-const client = new Client('YOUR_API_HERE');
+const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
