@@ -29,7 +29,7 @@ This is for a couple reasons, but most importantly performance.
 import { Client } from 'fiber-ts';
 import { TypedTransaction } from '@ethereumjs/tx';
 
-const client = new Client('YOUR_API_HERE');
+const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
