@@ -20,7 +20,8 @@
     "@ethereumjs/tx": "^4.0.0",
     "@ethereumjs/util": "^8.0.0",
     "@grpc/grpc-js": "^1.6.12",
-    "ethers": "^5.7.0"
+    "ethers": "^5.7.0",
+    "google-protobuf": "^3.21.0"
   },
   "devDependencies": {
     "grpc-tools": "^1.11.2",

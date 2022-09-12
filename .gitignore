@@ -1,3 +1,4 @@
 build.sh
 node_modules/
 test.ts
+test.js
