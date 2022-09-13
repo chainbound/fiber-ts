@@ -30,6 +30,12 @@ export declare class Client {
      */
     sendTransaction(tx: TypedTransaction): Promise<TransactionResponse>;
     /**
+     * sends a transaction
+     * @param rawtx a serialized RLP encoded signed transaction in hexadecimal
+     * @returns response containing hash and timestamp
+     */
+    sendRawTransaction(rawtx: string): Promise<TransactionResponse>;
+    /**
      *
      * @param hash hash of target transaction
      * @param tx a signed! typed transaction

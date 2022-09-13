@@ -1,6 +1,6 @@
 {
   "name": "fiber-ts",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Client package for connecting to Fiber Network",
   "repository": {
     "url": "https://github.com/chainbound/fiber-ts"
