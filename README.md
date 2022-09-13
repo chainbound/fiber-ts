@@ -60,8 +60,9 @@ sub.on('block', (block: Block) => {
 ```
 
 ### Sending Transactions
-`fiber-ts` has 2 endpoints for sending transactions:
+`fiber-ts` has 3 endpoints for sending transactions:
 * `client.sendTransaction` for just sending a normal transaction.
+* `client.sendRawTransaction` for sending a raw transaction (signed with ethers or web3.js).
 * `client.backrunTransaction` for backrunning a transaction.
 
 For constructing transactions, I recommend using `TransactionFactory`. This will automatically
@@ -96,6 +97,26 @@ const signed = tx.sign(pk);
 
 // Result contains the timestamp (unix microseconds) and hash of the transaction
 const result: TransactionResponse = await client.sendTransaction(signed);
+```
+#### `sendRawTransaction`
+```ts
+import { Client } from 'fiber-ts';
+import { ethers } from 'ethers';
+
+const wallet = new ethers.Wallet('PRIVATE_KEY');
+
+const signedTx = await wallet.signTransaction({
+    chainId: 1,
+    type: 2,
+    to: '0x...',
+    gasLimit: 21000,
+    value: 0,
+    nonce: 21,
+    maxFeePerGas: 20 * 1e9,
+    maxPriorityFeePerGas: 2 * 1e9,
+});
+
+const result = await client.sendRawTransaction(signedTx);
 ```
 #### `backrunTransaction`
 This endpoint is specifically for backrunning a transaction. It takes a target transaction
