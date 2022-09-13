@@ -27,6 +27,17 @@ function deserialize_api_BlockFilter(buffer_arg) {
   return api_pb.BlockFilter.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_api_RawTxMsg(arg) {
+  if (!(arg instanceof api_pb.RawTxMsg)) {
+    throw new Error('Expected argument of type api.RawTxMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_RawTxMsg(buffer_arg) {
+  return api_pb.RawTxMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_api_TransactionResponse(arg) {
   if (!(arg instanceof api_pb.TransactionResponse)) {
     throw new Error('Expected argument of type api.TransactionResponse');
@@ -103,6 +114,17 @@ var APIService = exports.APIService = {
     responseType: api_pb.TransactionResponse,
     requestSerialize: serialize_eth_Transaction,
     requestDeserialize: deserialize_eth_Transaction,
+    responseSerialize: serialize_api_TransactionResponse,
+    responseDeserialize: deserialize_api_TransactionResponse,
+  },
+  sendRawTransaction: {
+    path: '/api.API/SendRawTransaction',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_pb.RawTxMsg,
+    responseType: api_pb.TransactionResponse,
+    requestSerialize: serialize_api_RawTxMsg,
+    requestDeserialize: deserialize_api_RawTxMsg,
     responseSerialize: serialize_api_TransactionResponse,
     responseDeserialize: deserialize_api_TransactionResponse,
   },

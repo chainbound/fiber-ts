@@ -55,6 +55,28 @@ export namespace BlockFilter {
     }
 }
 
+export class RawTxMsg extends jspb.Message { 
+    getRawtx(): Uint8Array | string;
+    getRawtx_asU8(): Uint8Array;
+    getRawtx_asB64(): string;
+    setRawtx(value: Uint8Array | string): RawTxMsg;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): RawTxMsg.AsObject;
+    static toObject(includeInstance: boolean, msg: RawTxMsg): RawTxMsg.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: RawTxMsg, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): RawTxMsg;
+    static deserializeBinaryFromReader(message: RawTxMsg, reader: jspb.BinaryReader): RawTxMsg;
+}
+
+export namespace RawTxMsg {
+    export type AsObject = {
+        rawtx: Uint8Array | string,
+    }
+}
+
 export class TransactionResponse extends jspb.Message { 
     getHash(): string;
     setHash(value: string): TransactionResponse;
