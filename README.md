@@ -1,6 +1,9 @@
 # Fiber TypeScript Client
 This package contains a JS/TS client for connecting to the Fiber Network.
 
+## Examples
+You can find some examples in the [examples directory](./examples).
+
 ## Usage
 ### Installation
 ```bash
