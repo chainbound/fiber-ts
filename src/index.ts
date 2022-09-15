@@ -204,10 +204,18 @@ function fromProto(tx: eth.Transaction): TypedTransaction {
     if (tx.getValue()) {
         value = BigInt("0x" + Buffer.from(tx.getValue()).toString('hex'))
     }
+
+    let to;
+    if (tx.getTo().length !== 0) {
+        to = new Address(Buffer.from(tx.getTo()));
+    } else {
+        to = Address.zero();
+    }
+
     return TransactionFactory.fromTxData({
         // hash: tx.getHash(),
         // from: bytesToHex(tx.getFrom()),
-        to: new Address(Buffer.from(tx.getTo())),
+        to: to,
         type: tx.getType(),
         nonce: BigInt(tx.getNonce()),
         gasLimit: BigInt(tx.getGas()),
