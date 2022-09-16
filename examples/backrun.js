@@ -21,7 +21,7 @@ async function main() {
     // On a transaction event, the callback handles the transaction
     sub.on('tx', async (tx) => {
         // If the sender is not our target, we return
-        if (tx.from.toLowerCase() !== targetSender) {
+        if (tx.getSenderAddress().toLowerCase() !== targetSender) {
             return
         }
 
