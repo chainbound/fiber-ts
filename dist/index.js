@@ -165,10 +165,17 @@ function fromProto(tx) {
     if (tx.getValue()) {
         value = BigInt("0x" + Buffer.from(tx.getValue()).toString('hex'));
     }
+    let to;
+    if (tx.getTo().length !== 0) {
+        to = new util_1.Address(Buffer.from(tx.getTo()));
+    }
+    else {
+        to = util_1.Address.zero();
+    }
     return tx_1.TransactionFactory.fromTxData({
         // hash: tx.getHash(),
         // from: bytesToHex(tx.getFrom()),
-        to: new util_1.Address(Buffer.from(tx.getTo())),
+        to: to,
         type: tx.getType(),
         nonce: BigInt(tx.getNonce()),
         gasLimit: BigInt(tx.getGas()),

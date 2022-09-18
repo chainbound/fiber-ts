@@ -1,6 +1,6 @@
 import { APIClient } from '../protobuf/api_grpc_pb';
 import { ClientReadableStream, credentials, Metadata } from '@grpc/grpc-js';
-import { BackrunMsg, BlockFilter, RawTxMsg, TxFilter } from '../protobuf/api_pb';
+import { BackrunMsg, BlockFilter, RawBackrunMsg, RawTxMsg, TxFilter } from '../protobuf/api_pb';
 import { EventEmitter } from 'events';
 import { ethers } from 'ethers';
 import { FeeMarketEIP1559Transaction, Transaction, TransactionFactory, TypedTransaction } from '@ethereumjs/tx';
@@ -117,6 +117,35 @@ export class Client {
 
         return new Promise((resolve, reject) => {
             this._client.backrun(backrunMsg, this._md, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({
+                        hash: res.getHash(),
+                        timestamp: res.getTimestamp(),
+                    });
+                }
+            });
+        });
+    }
+
+    /**
+     * @param hash hash of target transaction
+     * @param rawtx a signed and serialized transaction
+     * @returns response containing hash and timestamp
+     */
+    async rawBackrunTransaction(hash: string, rawtx: string): Promise<TransactionResponse> {
+        const backrunMsg = new RawBackrunMsg();
+        backrunMsg.setHash(hash);
+
+        if (rawtx.substring(0, 2) === '0x') {
+            rawtx = rawtx.substring(2);
+        }
+
+        backrunMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
+
+        return new Promise((resolve, reject) => {
+            this._client.rawBackrun(backrunMsg, this._md, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {

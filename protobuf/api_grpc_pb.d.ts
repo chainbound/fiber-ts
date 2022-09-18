@@ -14,6 +14,7 @@ interface IAPIService extends grpc.ServiceDefinition<grpc.UntypedServiceImplemen
     sendTransaction: IAPIService_ISendTransaction;
     sendRawTransaction: IAPIService_ISendRawTransaction;
     backrun: IAPIService_IBackrun;
+    rawBackrun: IAPIService_IRawBackrun;
 }
 
 interface IAPIService_ISubscribeNewTxs extends grpc.MethodDefinition<api_pb.TxFilter, eth_pb.Transaction> {
@@ -61,6 +62,15 @@ interface IAPIService_IBackrun extends grpc.MethodDefinition<api_pb.BackrunMsg, 
     responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
     responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
 }
+interface IAPIService_IRawBackrun extends grpc.MethodDefinition<api_pb.RawBackrunMsg, api_pb.TransactionResponse> {
+    path: "/api.API/RawBackrun";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<api_pb.RawBackrunMsg>;
+    requestDeserialize: grpc.deserialize<api_pb.RawBackrunMsg>;
+    responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
+    responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
+}
 
 export const APIService: IAPIService;
 
@@ -70,6 +80,7 @@ export interface IAPIServer extends grpc.UntypedServiceImplementation {
     sendTransaction: grpc.handleUnaryCall<eth_pb.Transaction, api_pb.TransactionResponse>;
     sendRawTransaction: grpc.handleUnaryCall<api_pb.RawTxMsg, api_pb.TransactionResponse>;
     backrun: grpc.handleUnaryCall<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    rawBackrun: grpc.handleUnaryCall<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
 }
 
 export interface IAPIClient {
@@ -86,6 +97,9 @@ export interface IAPIClient {
     backrun(request: api_pb.BackrunMsg, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     backrun(request: api_pb.BackrunMsg, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     backrun(request: api_pb.BackrunMsg, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    rawBackrun(request: api_pb.RawBackrunMsg, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
 }
 
 export class APIClient extends grpc.Client implements IAPIClient {
@@ -103,4 +117,7 @@ export class APIClient extends grpc.Client implements IAPIClient {
     public backrun(request: api_pb.BackrunMsg, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     public backrun(request: api_pb.BackrunMsg, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     public backrun(request: api_pb.BackrunMsg, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    public rawBackrun(request: api_pb.RawBackrunMsg, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    public rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    public rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
 }

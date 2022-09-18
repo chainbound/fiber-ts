@@ -125,3 +125,28 @@ export namespace BackrunMsg {
         tx?: eth_pb.Transaction.AsObject,
     }
 }
+
+export class RawBackrunMsg extends jspb.Message { 
+    getHash(): string;
+    setHash(value: string): RawBackrunMsg;
+    getRawtx(): Uint8Array | string;
+    getRawtx_asU8(): Uint8Array;
+    getRawtx_asB64(): string;
+    setRawtx(value: Uint8Array | string): RawBackrunMsg;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): RawBackrunMsg.AsObject;
+    static toObject(includeInstance: boolean, msg: RawBackrunMsg): RawBackrunMsg.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: RawBackrunMsg, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): RawBackrunMsg;
+    static deserializeBinaryFromReader(message: RawBackrunMsg, reader: jspb.BinaryReader): RawBackrunMsg;
+}
+
+export namespace RawBackrunMsg {
+    export type AsObject = {
+        hash: string,
+        rawtx: Uint8Array | string,
+    }
+}

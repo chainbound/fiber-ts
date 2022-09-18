@@ -156,3 +156,24 @@ const targetHash = '0xdeadbeef...'
 // Result contains the timestamp (unix microseconds) and hash of the transaction
 const result: TransactionResponse = await client.backrunTransaction(targetHash, signed);
 ```
+#### `rawBackrunTransaction`
+```ts
+import { Client } from 'fiber-ts';
+import { ethers } from 'ethers';
+
+const wallet = new ethers.Wallet('PRIVATE_KEY');
+
+const signedTx = await wallet.signTransaction({
+    chainId: 1,
+    type: 2,
+    to: '0x...',
+    gasLimit: 21000,
+    value: 0,
+    nonce: 21,
+    maxFeePerGas: 20 * 1e9,
+    maxPriorityFeePerGas: 2 * 1e9,
+});
+const targetHash = '0xdeadbeef...'
+
+const result = await client.rawBackrunTransaction(targetHash, signedTx);
+```

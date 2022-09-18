@@ -27,6 +27,17 @@ function deserialize_api_BlockFilter(buffer_arg) {
   return api_pb.BlockFilter.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_api_RawBackrunMsg(arg) {
+  if (!(arg instanceof api_pb.RawBackrunMsg)) {
+    throw new Error('Expected argument of type api.RawBackrunMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_RawBackrunMsg(buffer_arg) {
+  return api_pb.RawBackrunMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_api_RawTxMsg(arg) {
   if (!(arg instanceof api_pb.RawTxMsg)) {
     throw new Error('Expected argument of type api.RawTxMsg');
@@ -137,6 +148,17 @@ backrun: {
     responseType: api_pb.TransactionResponse,
     requestSerialize: serialize_api_BackrunMsg,
     requestDeserialize: deserialize_api_BackrunMsg,
+    responseSerialize: serialize_api_TransactionResponse,
+    responseDeserialize: deserialize_api_TransactionResponse,
+  },
+  rawBackrun: {
+    path: '/api.API/RawBackrun',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_pb.RawBackrunMsg,
+    responseType: api_pb.TransactionResponse,
+    requestSerialize: serialize_api_RawBackrunMsg,
+    requestDeserialize: deserialize_api_RawBackrunMsg,
     responseSerialize: serialize_api_TransactionResponse,
     responseDeserialize: deserialize_api_TransactionResponse,
   },
