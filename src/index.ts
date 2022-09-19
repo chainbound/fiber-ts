@@ -21,7 +21,6 @@ export class Client {
         this._client = new APIClient(target, credentials.createInsecure());
         this._md = new Metadata();
         this._md.add('x-api-key', apiKey)
-
     }
 
     waitForReady(seconds: number): Promise<void> {
@@ -44,8 +43,7 @@ export class Client {
      * @returns {TxStream} - emits new txs as events
      */
     subscribeNewTxs(): TxStream {
-        const stream = this._client.subscribeNewTxs(new TxFilter(), this._md);
-        return new TxStream(stream);
+        return new TxStream(this._client, this._md);
     }
 
     /**
@@ -53,8 +51,7 @@ export class Client {
      * @returns {BlockStream} - emits new blocks as events
      */
     subscribeNewBlocks(): BlockStream {
-        const stream = this._client.subscribeNewBlocks(new BlockFilter(), this._md);
-        return new BlockStream(stream);
+        return new BlockStream(this._client, this._md);
     }
 
     /**
@@ -160,16 +157,33 @@ export class Client {
 }
 
 class TxStream extends EventEmitter {
-    private _txStream: ClientReadableStream<eth.Transaction>;
-
-    constructor(txStream: ClientReadableStream<eth.Transaction>) {
+    constructor(_client: APIClient, _md: Metadata) {
         super();
-        this._txStream = txStream;
+        this.retry(_client, _md);
+    }
 
-        this._txStream.on('close', () => this.emit('close'));
-        this._txStream.on('end', () => this.emit('end'));
+    async retry(_client: APIClient, _md: Metadata) {
+        const deadline = new Date();
+        deadline.setSeconds(deadline.getSeconds() + 60);
+        await new Promise<void>((resolve, reject) => {
+            _client.waitForReady(deadline, err => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve()
+                }
+            });
 
-        this._txStream.on('data', (data: eth.Transaction) => this.emit('tx', fromProto(data)));
+        });
+
+        const _txStream = _client.subscribeNewTxs(new TxFilter(), _md);
+        _txStream.on('close', () => this.emit('close'));
+        _txStream.on('end', () => this.emit('end'));
+        _txStream.on('data', (data: eth.Transaction) => this.emit('tx', fromProto(data)));
+
+        _txStream.on('error', async () => {
+            this.retry(_client, _md);
+        });
     }
 }
 
@@ -189,16 +203,33 @@ export interface Block {
 }
 
 class BlockStream extends EventEmitter {
-    private _txStream: ClientReadableStream<eth.Block>;
-
-    constructor(txStream: ClientReadableStream<eth.Block>) {
+    constructor(_client: APIClient, _md: Metadata) {
         super();
-        this._txStream = txStream;
+        this.retry(_client, _md);
+    }
 
-        this._txStream.on('close', () => this.emit('close'));
-        this._txStream.on('end', () => this.emit('end'));
+    async retry(_client: APIClient, _md: Metadata) {
+        const deadline = new Date();
+        deadline.setSeconds(deadline.getSeconds() + 60);
+        await new Promise<void>((resolve, reject) => {
+            _client.waitForReady(deadline, err => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve()
+                }
+            });
 
-        this._txStream.on('data', (data: eth.Block) => this.emit('block', this.handleBlock(data)));
+        });
+
+        const _blockStream = _client.subscribeNewBlocks(new BlockFilter(), _md);
+        _blockStream.on('close', () => this.emit('close'));
+        _blockStream.on('end', () => this.emit('end'));
+        _blockStream.on('data', (data: eth.Block) => this.emit('block', this.handleBlock(data)));
+
+        _blockStream.on('error', async () => {
+            this.retry(_client, _md);
+        });
     }
 
     private handleBlock(block: eth.Block): Block {
@@ -256,7 +287,7 @@ function fromProto(tx: eth.Transaction): TypedTransaction {
         maxPriorityFeePerGas: BigInt(tx.getPriorityFee()),
         v: BigInt(tx.getV()),
         r: BigInt("0x" + Buffer.from(tx.getR()).toString('hex')),
-        s: BigInt("0x"+ Buffer.from(tx.getS()).toString('hex')),
+        s: BigInt("0x" + Buffer.from(tx.getS()).toString('hex')),
     })
 }
 
@@ -278,7 +309,7 @@ function toProto(tx: TypedTransaction): eth.Transaction {
         }
 
         proto.setChainid(1);
-        proto.setValue(hexToBytes("0x" +tx.value.toString(16)));
+        proto.setValue(hexToBytes("0x" + tx.value.toString(16)));
         proto.setGas(Number(tx.gasLimit));
         proto.setGasPrice(Number(legacy.gasPrice));
         proto.setV(Number(tx.v!));
@@ -299,7 +330,7 @@ function toProto(tx: TypedTransaction): eth.Transaction {
         }
 
         proto.setChainid(Number(newtx.chainId));
-        proto.setValue(hexToBytes("0x" +newtx.value.toString(16)));
+        proto.setValue(hexToBytes("0x" + newtx.value.toString(16)));
         proto.setGas(Number(newtx.gasLimit));
         proto.setMaxFee(Number(newtx.maxFeePerGas));
         proto.setPriorityFee(Number(newtx.maxPriorityFeePerGas));
