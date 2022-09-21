@@ -24,8 +24,8 @@ export class Client {
     }
 
     waitForReady(seconds: number): Promise<void> {
-        const deadline = new Date();
-        deadline.setSeconds(deadline.getSeconds() + seconds);
+        const now = new Date();
+        const deadline = new Date(now.getTime() + seconds * 1000);
 
         return new Promise((resolve, reject) => {
             this._client.waitForReady(deadline, err => {
@@ -163,8 +163,8 @@ class TxStream extends EventEmitter {
     }
 
     async retry(_client: APIClient, _md: Metadata) {
-        const deadline = new Date();
-        deadline.setSeconds(deadline.getSeconds() + 60);
+        const now = new Date();
+        const deadline = new Date(now.getTime() + 60 * 1000);
         await new Promise<void>((resolve, reject) => {
             _client.waitForReady(deadline, err => {
                 if (err) {
@@ -209,8 +209,8 @@ class BlockStream extends EventEmitter {
     }
 
     async retry(_client: APIClient, _md: Metadata) {
-        const deadline = new Date();
-        deadline.setSeconds(deadline.getSeconds() + 60);
+        const now = new Date();
+        const deadline = new Date(now.getTime() + 60 * 1000);
         await new Promise<void>((resolve, reject) => {
             _client.waitForReady(deadline, err => {
                 if (err) {
