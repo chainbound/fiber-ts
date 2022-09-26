@@ -16,10 +16,10 @@ export class TxFilter extends jspb.Message {
     getTo_asU8(): Uint8Array;
     getTo_asB64(): string;
     setTo(value: Uint8Array | string): TxFilter;
-    getValue(): Uint8Array | string;
-    getValue_asU8(): Uint8Array;
-    getValue_asB64(): string;
-    setValue(value: Uint8Array | string): TxFilter;
+    getMethodid(): Uint8Array | string;
+    getMethodid_asU8(): Uint8Array;
+    getMethodid_asB64(): string;
+    setMethodid(value: Uint8Array | string): TxFilter;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): TxFilter.AsObject;
@@ -35,7 +35,7 @@ export namespace TxFilter {
     export type AsObject = {
         from: Uint8Array | string,
         to: Uint8Array | string,
-        value: Uint8Array | string,
+        methodid: Uint8Array | string,
     }
 }
 

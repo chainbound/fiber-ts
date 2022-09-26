@@ -45,8 +45,9 @@ export class Client {
      * subscribes to the new transactions stream.
      * @returns {TxStream} - emits new txs as events
      */
-    subscribeNewTxs(filter: TxFilter): TxStream {
-        return new TxStream(this._client, this._md, filter);
+    subscribeNewTxs(filter?: TxFilter): TxStream {
+        const f = filter ?? new TxFilter()
+        return new TxStream(this._client, this._md, f);
     }
 
     /**
@@ -356,8 +357,14 @@ export function hexToBytes(str: string) {
         return new Uint8Array();
     }
 
-    var a = [];
-    for (var i = 2, len = str.length; i < len; i += 2) {
+    if (str.substring(0, 2) !== '0x') {
+        str = '0x' + str
+    }
+
+    console.log(str)
+
+    const a = [];
+    for (let i = 2, len = str.length; i < len; i += 2) {
         a.push(parseInt(str.substr(i, 2), 16));
     }
 

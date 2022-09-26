@@ -29,8 +29,7 @@ They are implemented as event emitters which you can listen to.
 and transactions are implemented as `@ethereumjs/tx.TypedTransaction`.
 This is for a couple reasons, but most importantly performance.
 
-Filtering is currently in progress. The filter object passed to SubscribeNewTxs is a simple **OR** filter, so if a transaction matches either to `to` or the `from` field, 
-it will be sent on the stream.
+Filtering is currently in progress. The filter object passed to SubscribeNewTxs is a simple **OR** filter, so if a transaction matches either to `to`, `from` or `methodid` field, it will be sent on the stream.
 ```ts
 import { Client, TxFilter, hexToBytes } from 'fiber-ts';
 import { TypedTransaction } from '@ethereumjs/tx';

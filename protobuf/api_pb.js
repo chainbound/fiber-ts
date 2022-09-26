@@ -183,7 +183,7 @@ proto.api.TxFilter.toObject = function(includeInstance, msg) {
   var f, obj = {
     from: msg.getFrom_asB64(),
     to: msg.getTo_asB64(),
-    value: msg.getValue_asB64()
+    methodid: msg.getMethodid_asB64()
   };
 
   if (includeInstance) {
@@ -230,7 +230,7 @@ proto.api.TxFilter.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 3:
       var value = /** @type {!Uint8Array} */ (reader.readBytes());
-      msg.setValue(value);
+      msg.setMethodid(value);
       break;
     default:
       reader.skipField();
@@ -275,7 +275,7 @@ proto.api.TxFilter.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getValue_asU8();
+  f = message.getMethodid_asU8();
   if (f.length > 0) {
     writer.writeBytes(
       3,
@@ -370,35 +370,35 @@ proto.api.TxFilter.prototype.setTo = function(value) {
 
 
 /**
- * optional bytes value = 3;
+ * optional bytes methodID = 3;
  * @return {string}
  */
-proto.api.TxFilter.prototype.getValue = function() {
+proto.api.TxFilter.prototype.getMethodid = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /**
- * optional bytes value = 3;
- * This is a type-conversion wrapper around `getValue()`
+ * optional bytes methodID = 3;
+ * This is a type-conversion wrapper around `getMethodid()`
  * @return {string}
  */
-proto.api.TxFilter.prototype.getValue_asB64 = function() {
+proto.api.TxFilter.prototype.getMethodid_asB64 = function() {
   return /** @type {string} */ (jspb.Message.bytesAsB64(
-      this.getValue()));
+      this.getMethodid()));
 };
 
 
 /**
- * optional bytes value = 3;
+ * optional bytes methodID = 3;
  * Note that Uint8Array is not supported on all browsers.
  * @see http://caniuse.com/Uint8Array
- * This is a type-conversion wrapper around `getValue()`
+ * This is a type-conversion wrapper around `getMethodid()`
  * @return {!Uint8Array}
  */
-proto.api.TxFilter.prototype.getValue_asU8 = function() {
+proto.api.TxFilter.prototype.getMethodid_asU8 = function() {
   return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
-      this.getValue()));
+      this.getMethodid()));
 };
 
 
@@ -406,7 +406,7 @@ proto.api.TxFilter.prototype.getValue_asU8 = function() {
  * @param {!(string|Uint8Array)} value
  * @return {!proto.api.TxFilter} returns this
  */
-proto.api.TxFilter.prototype.setValue = function(value) {
+proto.api.TxFilter.prototype.setMethodid = function(value) {
   return jspb.Message.setProto3BytesField(this, 3, value);
 };
 
