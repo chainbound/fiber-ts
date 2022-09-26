@@ -1,4 +1,4 @@
-const { Client } = require('../src/index'); // replace with fiber-ts
+const { Client, TxFilter, hexToBytes } = require('../src/index'); // replace with fiber-ts
 // I use ethers here but it doesn't really matter, you can use web3.js too.
 const { ethers } = require('ethers');
 
@@ -9,14 +9,16 @@ async function main() {
     await client.waitForReady(10);
     console.log('ready');
 
-    // Subscribe to the new transactions stream
-    const sub = client.subscribeNewTxs()
 
     let nonce = 41;
     const targetSender = 'TARGET_SENDER';
     const target = 'TARGET_RECEIVER';
 
     const wallet = new ethers.Wallet('PRIVATE_KEY')
+
+    // Subscribe to the new transactions stream
+    const filter = new TxFilter().setTo(hexToBytes(target)).setFrom(hexToBytes(targetSender));
+    const sub = client.subscribeNewTxs(filter);
 
     // On a transaction event, the callback handles the transaction
     sub.on('tx', async (tx) => {

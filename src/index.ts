@@ -12,6 +12,9 @@ export interface TransactionResponse {
     timestamp: number;
 }
 
+// Re-export
+export { TxFilter };
+
 export class Client {
     private _client: APIClient;
     private _md: Metadata;

@@ -9,6 +9,7 @@ export interface TransactionResponse {
     hash: string;
     timestamp: number;
 }
+export { TxFilter };
 export declare class Client {
     private _client;
     private _md;
@@ -75,4 +76,3 @@ declare class BlockStream extends EventEmitter {
 }
 export declare function bytesToHex(b: string | Uint8Array): string;
 export declare function hexToBytes(str: string): Uint8Array;
-export {};

@@ -3,10 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hexToBytes = exports.bytesToHex = exports.Client = void 0;
+exports.hexToBytes = exports.bytesToHex = exports.Client = exports.TxFilter = void 0;
 const api_grpc_pb_1 = require("../protobuf/api_grpc_pb");
 const grpc_js_1 = require("@grpc/grpc-js");
 const api_pb_1 = require("../protobuf/api_pb");
+Object.defineProperty(exports, "TxFilter", { enumerable: true, get: function () { return api_pb_1.TxFilter; } });
 const events_1 = require("events");
 const ethers_1 = require("ethers");
 const tx_1 = require("@ethereumjs/tx");
