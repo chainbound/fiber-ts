@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Client = void 0;
+exports.hexToBytes = exports.bytesToHex = exports.Client = void 0;
 const api_grpc_pb_1 = require("../protobuf/api_grpc_pb");
 const grpc_js_1 = require("@grpc/grpc-js");
 const api_pb_1 = require("../protobuf/api_pb");
@@ -37,8 +37,8 @@ class Client {
      * subscribes to the new transactions stream.
      * @returns {TxStream} - emits new txs as events
      */
-    subscribeNewTxs() {
-        return new TxStream(this._client, this._md);
+    subscribeNewTxs(filter) {
+        return new TxStream(this._client, this._md, filter);
     }
     /**
      * subscribes to the new blocks stream.
@@ -145,11 +145,11 @@ class Client {
 }
 exports.Client = Client;
 class TxStream extends events_1.EventEmitter {
-    constructor(_client, _md) {
+    constructor(_client, _md, _filter) {
         super();
-        this.retry(_client, _md);
+        this.retry(_client, _md, _filter);
     }
-    async retry(_client, _md) {
+    async retry(_client, _md, _filter) {
         const now = new Date();
         const deadline = new Date(now.getTime() + 60 * 1000);
         await new Promise((resolve, reject) => {
@@ -162,12 +162,12 @@ class TxStream extends events_1.EventEmitter {
                 }
             });
         });
-        const _txStream = _client.subscribeNewTxs(new api_pb_1.TxFilter(), _md);
+        const _txStream = _client.subscribeNewTxs(_filter, _md);
         _txStream.on('close', () => this.emit('close'));
         _txStream.on('end', () => this.emit('end'));
         _txStream.on('data', (data) => this.emit('tx', fromProto(data)));
         _txStream.on('error', async () => {
-            this.retry(_client, _md);
+            this.retry(_client, _md, _filter);
         });
     }
 }
@@ -299,6 +299,7 @@ function toProto(tx) {
 function bytesToHex(b) {
     return '0x' + Buffer.from(b).toString('hex');
 }
+exports.bytesToHex = bytesToHex;
 function hexToBytes(str) {
     if (!str) {
         return new Uint8Array();
@@ -309,3 +310,4 @@ function hexToBytes(str) {
     }
     return new Uint8Array(a);
 }
+exports.hexToBytes = hexToBytes;

@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { APIClient } from '../protobuf/api_grpc_pb';
 import { Metadata } from '@grpc/grpc-js';
+import { TxFilter } from '../protobuf/api_pb';
 import { EventEmitter } from 'events';
 import { ethers } from 'ethers';
 import { TypedTransaction } from '@ethereumjs/tx';
@@ -17,7 +18,7 @@ export declare class Client {
      * subscribes to the new transactions stream.
      * @returns {TxStream} - emits new txs as events
      */
-    subscribeNewTxs(): TxStream;
+    subscribeNewTxs(filter: TxFilter): TxStream;
     /**
      * subscribes to the new blocks stream.
      * @returns {BlockStream} - emits new blocks as events
@@ -50,8 +51,8 @@ export declare class Client {
     rawBackrunTransaction(hash: string, rawtx: string): Promise<TransactionResponse>;
 }
 declare class TxStream extends EventEmitter {
-    constructor(_client: APIClient, _md: Metadata);
-    retry(_client: APIClient, _md: Metadata): Promise<void>;
+    constructor(_client: APIClient, _md: Metadata, _filter: TxFilter);
+    retry(_client: APIClient, _md: Metadata, _filter: TxFilter): Promise<void>;
 }
 export interface Block {
     hash: string;
@@ -72,4 +73,6 @@ declare class BlockStream extends EventEmitter {
     retry(_client: APIClient, _md: Metadata): Promise<void>;
     private handleBlock;
 }
+export declare function bytesToHex(b: string | Uint8Array): string;
+export declare function hexToBytes(str: string): Uint8Array;
 export {};
