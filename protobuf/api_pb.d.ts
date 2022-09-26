@@ -8,10 +8,14 @@ import * as jspb from "google-protobuf";
 import * as eth_pb from "./eth_pb";
 
 export class TxFilter extends jspb.Message { 
-    getFrom(): string;
-    setFrom(value: string): TxFilter;
-    getTo(): string;
-    setTo(value: string): TxFilter;
+    getFrom(): Uint8Array | string;
+    getFrom_asU8(): Uint8Array;
+    getFrom_asB64(): string;
+    setFrom(value: Uint8Array | string): TxFilter;
+    getTo(): Uint8Array | string;
+    getTo_asU8(): Uint8Array;
+    getTo_asB64(): string;
+    setTo(value: Uint8Array | string): TxFilter;
     getValue(): Uint8Array | string;
     getValue_asU8(): Uint8Array;
     getValue_asB64(): string;
@@ -29,8 +33,8 @@ export class TxFilter extends jspb.Message {
 
 export namespace TxFilter {
     export type AsObject = {
-        from: string,
-        to: string,
+        from: Uint8Array | string,
+        to: Uint8Array | string,
         value: Uint8Array | string,
     }
 }

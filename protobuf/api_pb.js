@@ -181,8 +181,8 @@ proto.api.TxFilter.prototype.toObject = function(opt_includeInstance) {
  */
 proto.api.TxFilter.toObject = function(includeInstance, msg) {
   var f, obj = {
-    from: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    to: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    from: msg.getFrom_asB64(),
+    to: msg.getTo_asB64(),
     value: msg.getValue_asB64()
   };
 
@@ -221,11 +221,11 @@ proto.api.TxFilter.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
       msg.setFrom(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
       msg.setTo(value);
       break;
     case 3:
@@ -261,16 +261,16 @@ proto.api.TxFilter.prototype.serializeBinary = function() {
  */
 proto.api.TxFilter.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getFrom();
+  f = message.getFrom_asU8();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeBytes(
       1,
       f
     );
   }
-  f = message.getTo();
+  f = message.getTo_asU8();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeBytes(
       2,
       f
     );
@@ -286,7 +286,7 @@ proto.api.TxFilter.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string from = 1;
+ * optional bytes from = 1;
  * @return {string}
  */
 proto.api.TxFilter.prototype.getFrom = function() {
@@ -295,16 +295,40 @@ proto.api.TxFilter.prototype.getFrom = function() {
 
 
 /**
- * @param {string} value
- * @return {!proto.api.TxFilter} returns this
+ * optional bytes from = 1;
+ * This is a type-conversion wrapper around `getFrom()`
+ * @return {string}
  */
-proto.api.TxFilter.prototype.setFrom = function(value) {
-  return jspb.Message.setProto3StringField(this, 1, value);
+proto.api.TxFilter.prototype.getFrom_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getFrom()));
 };
 
 
 /**
- * optional string to = 2;
+ * optional bytes from = 1;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getFrom()`
+ * @return {!Uint8Array}
+ */
+proto.api.TxFilter.prototype.getFrom_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getFrom()));
+};
+
+
+/**
+ * @param {!(string|Uint8Array)} value
+ * @return {!proto.api.TxFilter} returns this
+ */
+proto.api.TxFilter.prototype.setFrom = function(value) {
+  return jspb.Message.setProto3BytesField(this, 1, value);
+};
+
+
+/**
+ * optional bytes to = 2;
  * @return {string}
  */
 proto.api.TxFilter.prototype.getTo = function() {
@@ -313,11 +337,35 @@ proto.api.TxFilter.prototype.getTo = function() {
 
 
 /**
- * @param {string} value
+ * optional bytes to = 2;
+ * This is a type-conversion wrapper around `getTo()`
+ * @return {string}
+ */
+proto.api.TxFilter.prototype.getTo_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getTo()));
+};
+
+
+/**
+ * optional bytes to = 2;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getTo()`
+ * @return {!Uint8Array}
+ */
+proto.api.TxFilter.prototype.getTo_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getTo()));
+};
+
+
+/**
+ * @param {!(string|Uint8Array)} value
  * @return {!proto.api.TxFilter} returns this
  */
 proto.api.TxFilter.prototype.setTo = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
+  return jspb.Message.setProto3BytesField(this, 2, value);
 };
 
 

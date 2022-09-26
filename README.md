@@ -28,8 +28,11 @@ They are implemented as event emitters which you can listen to.
 `fiber-ts` works with [ethereumjs](https://github.com/ethereumjs/ethereumjs-monorepo) internally, 
 and transactions are implemented as `@ethereumjs/tx.TypedTransaction`.
 This is for a couple reasons, but most importantly performance.
+
+Filtering is currently in progress. The filter object passed to SubscribeNewTxs is a simple **OR** filter, so if a transaction matches either to `to` or the `from` field, 
+it will be sent on the stream.
 ```ts
-import { Client } from 'fiber-ts';
+import { Client, TxFilter, hexToBytes } from 'fiber-ts';
 import { TypedTransaction } from '@ethereumjs/tx';
 
 const client = new Client('fiber.example.io', 'YOUR_API_KEY');
@@ -37,7 +40,8 @@ const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const sub = client.subscribeNewTxs();
+const filter = new TxFilter().setTo(hexToBytes('0x7a250d5630b4cf539739df2c5dacb4c659f2488d'));
+const sub = client.subscribeNewTxs(filter);
 
 sub.on('tx', (tx: TypedTransaction) => {
     handleTx(tx);
