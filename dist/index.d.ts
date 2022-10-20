@@ -13,7 +13,10 @@ export { TxFilter };
 export declare class Client {
     private _client;
     private _md;
+    private _txStream;
     private _rawTxStream;
+    private _backrunStream;
+    private _rawBackrunStream;
     constructor(target: string, apiKey: string);
     waitForReady(seconds: number): Promise<void>;
     /**
@@ -38,7 +41,6 @@ export declare class Client {
      * @returns response containing hash and timestamp
      */
     sendRawTransaction(rawtx: string): Promise<TransactionResponse>;
-    sendRawTransaction2(rawtx: string): Promise<TransactionResponse>;
     /**
      *
      * @param hash hash of target transaction

@@ -19,7 +19,10 @@ class Client {
         this._client = new api_grpc_pb_1.APIClient(target, grpc_js_1.credentials.createInsecure());
         this._md = new grpc_js_1.Metadata();
         this._md.add('x-api-key', apiKey);
+        this._txStream = this._client.sendTransactionStream(this._md);
         this._rawTxStream = this._client.sendRawTransactionStream(this._md);
+        this._backrunStream = this._client.backrunStream(this._md);
+        this._rawBackrunStream = this._client.rawBackrunStream(this._md);
     }
     waitForReady(seconds) {
         const now = new Date();
@@ -57,14 +60,16 @@ class Client {
      */
     async sendTransaction(tx) {
         return new Promise((resolve, reject) => {
-            this._client.sendTransaction(toProto(tx), this._md, (err, res) => {
+            this._txStream.write(toProto(tx), this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._txStream.on('data', (res) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });
@@ -82,36 +87,6 @@ class Client {
         }
         rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
         return new Promise((resolve, reject) => {
-            this._client.sendRawTransaction(rawMsg, this._md, (err, res) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
-                    });
-                }
-            });
-        });
-    }
-    async sendRawTransaction2(rawtx) {
-        const rawMsg = new api_pb_1.RawTxMsg();
-        if (rawtx.substring(0, 2) === '0x') {
-            rawtx = rawtx.substring(2);
-        }
-        rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
-        return new Promise((resolve, reject) => {
-            // this._client.sendRawTransaction(rawMsg, this._md, (err, res) => {
-            //     if (err) {
-            //         reject(err);
-            //     } else {
-            //         resolve({
-            //             hash: res.getHash(),
-            //             timestamp: res.getTimestamp(),
-            //         });
-            //     }
-            // });
             this._rawTxStream.write(rawMsg, (err) => {
                 if (err) {
                     reject(err);
@@ -138,14 +113,16 @@ class Client {
         backrunMsg.setHash(hash);
         backrunMsg.setTx(toProto(tx));
         return new Promise((resolve, reject) => {
-            this._client.backrun(backrunMsg, this._md, (err, res) => {
+            this._backrunStream.write(backrunMsg, this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._backrunStream.on('data', (res) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });
@@ -164,14 +141,16 @@ class Client {
         }
         backrunMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
         return new Promise((resolve, reject) => {
-            this._client.rawBackrun(backrunMsg, this._md, (err, res) => {
+            this._rawBackrunStream.write(backrunMsg, this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._rawBackrunStream.on('data', (res) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });
