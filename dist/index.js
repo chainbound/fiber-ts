@@ -19,6 +19,7 @@ class Client {
         this._client = new api_grpc_pb_1.APIClient(target, grpc_js_1.credentials.createInsecure());
         this._md = new grpc_js_1.Metadata();
         this._md.add('x-api-key', apiKey);
+        this._rawTxStream = this._client.sendRawTransactionStream(this._md);
     }
     waitForReady(seconds) {
         const now = new Date();
@@ -39,7 +40,8 @@ class Client {
      * @returns {TxStream} - emits new txs as events
      */
     subscribeNewTxs(filter) {
-        return new TxStream(this._client, this._md, filter);
+        const f = filter ?? new api_pb_1.TxFilter();
+        return new TxStream(this._client, this._md, f);
     }
     /**
      * subscribes to the new blocks stream.
@@ -88,6 +90,38 @@ class Client {
                     resolve({
                         hash: res.getHash(),
                         timestamp: res.getTimestamp(),
+                    });
+                }
+            });
+        });
+    }
+    async sendRawTransaction2(rawtx) {
+        const rawMsg = new api_pb_1.RawTxMsg();
+        if (rawtx.substring(0, 2) === '0x') {
+            rawtx = rawtx.substring(2);
+        }
+        rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
+        return new Promise((resolve, reject) => {
+            // this._client.sendRawTransaction(rawMsg, this._md, (err, res) => {
+            //     if (err) {
+            //         reject(err);
+            //     } else {
+            //         resolve({
+            //             hash: res.getHash(),
+            //             timestamp: res.getTimestamp(),
+            //         });
+            //     }
+            // });
+            this._rawTxStream.write(rawMsg, (err) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    this._rawTxStream.on('data', (res) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });
@@ -305,8 +339,12 @@ function hexToBytes(str) {
     if (!str) {
         return new Uint8Array();
     }
-    var a = [];
-    for (var i = 2, len = str.length; i < len; i += 2) {
+    if (str.substring(0, 2) !== '0x') {
+        str = '0x' + str;
+    }
+    console.log(str);
+    const a = [];
+    for (let i = 2, len = str.length; i < len; i += 2) {
         a.push(parseInt(str.substr(i, 2), 16));
     }
     return new Uint8Array(a);

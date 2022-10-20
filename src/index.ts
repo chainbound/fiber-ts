@@ -1,6 +1,6 @@
 import { APIClient } from '../protobuf/api_grpc_pb';
-import { credentials, Metadata } from '@grpc/grpc-js';
-import { BackrunMsg, BlockFilter, RawBackrunMsg, RawTxMsg, TxFilter } from '../protobuf/api_pb';
+import { ClientDuplexStream, credentials, Metadata } from '@grpc/grpc-js';
+import { BackrunMsg, BlockFilter, RawBackrunMsg, RawTxMsg, TxFilter, TransactionResponse as PbResponse } from '../protobuf/api_pb';
 import { EventEmitter } from 'events';
 import { ethers } from 'ethers';
 import { FeeMarketEIP1559Transaction, Transaction, TransactionFactory, TypedTransaction } from '@ethereumjs/tx';
@@ -19,11 +19,21 @@ export class Client {
     private _client: APIClient;
     private _md: Metadata;
 
+    private _txStream: ClientDuplexStream<eth.Transaction, PbResponse>;
+    private _rawTxStream: ClientDuplexStream<RawTxMsg, PbResponse>;
+    private _backrunStream: ClientDuplexStream<BackrunMsg, PbResponse>;
+    private _rawBackrunStream: ClientDuplexStream<RawBackrunMsg, PbResponse>;
+
     constructor(target: string, apiKey: string) {
         // this._client = new API;
         this._client = new APIClient(target, credentials.createInsecure());
         this._md = new Metadata();
         this._md.add('x-api-key', apiKey)
+
+        this._txStream = this._client.sendTransactionStream(this._md);
+        this._rawTxStream = this._client.sendRawTransactionStream(this._md);
+        this._backrunStream = this._client.backrunStream(this._md);
+        this._rawBackrunStream = this._client.rawBackrunStream(this._md);
     }
 
     waitForReady(seconds: number): Promise<void> {
@@ -65,13 +75,15 @@ export class Client {
      */
     async sendTransaction(tx: TypedTransaction): Promise<TransactionResponse> {
         return new Promise((resolve, reject) => {
-            this._client.sendTransaction(toProto(tx), this._md, (err, res) => {
+            this._txStream.write(toProto(tx), this._md, (err: Error) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._txStream.on('data', (res: PbResponse) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });
@@ -92,16 +104,18 @@ export class Client {
 
         rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
         return new Promise((resolve, reject) => {
-            this._client.sendRawTransaction(rawMsg, this._md, (err, res) => {
+            this._rawTxStream.write(rawMsg, (err: Error) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._rawTxStream.on('data', (res: PbResponse) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
-            });
+            })
         });
     }
 
@@ -117,13 +131,15 @@ export class Client {
         backrunMsg.setTx(toProto(tx));
 
         return new Promise((resolve, reject) => {
-            this._client.backrun(backrunMsg, this._md, (err, res) => {
+            this._backrunStream.write(backrunMsg, this._md, (err: Error) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._backrunStream.on('data', (res: PbResponse) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });
@@ -144,15 +160,16 @@ export class Client {
         }
 
         backrunMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
-
         return new Promise((resolve, reject) => {
-            this._client.rawBackrun(backrunMsg, this._md, (err, res) => {
+            this._rawBackrunStream.write(backrunMsg, this._md, (err: Error) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({
-                        hash: res.getHash(),
-                        timestamp: res.getTimestamp(),
+                    this._rawBackrunStream.on('data', (res: PbResponse) => {
+                        resolve({
+                            hash: res.getHash(),
+                            timestamp: res.getTimestamp(),
+                        });
                     });
                 }
             });

@@ -196,6 +196,10 @@ export class Transaction extends jspb.Message {
     setS(value: Uint8Array | string): Transaction;
     getChainid(): number;
     setChainid(value: number): Transaction;
+    clearAccessListList(): void;
+    getAccessListList(): Array<AccessTuple>;
+    setAccessListList(value: Array<AccessTuple>): Transaction;
+    addAccessList(value?: AccessTuple, index?: number): AccessTuple;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Transaction.AsObject;
@@ -224,6 +228,36 @@ export namespace Transaction {
         r: Uint8Array | string,
         s: Uint8Array | string,
         chainid: number,
+        accessListList: Array<AccessTuple.AsObject>,
+    }
+}
+
+export class AccessTuple extends jspb.Message { 
+    getAddress(): Uint8Array | string;
+    getAddress_asU8(): Uint8Array;
+    getAddress_asB64(): string;
+    setAddress(value: Uint8Array | string): AccessTuple;
+    clearStorageKeysList(): void;
+    getStorageKeysList(): Array<Uint8Array | string>;
+    getStorageKeysList_asU8(): Array<Uint8Array>;
+    getStorageKeysList_asB64(): Array<string>;
+    setStorageKeysList(value: Array<Uint8Array | string>): AccessTuple;
+    addStorageKeys(value: Uint8Array | string, index?: number): Uint8Array | string;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): AccessTuple.AsObject;
+    static toObject(includeInstance: boolean, msg: AccessTuple): AccessTuple.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: AccessTuple, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): AccessTuple;
+    static deserializeBinaryFromReader(message: AccessTuple, reader: jspb.BinaryReader): AccessTuple;
+}
+
+export namespace AccessTuple {
+    export type AsObject = {
+        address: Uint8Array | string,
+        storageKeysList: Array<Uint8Array | string>,
     }
 }
 

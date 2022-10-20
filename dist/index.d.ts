@@ -13,13 +13,14 @@ export { TxFilter };
 export declare class Client {
     private _client;
     private _md;
+    private _rawTxStream;
     constructor(target: string, apiKey: string);
     waitForReady(seconds: number): Promise<void>;
     /**
      * subscribes to the new transactions stream.
      * @returns {TxStream} - emits new txs as events
      */
-    subscribeNewTxs(filter: TxFilter): TxStream;
+    subscribeNewTxs(filter?: TxFilter): TxStream;
     /**
      * subscribes to the new blocks stream.
      * @returns {BlockStream} - emits new blocks as events
@@ -37,6 +38,7 @@ export declare class Client {
      * @returns response containing hash and timestamp
      */
     sendRawTransaction(rawtx: string): Promise<TransactionResponse>;
+    sendRawTransaction2(rawtx: string): Promise<TransactionResponse>;
     /**
      *
      * @param hash hash of target transaction

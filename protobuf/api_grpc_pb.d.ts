@@ -15,6 +15,10 @@ interface IAPIService extends grpc.ServiceDefinition<grpc.UntypedServiceImplemen
     sendRawTransaction: IAPIService_ISendRawTransaction;
     backrun: IAPIService_IBackrun;
     rawBackrun: IAPIService_IRawBackrun;
+    sendTransactionStream: IAPIService_ISendTransactionStream;
+    sendRawTransactionStream: IAPIService_ISendRawTransactionStream;
+    backrunStream: IAPIService_IBackrunStream;
+    rawBackrunStream: IAPIService_IRawBackrunStream;
 }
 
 interface IAPIService_ISubscribeNewTxs extends grpc.MethodDefinition<api_pb.TxFilter, eth_pb.Transaction> {
@@ -71,6 +75,42 @@ interface IAPIService_IRawBackrun extends grpc.MethodDefinition<api_pb.RawBackru
     responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
     responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
 }
+interface IAPIService_ISendTransactionStream extends grpc.MethodDefinition<eth_pb.Transaction, api_pb.TransactionResponse> {
+    path: "/api.API/SendTransactionStream";
+    requestStream: true;
+    responseStream: true;
+    requestSerialize: grpc.serialize<eth_pb.Transaction>;
+    requestDeserialize: grpc.deserialize<eth_pb.Transaction>;
+    responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
+    responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
+}
+interface IAPIService_ISendRawTransactionStream extends grpc.MethodDefinition<api_pb.RawTxMsg, api_pb.TransactionResponse> {
+    path: "/api.API/SendRawTransactionStream";
+    requestStream: true;
+    responseStream: true;
+    requestSerialize: grpc.serialize<api_pb.RawTxMsg>;
+    requestDeserialize: grpc.deserialize<api_pb.RawTxMsg>;
+    responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
+    responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
+}
+interface IAPIService_IBackrunStream extends grpc.MethodDefinition<api_pb.BackrunMsg, api_pb.TransactionResponse> {
+    path: "/api.API/BackrunStream";
+    requestStream: true;
+    responseStream: true;
+    requestSerialize: grpc.serialize<api_pb.BackrunMsg>;
+    requestDeserialize: grpc.deserialize<api_pb.BackrunMsg>;
+    responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
+    responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
+}
+interface IAPIService_IRawBackrunStream extends grpc.MethodDefinition<api_pb.RawBackrunMsg, api_pb.TransactionResponse> {
+    path: "/api.API/RawBackrunStream";
+    requestStream: true;
+    responseStream: true;
+    requestSerialize: grpc.serialize<api_pb.RawBackrunMsg>;
+    requestDeserialize: grpc.deserialize<api_pb.RawBackrunMsg>;
+    responseSerialize: grpc.serialize<api_pb.TransactionResponse>;
+    responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
+}
 
 export const APIService: IAPIService;
 
@@ -81,6 +121,10 @@ export interface IAPIServer extends grpc.UntypedServiceImplementation {
     sendRawTransaction: grpc.handleUnaryCall<api_pb.RawTxMsg, api_pb.TransactionResponse>;
     backrun: grpc.handleUnaryCall<api_pb.BackrunMsg, api_pb.TransactionResponse>;
     rawBackrun: grpc.handleUnaryCall<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
+    sendTransactionStream: grpc.handleBidiStreamingCall<eth_pb.Transaction, api_pb.TransactionResponse>;
+    sendRawTransactionStream: grpc.handleBidiStreamingCall<api_pb.RawTxMsg, api_pb.TransactionResponse>;
+    backrunStream: grpc.handleBidiStreamingCall<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    rawBackrunStream: grpc.handleBidiStreamingCall<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
 }
 
 export interface IAPIClient {
@@ -100,6 +144,18 @@ export interface IAPIClient {
     rawBackrun(request: api_pb.RawBackrunMsg, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    sendTransactionStream(): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
+    sendTransactionStream(options: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
+    sendTransactionStream(metadata: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
+    sendRawTransactionStream(): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
+    sendRawTransactionStream(options: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
+    sendRawTransactionStream(metadata: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
+    backrunStream(): grpc.ClientDuplexStream<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    backrunStream(options: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    backrunStream(metadata: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    rawBackrunStream(): grpc.ClientDuplexStream<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
+    rawBackrunStream(options: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
+    rawBackrunStream(metadata: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
 }
 
 export class APIClient extends grpc.Client implements IAPIClient {
@@ -120,4 +176,12 @@ export class APIClient extends grpc.Client implements IAPIClient {
     public rawBackrun(request: api_pb.RawBackrunMsg, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     public rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
     public rawBackrun(request: api_pb.RawBackrunMsg, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
+    public sendTransactionStream(options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
+    public sendTransactionStream(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
+    public sendRawTransactionStream(options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
+    public sendRawTransactionStream(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
+    public backrunStream(options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    public backrunStream(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.BackrunMsg, api_pb.TransactionResponse>;
+    public rawBackrunStream(options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
+    public rawBackrunStream(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawBackrunMsg, api_pb.TransactionResponse>;
 }
