@@ -31,7 +31,7 @@ This is for a couple reasons, but most importantly performance.
 
 Filtering is currently in progress. The filter object passed to SubscribeNewTxs is a simple **OR** filter, so if a transaction matches either to `to`, `from` or `methodid` field, it will be sent on the stream.
 ```ts
-import { Client, TxFilter, hexToBytes } from 'fiber-ts';
+import { Client, FilterBuilder, or, to } from 'fiber-ts';
 import { TypedTransaction } from '@ethereumjs/tx';
 
 const client = new Client('fiber.example.io', 'YOUR_API_KEY');
@@ -39,7 +39,7 @@ const client = new Client('fiber.example.io', 'YOUR_API_KEY');
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const filter = new TxFilter().setTo(hexToBytes('0x7a250d5630b4cf539739df2c5dacb4c659f2488d'));
+let filter = new FilterBuilder(or(to('0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45'), to('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488d')));
 const sub = client.subscribeNewTxs(filter);
 
 sub.on('tx', (tx: TypedTransaction) => {

@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { APIClient } from '../protobuf/api_grpc_pb';
 import { Metadata } from '@grpc/grpc-js';
-import { TxFilter } from '../protobuf/api_pb';
+import { TxFilterV2 } from '../protobuf/api_pb';
 import { EventEmitter } from 'events';
 import { ethers } from 'ethers';
 import { TypedTransaction } from '@ethereumjs/tx';
@@ -9,7 +9,35 @@ export interface TransactionResponse {
     hash: string;
     timestamp: number;
 }
-export { TxFilter };
+declare enum Operator {
+    AND = 1,
+    OR = 2
+}
+interface FilterKV {
+    Key: string;
+    Value: string;
+}
+interface Node {
+    Operand?: FilterKV;
+    Operator?: Operator;
+    Nodes?: Array<Node>;
+}
+interface Filter {
+    Root: Node;
+}
+declare type FilterOp = (f: Filter, n?: Node) => void;
+export declare function or(...ops: FilterOp[]): FilterOp;
+export declare function and(...ops: FilterOp[]): FilterOp;
+export declare function to(to: string): FilterOp;
+export declare function from(from: string): FilterOp;
+export declare class FilterBuilder {
+    private _filter;
+    private _next;
+    private _last;
+    constructor(rootOp: FilterOp);
+    toString(): string;
+    build(): Uint8Array;
+}
 export declare class Client {
     private _client;
     private _md;
@@ -23,7 +51,7 @@ export declare class Client {
      * subscribes to the new transactions stream.
      * @returns {TxStream} - emits new txs as events
      */
-    subscribeNewTxs(filter?: TxFilter): TxStream;
+    subscribeNewTxs(filter?: FilterBuilder): TxStream;
     /**
      * subscribes to the new blocks stream.
      * @returns {BlockStream} - emits new blocks as events
@@ -56,8 +84,8 @@ export declare class Client {
     rawBackrunTransaction(hash: string, rawtx: string): Promise<TransactionResponse>;
 }
 declare class TxStream extends EventEmitter {
-    constructor(_client: APIClient, _md: Metadata, _filter: TxFilter);
-    retry(_client: APIClient, _md: Metadata, _filter: TxFilter): Promise<void>;
+    constructor(_client: APIClient, _md: Metadata, _filter: TxFilterV2);
+    retry(_client: APIClient, _md: Metadata, _filter: TxFilterV2): Promise<void>;
 }
 export interface Block {
     hash: string;
@@ -80,3 +108,4 @@ declare class BlockStream extends EventEmitter {
 }
 export declare function bytesToHex(b: string | Uint8Array): string;
 export declare function hexToBytes(str: string): Uint8Array;
+export {};

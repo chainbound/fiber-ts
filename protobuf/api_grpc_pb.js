@@ -71,6 +71,17 @@ function deserialize_api_TxFilter(buffer_arg) {
   return api_pb.TxFilter.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_api_TxFilterV2(arg) {
+  if (!(arg instanceof api_pb.TxFilterV2)) {
+    throw new Error('Expected argument of type api.TxFilterV2');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_TxFilterV2(buffer_arg) {
+  return api_pb.TxFilterV2.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_eth_Block(arg) {
   if (!(arg instanceof eth_pb.Block)) {
     throw new Error('Expected argument of type eth.Block');
@@ -103,6 +114,17 @@ var APIService = exports.APIService = {
     responseType: eth_pb.Transaction,
     requestSerialize: serialize_api_TxFilter,
     requestDeserialize: deserialize_api_TxFilter,
+    responseSerialize: serialize_eth_Transaction,
+    responseDeserialize: deserialize_eth_Transaction,
+  },
+  subscribeNewTxsV2: {
+    path: '/api.API/SubscribeNewTxsV2',
+    requestStream: false,
+    responseStream: true,
+    requestType: api_pb.TxFilterV2,
+    responseType: eth_pb.Transaction,
+    requestSerialize: serialize_api_TxFilterV2,
+    requestDeserialize: deserialize_api_TxFilterV2,
     responseSerialize: serialize_eth_Transaction,
     responseDeserialize: deserialize_eth_Transaction,
   },

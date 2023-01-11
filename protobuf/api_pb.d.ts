@@ -39,6 +39,28 @@ export namespace TxFilter {
     }
 }
 
+export class TxFilterV2 extends jspb.Message { 
+    getEncoded(): Uint8Array | string;
+    getEncoded_asU8(): Uint8Array;
+    getEncoded_asB64(): string;
+    setEncoded(value: Uint8Array | string): TxFilterV2;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): TxFilterV2.AsObject;
+    static toObject(includeInstance: boolean, msg: TxFilterV2): TxFilterV2.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: TxFilterV2, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): TxFilterV2;
+    static deserializeBinaryFromReader(message: TxFilterV2, reader: jspb.BinaryReader): TxFilterV2;
+}
+
+export namespace TxFilterV2 {
+    export type AsObject = {
+        encoded: Uint8Array | string,
+    }
+}
+
 export class BlockFilter extends jspb.Message { 
     getProducer(): string;
     setProducer(value: string): BlockFilter;

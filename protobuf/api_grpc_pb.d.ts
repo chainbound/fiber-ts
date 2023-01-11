@@ -10,6 +10,7 @@ import * as eth_pb from "./eth_pb";
 
 interface IAPIService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
     subscribeNewTxs: IAPIService_ISubscribeNewTxs;
+    subscribeNewTxsV2: IAPIService_ISubscribeNewTxsV2;
     subscribeNewBlocks: IAPIService_ISubscribeNewBlocks;
     sendTransaction: IAPIService_ISendTransaction;
     sendRawTransaction: IAPIService_ISendRawTransaction;
@@ -27,6 +28,15 @@ interface IAPIService_ISubscribeNewTxs extends grpc.MethodDefinition<api_pb.TxFi
     responseStream: true;
     requestSerialize: grpc.serialize<api_pb.TxFilter>;
     requestDeserialize: grpc.deserialize<api_pb.TxFilter>;
+    responseSerialize: grpc.serialize<eth_pb.Transaction>;
+    responseDeserialize: grpc.deserialize<eth_pb.Transaction>;
+}
+interface IAPIService_ISubscribeNewTxsV2 extends grpc.MethodDefinition<api_pb.TxFilterV2, eth_pb.Transaction> {
+    path: "/api.API/SubscribeNewTxsV2";
+    requestStream: false;
+    responseStream: true;
+    requestSerialize: grpc.serialize<api_pb.TxFilterV2>;
+    requestDeserialize: grpc.deserialize<api_pb.TxFilterV2>;
     responseSerialize: grpc.serialize<eth_pb.Transaction>;
     responseDeserialize: grpc.deserialize<eth_pb.Transaction>;
 }
@@ -116,6 +126,7 @@ export const APIService: IAPIService;
 
 export interface IAPIServer extends grpc.UntypedServiceImplementation {
     subscribeNewTxs: grpc.handleServerStreamingCall<api_pb.TxFilter, eth_pb.Transaction>;
+    subscribeNewTxsV2: grpc.handleServerStreamingCall<api_pb.TxFilterV2, eth_pb.Transaction>;
     subscribeNewBlocks: grpc.handleServerStreamingCall<api_pb.BlockFilter, eth_pb.Block>;
     sendTransaction: grpc.handleUnaryCall<eth_pb.Transaction, api_pb.TransactionResponse>;
     sendRawTransaction: grpc.handleUnaryCall<api_pb.RawTxMsg, api_pb.TransactionResponse>;
@@ -130,6 +141,8 @@ export interface IAPIServer extends grpc.UntypedServiceImplementation {
 export interface IAPIClient {
     subscribeNewTxs(request: api_pb.TxFilter, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
     subscribeNewTxs(request: api_pb.TxFilter, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
+    subscribeNewTxsV2(request: api_pb.TxFilterV2, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
+    subscribeNewTxsV2(request: api_pb.TxFilterV2, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
     subscribeNewBlocks(request: api_pb.BlockFilter, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
     subscribeNewBlocks(request: api_pb.BlockFilter, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
     sendTransaction(request: eth_pb.Transaction, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
@@ -162,6 +175,8 @@ export class APIClient extends grpc.Client implements IAPIClient {
     constructor(address: string, credentials: grpc.ChannelCredentials, options?: Partial<grpc.ClientOptions>);
     public subscribeNewTxs(request: api_pb.TxFilter, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
     public subscribeNewTxs(request: api_pb.TxFilter, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
+    public subscribeNewTxsV2(request: api_pb.TxFilterV2, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
+    public subscribeNewTxsV2(request: api_pb.TxFilterV2, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Transaction>;
     public subscribeNewBlocks(request: api_pb.BlockFilter, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
     public subscribeNewBlocks(request: api_pb.BlockFilter, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
     public sendTransaction(request: eth_pb.Transaction, callback: (error: grpc.ServiceError | null, response: api_pb.TransactionResponse) => void): grpc.ClientUnaryCall;
