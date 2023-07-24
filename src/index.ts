@@ -481,7 +481,7 @@ class TxStream extends EventEmitter {
     });
   }
 
-  onTx(cb: (tx: TypedTransaction) => void) {
+  onData(cb: (tx: TypedTransaction) => void) {
     this.on("tx", cb);
   }
 }
@@ -559,7 +559,7 @@ class BlockStream extends EventEmitter {
     };
   }
 
-  onBlock(cb: (block: Block) => void) {
+  onData(cb: (block: Block) => void) {
     this.on("block", cb);
   }
 }

@@ -58,7 +58,7 @@ let filter = new FilterBuilder(
 
 const sub = client.subscribeNewTxs(filter);
 
-sub.onTx((tx: TypedTransaction) => {
+sub.onData((tx: TypedTransaction) => {
   handleTx(tx);
 });
 ```
@@ -77,7 +77,7 @@ await client.waitForReady(10);
 
 const sub = client.subscribeNewBlocks();
 
-sub.onBlock((block: Block) => {
+sub.onData((block: Block) => {
   handleBlock(block);
 });
 ```
