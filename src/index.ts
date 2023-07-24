@@ -1,11 +1,26 @@
-import { APIClient } from '../protobuf/api_grpc_pb';
-import { ClientDuplexStream, credentials, Metadata } from '@grpc/grpc-js';
-import { BackrunMsg, BlockFilter, RawBackrunMsg, RawTxMsg, TransactionResponse as PbResponse, TxFilterV2 } from '../protobuf/api_pb';
-import { EventEmitter } from 'events';
-import { ethers } from 'ethers';
-import { FeeMarketEIP1559Transaction, Transaction, TransactionFactory, TypedTransaction } from '@ethereumjs/tx';
-import eth from '../protobuf/eth_pb'
-import { Address } from '@ethereumjs/util';
+import { EventEmitter } from "events";
+import { ethers } from "ethers";
+
+import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
+import { Address } from "@ethereumjs/util";
+import {
+  FeeMarketEIP1559Transaction,
+  Transaction,
+  TransactionFactory,
+  TypedTransaction,
+} from "@ethereumjs/tx";
+
+import eth from "../protobuf/eth_pb";
+import { APIClient } from "../protobuf/api_grpc_pb";
+import {
+  BlockFilter,
+  RawTxMsg,
+  TransactionResponse as PbResponse,
+  TxSequenceMsg,
+  TxSequenceResponse,
+  RawTxSequenceMsg,
+  TxFilter,
+} from "../protobuf/api_pb";
 
 export interface TransactionResponse {
   hash: string;
@@ -18,24 +33,24 @@ enum Operator {
 }
 
 interface FilterKV {
-  Key: string,
-  Value: string,
+  Key: string;
+  Value: string;
 }
 
 interface Node {
-  Operand?: FilterKV,
-  Operator?: Operator,
-  Nodes?: Array<Node>,
+  Operand?: FilterKV;
+  Operator?: Operator;
+  Nodes?: Array<Node>;
 }
 
 interface Filter {
-  Root: Node,
+  Root: Node;
 }
 
 type FilterOp = (f: Filter, n?: Node) => void;
 
 export function or(...ops: FilterOp[]): FilterOp {
-  return function(f, n) {
+  return function (f, n) {
     let newNode = {
       Operator: Operator.OR,
     };
@@ -52,11 +67,11 @@ export function or(...ops: FilterOp[]): FilterOp {
     for (let op of ops) {
       op(f, newNode);
     }
-  }
+  };
 }
 
 export function and(...ops: FilterOp[]): FilterOp {
-  return function(f, n) {
+  return function (f, n) {
     let newNode = {
       Operator: Operator.AND,
     };
@@ -73,12 +88,11 @@ export function and(...ops: FilterOp[]): FilterOp {
     for (let op of ops) {
       op(f, newNode);
     }
-  }
+  };
 }
 
 export function to(to: string): FilterOp {
-  return function(f, n) {
-  
+  return function (f, n) {
     let newNode = {
       Operand: {
         Key: "to",
@@ -95,12 +109,11 @@ export function to(to: string): FilterOp {
         n.Nodes = new Array(newNode);
       }
     }
-  }
+  };
 }
 
 export function from(from: string): FilterOp {
-  return function(f, n) {
-  
+  return function (f, n) {
     let newNode = {
       Operand: {
         Key: "from",
@@ -117,9 +130,8 @@ export function from(from: string): FilterOp {
         n.Nodes = new Array(newNode);
       }
     }
-  }
+  };
 }
-
 
 export class FilterBuilder {
   private _filter: Filter;
@@ -132,7 +144,6 @@ export class FilterBuilder {
     rootOp(f, undefined);
     this._filter = f;
   }
-
 
   // public get or(): FilterBuilder {
   //   let newNode = {
@@ -193,7 +204,6 @@ export class FilterBuilder {
   //     },
   //   };
 
-
   //   // If there's no root yet, set it here
   //   if (!this._filter.Root) {
   //     this._filter.Root = newNode;
@@ -223,7 +233,6 @@ export class FilterBuilder {
   //     },
   //   };
 
-
   //   // If there's no root yet, set it here
   //   if (!this._filter.Root) {
   //     this._filter.Root = newNode;
@@ -252,26 +261,32 @@ export class FilterBuilder {
   }
 }
 
-
 export class Client {
   private _client: APIClient;
   private _md: Metadata;
 
   private _txStream: ClientDuplexStream<eth.Transaction, PbResponse>;
   private _rawTxStream: ClientDuplexStream<RawTxMsg, PbResponse>;
-  private _backrunStream: ClientDuplexStream<BackrunMsg, PbResponse>;
-  private _rawBackrunStream: ClientDuplexStream<RawBackrunMsg, PbResponse>;
+  private _txSequenceStream: ClientDuplexStream<
+    TxSequenceMsg,
+    TxSequenceResponse
+  >;
+  private _rawTxSequenceStream: ClientDuplexStream<
+    RawTxSequenceMsg,
+    TxSequenceResponse
+  >;
 
   constructor(target: string, apiKey: string) {
-    // this._client = new API;
     this._client = new APIClient(target, credentials.createInsecure());
     this._md = new Metadata();
-    this._md.add('x-api-key', apiKey)
+    this._md.add("x-api-key", apiKey);
 
-    this._txStream = this._client.sendTransactionStream(this._md);
-    this._rawTxStream = this._client.sendRawTransactionStream(this._md);
-    this._backrunStream = this._client.backrunStream(this._md);
-    this._rawBackrunStream = this._client.rawBackrunStream(this._md);
+    this._txStream = this._client.sendTransaction(this._md);
+    this._rawTxStream = this._client.sendRawTransaction(this._md);
+    this._txSequenceStream = this._client.sendTransactionSequence(this._md);
+    this._rawTxSequenceStream = this._client.sendRawTransactionSequence(
+      this._md
+    );
   }
 
   waitForReady(seconds: number): Promise<void> {
@@ -279,14 +294,14 @@ export class Client {
     const deadline = new Date(now.getTime() + seconds * 1000);
 
     return new Promise((resolve, reject) => {
-      this._client.waitForReady(deadline, err => {
+      this._client.waitForReady(deadline, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         } else {
-          resolve()
+          resolve();
         }
-      })
-    })
+      });
+    });
   }
 
   /**
@@ -294,9 +309,9 @@ export class Client {
    * @returns {TxStream} - emits new txs as events
    */
   subscribeNewTxs(filter?: FilterBuilder): TxStream {
-    const f = filter ? filter.build() : new Uint8Array;
+    const f = filter ? filter.build() : new Uint8Array();
 
-    const protoFilter = new TxFilterV2;
+    const protoFilter = new TxFilter();
     protoFilter.setEncoded(f);
     return new TxStream(this._client, this._md, protoFilter);
   }
@@ -310,7 +325,7 @@ export class Client {
   }
 
   /**
-   * sends a transaction 
+   * sends a transaction
    * @param tx a signed! typed transaction
    * @returns response containing hash and timestamp
    */
@@ -320,7 +335,7 @@ export class Client {
         if (err) {
           reject(err);
         } else {
-          this._txStream.on('data', (res: PbResponse) => {
+          this._txStream.on("data", (res: PbResponse) => {
             resolve({
               hash: res.getHash(),
               timestamp: res.getTimestamp(),
@@ -332,51 +347,24 @@ export class Client {
   }
 
   /**
-   * sends a transaction 
-   * @param rawtx a serialized RLP encoded signed transaction in hexadecimal
-   * @returns response containing hash and timestamp
+   * sends a transaction
+   * @param rawtx an array of serialized RLP encoded signed transactions in hexadecimal
+   * @returns response containing array of hashes and timestamps
    */
   async sendRawTransaction(rawtx: string): Promise<TransactionResponse> {
     const rawMsg = new RawTxMsg();
 
-    if (rawtx.substring(0, 2) === '0x') {
+    if (rawtx.substring(0, 2) === "0x") {
       rawtx = rawtx.substring(2);
     }
 
-    rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
+    rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, "hex")));
     return new Promise((resolve, reject) => {
       this._rawTxStream.write(rawMsg, (err: Error) => {
         if (err) {
           reject(err);
         } else {
-          this._rawTxStream.on('data', (res: PbResponse) => {
-            resolve({
-              hash: res.getHash(),
-              timestamp: res.getTimestamp(),
-            });
-          });
-        }
-      })
-    });
-  }
-
-  /**
-   * 
-   * @param hash hash of target transaction
-   * @param tx a signed! typed transaction
-   * @returns response containing hash and timestamp
-   */
-  async backrunTransaction(hash: string, tx: TypedTransaction): Promise<TransactionResponse> {
-    const backrunMsg = new BackrunMsg();
-    backrunMsg.setHash(hash);
-    backrunMsg.setTx(toProto(tx));
-
-    return new Promise((resolve, reject) => {
-      this._backrunStream.write(backrunMsg, this._md, (err: Error) => {
-        if (err) {
-          reject(err);
-        } else {
-          this._backrunStream.on('data', (res: PbResponse) => {
+          this._rawTxStream.on("data", (res: PbResponse) => {
             resolve({
               hash: res.getHash(),
               timestamp: res.getTimestamp(),
@@ -388,29 +376,72 @@ export class Client {
   }
 
   /**
-   * @param hash hash of target transaction
-   * @param rawtx a signed and serialized transaction
-   * @returns response containing hash and timestamp
+   *
+   * @param txs an array of signed! typed transactions
+   * @returns response containing array of hashes and timestamps
    */
-  async rawBackrunTransaction(hash: string, rawtx: string): Promise<TransactionResponse> {
-    const backrunMsg = new RawBackrunMsg();
-    backrunMsg.setHash(hash);
+  async sendTransactionSequence(
+    txs: TypedTransaction[]
+  ): Promise<TransactionResponse[]> {
+    const sequenceMsg = new TxSequenceMsg();
+    sequenceMsg.setSequenceList(txs.map(toProto));
 
-    if (rawtx.substring(0, 2) === '0x') {
-      rawtx = rawtx.substring(2);
-    }
-
-    backrunMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
     return new Promise((resolve, reject) => {
-      this._rawBackrunStream.write(backrunMsg, this._md, (err: Error) => {
+      this._txSequenceStream.write(sequenceMsg, this._md, (err: Error) => {
         if (err) {
           reject(err);
         } else {
-          this._rawBackrunStream.on('data', (res: PbResponse) => {
-            resolve({
-              hash: res.getHash(),
-              timestamp: res.getTimestamp(),
-            });
+          this._txSequenceStream.on("data", (res: TxSequenceResponse) => {
+            let response: TransactionResponse[] = [];
+            for (let r of res.getSequenceResponseList()) {
+              response.push({
+                hash: r.getHash(),
+                timestamp: r.getTimestamp(),
+              });
+            }
+
+            resolve(response);
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * @param rawTxs an array of signed and serialized transactions
+   * @returns response containing array of hashes and timestamps
+   */
+  async sendRawTransactionSequence(
+    rawTxs: string[]
+  ): Promise<TransactionResponse[]> {
+    const sequenceMsg = new RawTxSequenceMsg();
+
+    // remove 0x prefix if present
+    for (const [idx, rawtx] of rawTxs.entries()) {
+      if (rawtx.substring(0, 2) === "0x") {
+        rawTxs[idx] = rawtx.substring(2);
+      }
+    }
+
+    sequenceMsg.setRawTxsList(
+      rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex")))
+    );
+
+    return new Promise((resolve, reject) => {
+      this._rawTxSequenceStream.write(sequenceMsg, this._md, (err: Error) => {
+        if (err) {
+          reject(err);
+        } else {
+          this._rawTxSequenceStream.on("data", (res: TxSequenceResponse) => {
+            let response: TransactionResponse[] = [];
+            for (let r of res.getSequenceResponseList()) {
+              response.push({
+                hash: r.getHash(),
+                timestamp: r.getTimestamp(),
+              });
+            }
+
+            resolve(response);
           });
         }
       });
@@ -419,31 +450,32 @@ export class Client {
 }
 
 class TxStream extends EventEmitter {
-  constructor(_client: APIClient, _md: Metadata, _filter: TxFilterV2) {
+  constructor(_client: APIClient, _md: Metadata, _filter: TxFilter) {
     super();
     this.retry(_client, _md, _filter);
   }
 
-  async retry(_client: APIClient, _md: Metadata, _filter: TxFilterV2) {
+  async retry(_client: APIClient, _md: Metadata, _filter: TxFilter) {
     const now = new Date();
     const deadline = new Date(now.getTime() + 60 * 1000);
     await new Promise<void>((resolve, reject) => {
-      _client.waitForReady(deadline, err => {
+      _client.waitForReady(deadline, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         } else {
-          resolve()
+          resolve();
         }
       });
-
     });
 
-    const _txStream = _client.subscribeNewTxsV2(_filter, _md);
-    _txStream.on('close', () => this.emit('close'));
-    _txStream.on('end', () => this.emit('end'));
-    _txStream.on('data', (data: eth.Transaction) => this.emit('tx', fromProto(data)));
+    const _txStream = _client.subscribeNewTxs(_filter, _md);
+    _txStream.on("close", () => this.emit("close"));
+    _txStream.on("end", () => this.emit("end"));
+    _txStream.on("data", (data: eth.Transaction) =>
+      this.emit("tx", fromProto(data))
+    );
 
-    _txStream.on('error', async (err) => {
+    _txStream.on("error", async (err) => {
       console.error(err);
       this.retry(_client, _md, _filter);
     });
@@ -451,18 +483,20 @@ class TxStream extends EventEmitter {
 }
 
 export interface Block {
-  hash: string,
-  parentHash: string,
-  number: number,
-  nonce: number,
-  timestamp: number,
-  difficulty: number,
-  totalDifficulty: ethers.BigNumber,
-  gasLimit: ethers.BigNumber,
-  gasUsed: ethers.BigNumber,
-  coinbase: string,
-  extraData: string,
-  transactions: TypedTransaction[],
+  number: number;
+  hash: string;
+  parentHash: string;
+  prevRandao: string;
+  stateRoot: string;
+  receiptRoot: string;
+  feeRecipient: string;
+  extraData: string;
+  gasLimit: ethers.BigNumber;
+  gasUsed: ethers.BigNumber;
+  timestamp: number;
+  logsBloom: string;
+  baseFeePerGas: ethers.BigNumber;
+  transactions: TypedTransaction[];
 }
 
 class BlockStream extends EventEmitter {
@@ -475,57 +509,57 @@ class BlockStream extends EventEmitter {
     const now = new Date();
     const deadline = new Date(now.getTime() + 60 * 1000);
     await new Promise<void>((resolve, reject) => {
-      _client.waitForReady(deadline, err => {
+      _client.waitForReady(deadline, (err) => {
         if (err) {
-          reject(err)
+          reject(err);
         } else {
-          resolve()
+          resolve();
         }
       });
-
     });
 
     const _blockStream = _client.subscribeNewBlocks(new BlockFilter(), _md);
-    _blockStream.on('close', () => this.emit('close'));
-    _blockStream.on('end', () => this.emit('end'));
-    _blockStream.on('data', (data: eth.Block) => this.emit('block', this.handleBlock(data)));
+    _blockStream.on("close", () => this.emit("close"));
+    _blockStream.on("end", () => this.emit("end"));
+    _blockStream.on("data", (data: eth.Block) =>
+      this.emit("block", this.handleBlock(data))
+    );
 
-    _blockStream.on('error', async () => {
+    _blockStream.on("error", async () => {
       this.retry(_client, _md);
     });
   }
 
   private handleBlock(block: eth.Block): Block {
-    const header = block.getHeader()!;
-    const body = block.getBody()!;
-
     const txList: TypedTransaction[] = [];
 
-    for (let tx of body.getTransactionsList()) {
+    for (let tx of block.getTransactionsList()) {
       txList.push(fromProto(tx));
     }
 
     return {
-      hash: bytesToHex(header.getHash()),
-      parentHash: bytesToHex(header.getParentHash()),
-      number: header.getNumber(),
-      timestamp: header.getTimestamp(),
-      nonce: header.getNonce(),
-      difficulty: header.getDifficulty(),
-      totalDifficulty: ethers.BigNumber.from(header.getTotalDifficulty()),
-      gasLimit: ethers.BigNumber.from(header.getGasLimit()),
-      gasUsed: ethers.BigNumber.from(header.getGasUsed()),
-      coinbase: bytesToHex(header.getCoinbase()),
-      extraData: bytesToHex(header.getExtraData()),
+      hash: bytesToHex(block.getHash()),
+      parentHash: bytesToHex(block.getParentHash()),
+      number: block.getNumber(),
+      timestamp: block.getTimestamp(),
+      prevRandao: bytesToHex(block.getPrevRandao()),
+      stateRoot: bytesToHex(block.getStateRoot()),
+      receiptRoot: bytesToHex(block.getReceiptRoot()),
+      feeRecipient: bytesToHex(block.getFeeRecipient()),
+      extraData: bytesToHex(block.getExtraData()),
+      gasLimit: ethers.BigNumber.from(block.getGasLimit()),
+      gasUsed: ethers.BigNumber.from(block.getGasUsed()),
+      logsBloom: bytesToHex(block.getLogsBloom()),
+      baseFeePerGas: ethers.BigNumber.from(block.getBaseFeePerGas()),
       transactions: txList,
-    }
+    };
   }
 }
 
 function fromProto(tx: eth.Transaction): TypedTransaction {
-  let value = 0n
+  let value = 0n;
   if (tx.getValue()) {
-    value = BigInt("0x" + Buffer.from(tx.getValue()).toString('hex'))
+    value = BigInt("0x" + Buffer.from(tx.getValue()).toString("hex"));
   }
 
   let to;
@@ -546,12 +580,10 @@ function fromProto(tx: eth.Transaction): TypedTransaction {
     chainId: BigInt(tx.getChainid()),
     value: value,
     gasPrice: BigInt(tx.getGasPrice()),
-    maxFeePerGas: BigInt(tx.getMaxFee()),
-    maxPriorityFeePerGas: BigInt(tx.getPriorityFee()),
     v: BigInt(tx.getV()),
-    r: BigInt("0x" + Buffer.from(tx.getR()).toString('hex')),
-    s: BigInt("0x" + Buffer.from(tx.getS()).toString('hex')),
-  })
+    r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
+    s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
+  });
 }
 
 // WARNING: if transaction is legacy, it will only work on Ethereum mainnet.
@@ -583,7 +615,7 @@ function toProto(tx: TypedTransaction): eth.Transaction {
     proto.setHash(newtx.hash());
     proto.setFrom(newtx.getSenderAddress().buf);
     if (newtx.to) {
-      proto.setTo(newtx.to.buf)
+      proto.setTo(newtx.to.buf);
     }
 
     proto.setType(tx.type);
@@ -602,13 +634,11 @@ function toProto(tx: TypedTransaction): eth.Transaction {
     proto.setS(hexToBytes("0x" + tx.s!.toString(16)));
   }
 
-
-
   return proto;
 }
 
 export function bytesToHex(b: string | Uint8Array): string {
-  return '0x' + Buffer.from(b).toString('hex')
+  return "0x" + Buffer.from(b).toString("hex");
 }
 
 export function hexToBytes(str: string) {
@@ -616,8 +646,8 @@ export function hexToBytes(str: string) {
     return new Uint8Array();
   }
 
-  if (str.substring(0, 2) !== '0x') {
-    str = '0x' + str
+  if (str.substring(0, 2) !== "0x") {
+    str = "0x" + str;
   }
 
   const a = [];
@@ -629,9 +659,9 @@ export function hexToBytes(str: string) {
 }
 
 function hexToBase64(str: string) {
-  if (str.substring(0, 2) == '0x') {
+  if (str.substring(0, 2) == "0x") {
     str = str.slice(2);
   }
 
-  return Buffer.from(str, 'hex').toString('base64');
+  return Buffer.from(str, "hex").toString("base64");
 }

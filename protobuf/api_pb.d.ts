@@ -6,20 +6,81 @@
 
 import * as jspb from "google-protobuf";
 import * as eth_pb from "./eth_pb";
+import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
+
+export class TxSequenceMsg extends jspb.Message { 
+    clearSequenceList(): void;
+    getSequenceList(): Array<eth_pb.Transaction>;
+    setSequenceList(value: Array<eth_pb.Transaction>): TxSequenceMsg;
+    addSequence(value?: eth_pb.Transaction, index?: number): eth_pb.Transaction;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): TxSequenceMsg.AsObject;
+    static toObject(includeInstance: boolean, msg: TxSequenceMsg): TxSequenceMsg.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: TxSequenceMsg, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): TxSequenceMsg;
+    static deserializeBinaryFromReader(message: TxSequenceMsg, reader: jspb.BinaryReader): TxSequenceMsg;
+}
+
+export namespace TxSequenceMsg {
+    export type AsObject = {
+        sequenceList: Array<eth_pb.Transaction.AsObject>,
+    }
+}
+
+export class RawTxSequenceMsg extends jspb.Message { 
+    clearRawTxsList(): void;
+    getRawTxsList(): Array<Uint8Array | string>;
+    getRawTxsList_asU8(): Array<Uint8Array>;
+    getRawTxsList_asB64(): Array<string>;
+    setRawTxsList(value: Array<Uint8Array | string>): RawTxSequenceMsg;
+    addRawTxs(value: Uint8Array | string, index?: number): Uint8Array | string;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): RawTxSequenceMsg.AsObject;
+    static toObject(includeInstance: boolean, msg: RawTxSequenceMsg): RawTxSequenceMsg.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: RawTxSequenceMsg, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): RawTxSequenceMsg;
+    static deserializeBinaryFromReader(message: RawTxSequenceMsg, reader: jspb.BinaryReader): RawTxSequenceMsg;
+}
+
+export namespace RawTxSequenceMsg {
+    export type AsObject = {
+        rawTxsList: Array<Uint8Array | string>,
+    }
+}
+
+export class TxSequenceResponse extends jspb.Message { 
+    clearSequenceResponseList(): void;
+    getSequenceResponseList(): Array<TransactionResponse>;
+    setSequenceResponseList(value: Array<TransactionResponse>): TxSequenceResponse;
+    addSequenceResponse(value?: TransactionResponse, index?: number): TransactionResponse;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): TxSequenceResponse.AsObject;
+    static toObject(includeInstance: boolean, msg: TxSequenceResponse): TxSequenceResponse.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: TxSequenceResponse, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): TxSequenceResponse;
+    static deserializeBinaryFromReader(message: TxSequenceResponse, reader: jspb.BinaryReader): TxSequenceResponse;
+}
+
+export namespace TxSequenceResponse {
+    export type AsObject = {
+        sequenceResponseList: Array<TransactionResponse.AsObject>,
+    }
+}
 
 export class TxFilter extends jspb.Message { 
-    getFrom(): Uint8Array | string;
-    getFrom_asU8(): Uint8Array;
-    getFrom_asB64(): string;
-    setFrom(value: Uint8Array | string): TxFilter;
-    getTo(): Uint8Array | string;
-    getTo_asU8(): Uint8Array;
-    getTo_asB64(): string;
-    setTo(value: Uint8Array | string): TxFilter;
-    getMethodid(): Uint8Array | string;
-    getMethodid_asU8(): Uint8Array;
-    getMethodid_asB64(): string;
-    setMethodid(value: Uint8Array | string): TxFilter;
+    getEncoded(): Uint8Array | string;
+    getEncoded_asU8(): Uint8Array;
+    getEncoded_asB64(): string;
+    setEncoded(value: Uint8Array | string): TxFilter;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): TxFilter.AsObject;
@@ -32,30 +93,6 @@ export class TxFilter extends jspb.Message {
 }
 
 export namespace TxFilter {
-    export type AsObject = {
-        from: Uint8Array | string,
-        to: Uint8Array | string,
-        methodid: Uint8Array | string,
-    }
-}
-
-export class TxFilterV2 extends jspb.Message { 
-    getEncoded(): Uint8Array | string;
-    getEncoded_asU8(): Uint8Array;
-    getEncoded_asB64(): string;
-    setEncoded(value: Uint8Array | string): TxFilterV2;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): TxFilterV2.AsObject;
-    static toObject(includeInstance: boolean, msg: TxFilterV2): TxFilterV2.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: TxFilterV2, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): TxFilterV2;
-    static deserializeBinaryFromReader(message: TxFilterV2, reader: jspb.BinaryReader): TxFilterV2;
-}
-
-export namespace TxFilterV2 {
     export type AsObject = {
         encoded: Uint8Array | string,
     }

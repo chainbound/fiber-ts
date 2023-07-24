@@ -4,14 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.hexToBytes = exports.bytesToHex = exports.Client = exports.FilterBuilder = exports.from = exports.to = exports.and = exports.or = void 0;
-const api_grpc_pb_1 = require("../protobuf/api_grpc_pb");
-const grpc_js_1 = require("@grpc/grpc-js");
-const api_pb_1 = require("../protobuf/api_pb");
 const events_1 = require("events");
 const ethers_1 = require("ethers");
+const grpc_js_1 = require("@grpc/grpc-js");
+const util_1 = require("@ethereumjs/util");
 const tx_1 = require("@ethereumjs/tx");
 const eth_pb_1 = __importDefault(require("../protobuf/eth_pb"));
-const util_1 = require("@ethereumjs/util");
+const api_grpc_pb_1 = require("../protobuf/api_grpc_pb");
+const api_pb_1 = require("../protobuf/api_pb");
 var Operator;
 (function (Operator) {
     Operator[Operator["AND"] = 1] = "AND";
@@ -209,20 +209,19 @@ class FilterBuilder {
 exports.FilterBuilder = FilterBuilder;
 class Client {
     constructor(target, apiKey) {
-        // this._client = new API;
         this._client = new api_grpc_pb_1.APIClient(target, grpc_js_1.credentials.createInsecure());
         this._md = new grpc_js_1.Metadata();
-        this._md.add('x-api-key', apiKey);
-        this._txStream = this._client.sendTransactionStream(this._md);
-        this._rawTxStream = this._client.sendRawTransactionStream(this._md);
-        this._backrunStream = this._client.backrunStream(this._md);
-        this._rawBackrunStream = this._client.rawBackrunStream(this._md);
+        this._md.add("x-api-key", apiKey);
+        this._txStream = this._client.sendTransaction(this._md);
+        this._rawTxStream = this._client.sendRawTransaction(this._md);
+        this._txSequenceStream = this._client.sendTransactionSequence(this._md);
+        this._rawTxSequenceStream = this._client.sendRawTransactionSequence(this._md);
     }
     waitForReady(seconds) {
         const now = new Date();
         const deadline = new Date(now.getTime() + seconds * 1000);
         return new Promise((resolve, reject) => {
-            this._client.waitForReady(deadline, err => {
+            this._client.waitForReady(deadline, (err) => {
                 if (err) {
                     reject(err);
                 }
@@ -237,8 +236,8 @@ class Client {
      * @returns {TxStream} - emits new txs as events
      */
     subscribeNewTxs(filter) {
-        const f = filter ? filter.build() : new Uint8Array;
-        const protoFilter = new api_pb_1.TxFilterV2;
+        const f = filter ? filter.build() : new Uint8Array();
+        const protoFilter = new api_pb_1.TxFilter();
         protoFilter.setEncoded(f);
         return new TxStream(this._client, this._md, protoFilter);
     }
@@ -261,7 +260,7 @@ class Client {
                     reject(err);
                 }
                 else {
-                    this._txStream.on('data', (res) => {
+                    this._txStream.on("data", (res) => {
                         resolve({
                             hash: res.getHash(),
                             timestamp: res.getTimestamp(),
@@ -273,22 +272,22 @@ class Client {
     }
     /**
      * sends a transaction
-     * @param rawtx a serialized RLP encoded signed transaction in hexadecimal
-     * @returns response containing hash and timestamp
+     * @param rawtx an array of serialized RLP encoded signed transactions in hexadecimal
+     * @returns response containing array of hashes and timestamps
      */
     async sendRawTransaction(rawtx) {
         const rawMsg = new api_pb_1.RawTxMsg();
-        if (rawtx.substring(0, 2) === '0x') {
+        if (rawtx.substring(0, 2) === "0x") {
             rawtx = rawtx.substring(2);
         }
-        rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
+        rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, "hex")));
         return new Promise((resolve, reject) => {
             this._rawTxStream.write(rawMsg, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    this._rawTxStream.on('data', (res) => {
+                    this._rawTxStream.on("data", (res) => {
                         resolve({
                             hash: res.getHash(),
                             timestamp: res.getTimestamp(),
@@ -300,53 +299,60 @@ class Client {
     }
     /**
      *
-     * @param hash hash of target transaction
-     * @param tx a signed! typed transaction
-     * @returns response containing hash and timestamp
+     * @param txs an array of signed! typed transactions
+     * @returns response containing array of hashes and timestamps
      */
-    async backrunTransaction(hash, tx) {
-        const backrunMsg = new api_pb_1.BackrunMsg();
-        backrunMsg.setHash(hash);
-        backrunMsg.setTx(toProto(tx));
+    async sendTransactionSequence(txs) {
+        const sequenceMsg = new api_pb_1.TxSequenceMsg();
+        sequenceMsg.setSequenceList(txs.map(toProto));
         return new Promise((resolve, reject) => {
-            this._backrunStream.write(backrunMsg, this._md, (err) => {
+            this._txSequenceStream.write(sequenceMsg, this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    this._backrunStream.on('data', (res) => {
-                        resolve({
-                            hash: res.getHash(),
-                            timestamp: res.getTimestamp(),
-                        });
+                    this._txSequenceStream.on("data", (res) => {
+                        let response = [];
+                        for (let r of res.getSequenceResponseList()) {
+                            response.push({
+                                hash: r.getHash(),
+                                timestamp: r.getTimestamp(),
+                            });
+                        }
+                        resolve(response);
                     });
                 }
             });
         });
     }
     /**
-     * @param hash hash of target transaction
-     * @param rawtx a signed and serialized transaction
-     * @returns response containing hash and timestamp
+     * @param rawTxs an array of signed and serialized transactions
+     * @returns response containing array of hashes and timestamps
      */
-    async rawBackrunTransaction(hash, rawtx) {
-        const backrunMsg = new api_pb_1.RawBackrunMsg();
-        backrunMsg.setHash(hash);
-        if (rawtx.substring(0, 2) === '0x') {
-            rawtx = rawtx.substring(2);
+    async sendRawTransactionSequence(rawTxs) {
+        const sequenceMsg = new api_pb_1.RawTxSequenceMsg();
+        // remove 0x prefix if present
+        for (const [idx, rawtx] of rawTxs.entries()) {
+            if (rawtx.substring(0, 2) === "0x") {
+                rawTxs[idx] = rawtx.substring(2);
+            }
         }
-        backrunMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, 'hex')));
+        sequenceMsg.setRawTxsList(rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex"))));
         return new Promise((resolve, reject) => {
-            this._rawBackrunStream.write(backrunMsg, this._md, (err) => {
+            this._rawTxSequenceStream.write(sequenceMsg, this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    this._rawBackrunStream.on('data', (res) => {
-                        resolve({
-                            hash: res.getHash(),
-                            timestamp: res.getTimestamp(),
-                        });
+                    this._rawTxSequenceStream.on("data", (res) => {
+                        let response = [];
+                        for (let r of res.getSequenceResponseList()) {
+                            response.push({
+                                hash: r.getHash(),
+                                timestamp: r.getTimestamp(),
+                            });
+                        }
+                        resolve(response);
                     });
                 }
             });
@@ -363,7 +369,7 @@ class TxStream extends events_1.EventEmitter {
         const now = new Date();
         const deadline = new Date(now.getTime() + 60 * 1000);
         await new Promise((resolve, reject) => {
-            _client.waitForReady(deadline, err => {
+            _client.waitForReady(deadline, (err) => {
                 if (err) {
                     reject(err);
                 }
@@ -372,11 +378,11 @@ class TxStream extends events_1.EventEmitter {
                 }
             });
         });
-        const _txStream = _client.subscribeNewTxsV2(_filter, _md);
-        _txStream.on('close', () => this.emit('close'));
-        _txStream.on('end', () => this.emit('end'));
-        _txStream.on('data', (data) => this.emit('tx', fromProto(data)));
-        _txStream.on('error', async (err) => {
+        const _txStream = _client.subscribeNewTxs(_filter, _md);
+        _txStream.on("close", () => this.emit("close"));
+        _txStream.on("end", () => this.emit("end"));
+        _txStream.on("data", (data) => this.emit("tx", fromProto(data)));
+        _txStream.on("error", async (err) => {
             console.error(err);
             this.retry(_client, _md, _filter);
         });
@@ -391,7 +397,7 @@ class BlockStream extends events_1.EventEmitter {
         const now = new Date();
         const deadline = new Date(now.getTime() + 60 * 1000);
         await new Promise((resolve, reject) => {
-            _client.waitForReady(deadline, err => {
+            _client.waitForReady(deadline, (err) => {
                 if (err) {
                     reject(err);
                 }
@@ -401,32 +407,32 @@ class BlockStream extends events_1.EventEmitter {
             });
         });
         const _blockStream = _client.subscribeNewBlocks(new api_pb_1.BlockFilter(), _md);
-        _blockStream.on('close', () => this.emit('close'));
-        _blockStream.on('end', () => this.emit('end'));
-        _blockStream.on('data', (data) => this.emit('block', this.handleBlock(data)));
-        _blockStream.on('error', async () => {
+        _blockStream.on("close", () => this.emit("close"));
+        _blockStream.on("end", () => this.emit("end"));
+        _blockStream.on("data", (data) => this.emit("block", this.handleBlock(data)));
+        _blockStream.on("error", async () => {
             this.retry(_client, _md);
         });
     }
     handleBlock(block) {
-        const header = block.getHeader();
-        const body = block.getBody();
         const txList = [];
-        for (let tx of body.getTransactionsList()) {
+        for (let tx of block.getTransactionsList()) {
             txList.push(fromProto(tx));
         }
         return {
-            hash: bytesToHex(header.getHash()),
-            parentHash: bytesToHex(header.getParentHash()),
-            number: header.getNumber(),
-            timestamp: header.getTimestamp(),
-            nonce: header.getNonce(),
-            difficulty: header.getDifficulty(),
-            totalDifficulty: ethers_1.ethers.BigNumber.from(header.getTotalDifficulty()),
-            gasLimit: ethers_1.ethers.BigNumber.from(header.getGasLimit()),
-            gasUsed: ethers_1.ethers.BigNumber.from(header.getGasUsed()),
-            coinbase: bytesToHex(header.getCoinbase()),
-            extraData: bytesToHex(header.getExtraData()),
+            hash: bytesToHex(block.getHash()),
+            parentHash: bytesToHex(block.getParentHash()),
+            number: block.getNumber(),
+            timestamp: block.getTimestamp(),
+            prevRandao: bytesToHex(block.getPrevRandao()),
+            stateRoot: bytesToHex(block.getStateRoot()),
+            receiptRoot: bytesToHex(block.getReceiptRoot()),
+            feeRecipient: bytesToHex(block.getFeeRecipient()),
+            extraData: bytesToHex(block.getExtraData()),
+            gasLimit: ethers_1.ethers.BigNumber.from(block.getGasLimit()),
+            gasUsed: ethers_1.ethers.BigNumber.from(block.getGasUsed()),
+            logsBloom: bytesToHex(block.getLogsBloom()),
+            baseFeePerGas: ethers_1.ethers.BigNumber.from(block.getBaseFeePerGas()),
             transactions: txList,
         };
     }
@@ -434,7 +440,7 @@ class BlockStream extends events_1.EventEmitter {
 function fromProto(tx) {
     let value = 0n;
     if (tx.getValue()) {
-        value = BigInt("0x" + Buffer.from(tx.getValue()).toString('hex'));
+        value = BigInt("0x" + Buffer.from(tx.getValue()).toString("hex"));
     }
     let to;
     if (tx.getTo().length !== 0) {
@@ -454,11 +460,9 @@ function fromProto(tx) {
         chainId: BigInt(tx.getChainid()),
         value: value,
         gasPrice: BigInt(tx.getGasPrice()),
-        maxFeePerGas: BigInt(tx.getMaxFee()),
-        maxPriorityFeePerGas: BigInt(tx.getPriorityFee()),
         v: BigInt(tx.getV()),
-        r: BigInt("0x" + Buffer.from(tx.getR()).toString('hex')),
-        s: BigInt("0x" + Buffer.from(tx.getS()).toString('hex')),
+        r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
+        s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
     });
 }
 // WARNING: if transaction is legacy, it will only work on Ethereum mainnet.
@@ -508,15 +512,15 @@ function toProto(tx) {
     return proto;
 }
 function bytesToHex(b) {
-    return '0x' + Buffer.from(b).toString('hex');
+    return "0x" + Buffer.from(b).toString("hex");
 }
 exports.bytesToHex = bytesToHex;
 function hexToBytes(str) {
     if (!str) {
         return new Uint8Array();
     }
-    if (str.substring(0, 2) !== '0x') {
-        str = '0x' + str;
+    if (str.substring(0, 2) !== "0x") {
+        str = "0x" + str;
     }
     const a = [];
     for (let i = 2, len = str.length; i < len; i += 2) {
@@ -526,8 +530,8 @@ function hexToBytes(str) {
 }
 exports.hexToBytes = hexToBytes;
 function hexToBase64(str) {
-    if (str.substring(0, 2) == '0x') {
+    if (str.substring(0, 2) == "0x") {
         str = str.slice(2);
     }
-    return Buffer.from(str, 'hex').toString('base64');
+    return Buffer.from(str, "hex").toString("base64");
 }

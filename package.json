@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "tsc --build && node dist/test.js",
+    "test": "ts-node src/test.ts",
     "proto": "bash ./build.sh",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
