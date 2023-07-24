@@ -480,6 +480,10 @@ class TxStream extends EventEmitter {
       this.retry(_client, _md, _filter);
     });
   }
+
+  onTx(cb: (tx: TypedTransaction) => void) {
+    this.on("tx", cb);
+  }
 }
 
 export interface Block {
@@ -553,6 +557,10 @@ class BlockStream extends EventEmitter {
       baseFeePerGas: ethers.BigNumber.from(block.getBaseFeePerGas()),
       transactions: txList,
     };
+  }
+
+  onBlock(cb: (block: Block) => void) {
+    this.on("block", cb);
   }
 }
 
