@@ -24,6 +24,7 @@
     "google-protobuf": "^3.21.0"
   },
   "devDependencies": {
+    "@types/google-protobuf": "^3.15.6",
     "grpc-tools": "^1.11.2",
     "grpc_tools_node_protoc_ts": "^5.3.2",
     "ts-node": "^10.9.1",
@@ -31,7 +32,7 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "tsc --build && node dist/test.js",
+    "test": "ts-node src/test.ts",
     "proto": "bash ./build.sh",
     "build": "tsc --build",
     "clean": "tsc --build --clean",

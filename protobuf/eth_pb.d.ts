@@ -174,6 +174,9 @@ export class Transaction extends jspb.Message {
     getValue_asU8(): Uint8Array;
     getValue_asB64(): string;
     setValue(value: Uint8Array | string): Transaction;
+
+    hasFrom(): boolean;
+    clearFrom(): void;
     getFrom(): Uint8Array | string;
     getFrom_asU8(): Uint8Array;
     getFrom_asB64(): string;
@@ -261,160 +264,58 @@ export namespace AccessTuple {
     }
 }
 
-export class StoredTransaction extends jspb.Message { 
-
-    hasCanonicalData(): boolean;
-    clearCanonicalData(): void;
-    getCanonicalData(): CanonicalTransactionData | undefined;
-    setCanonicalData(value?: CanonicalTransactionData): StoredTransaction;
-
-    hasTransaction(): boolean;
-    clearTransaction(): void;
-    getTransaction(): Transaction | undefined;
-    setTransaction(value?: Transaction): StoredTransaction;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): StoredTransaction.AsObject;
-    static toObject(includeInstance: boolean, msg: StoredTransaction): StoredTransaction.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: StoredTransaction, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): StoredTransaction;
-    static deserializeBinaryFromReader(message: StoredTransaction, reader: jspb.BinaryReader): StoredTransaction;
-}
-
-export namespace StoredTransaction {
-    export type AsObject = {
-        canonicalData?: CanonicalTransactionData.AsObject,
-        transaction?: Transaction.AsObject,
-    }
-}
-
-export class Header extends jspb.Message { 
+export class Block extends jspb.Message { 
     getNumber(): number;
-    setNumber(value: number): Header;
+    setNumber(value: number): Block;
     getHash(): Uint8Array | string;
     getHash_asU8(): Uint8Array;
     getHash_asB64(): string;
-    setHash(value: Uint8Array | string): Header;
+    setHash(value: Uint8Array | string): Block;
     getParentHash(): Uint8Array | string;
     getParentHash_asU8(): Uint8Array;
     getParentHash_asB64(): string;
-    setParentHash(value: Uint8Array | string): Header;
-    getNonce(): number;
-    setNonce(value: number): Header;
-    getUncleHash(): Uint8Array | string;
-    getUncleHash_asU8(): Uint8Array;
-    getUncleHash_asB64(): string;
-    setUncleHash(value: Uint8Array | string): Header;
+    setParentHash(value: Uint8Array | string): Block;
+    getPrevRandao(): Uint8Array | string;
+    getPrevRandao_asU8(): Uint8Array;
+    getPrevRandao_asB64(): string;
+    setPrevRandao(value: Uint8Array | string): Block;
     getStateRoot(): Uint8Array | string;
     getStateRoot_asU8(): Uint8Array;
     getStateRoot_asB64(): string;
-    setStateRoot(value: Uint8Array | string): Header;
+    setStateRoot(value: Uint8Array | string): Block;
     getReceiptRoot(): Uint8Array | string;
     getReceiptRoot_asU8(): Uint8Array;
     getReceiptRoot_asB64(): string;
-    setReceiptRoot(value: Uint8Array | string): Header;
-    getCoinbase(): Uint8Array | string;
-    getCoinbase_asU8(): Uint8Array;
-    getCoinbase_asB64(): string;
-    setCoinbase(value: Uint8Array | string): Header;
-    getDifficulty(): number;
-    setDifficulty(value: number): Header;
-
-    hasTotalDifficulty(): boolean;
-    clearTotalDifficulty(): void;
-    getTotalDifficulty(): number | undefined;
-    setTotalDifficulty(value: number): Header;
+    setReceiptRoot(value: Uint8Array | string): Block;
+    getFeeRecipient(): Uint8Array | string;
+    getFeeRecipient_asU8(): Uint8Array;
+    getFeeRecipient_asB64(): string;
+    setFeeRecipient(value: Uint8Array | string): Block;
 
     hasExtraData(): boolean;
     clearExtraData(): void;
     getExtraData(): Uint8Array | string;
     getExtraData_asU8(): Uint8Array;
     getExtraData_asB64(): string;
-    setExtraData(value: Uint8Array | string): Header;
-
-    hasSize(): boolean;
-    clearSize(): void;
-    getSize(): number | undefined;
-    setSize(value: number): Header;
+    setExtraData(value: Uint8Array | string): Block;
     getGasLimit(): number;
-    setGasLimit(value: number): Header;
+    setGasLimit(value: number): Block;
     getGasUsed(): number;
-    setGasUsed(value: number): Header;
+    setGasUsed(value: number): Block;
     getTimestamp(): number;
-    setTimestamp(value: number): Header;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): Header.AsObject;
-    static toObject(includeInstance: boolean, msg: Header): Header.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: Header, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): Header;
-    static deserializeBinaryFromReader(message: Header, reader: jspb.BinaryReader): Header;
-}
-
-export namespace Header {
-    export type AsObject = {
-        number: number,
-        hash: Uint8Array | string,
-        parentHash: Uint8Array | string,
-        nonce: number,
-        uncleHash: Uint8Array | string,
-        stateRoot: Uint8Array | string,
-        receiptRoot: Uint8Array | string,
-        coinbase: Uint8Array | string,
-        difficulty: number,
-        totalDifficulty?: number,
-        extraData: Uint8Array | string,
-        size?: number,
-        gasLimit: number,
-        gasUsed: number,
-        timestamp: number,
-    }
-}
-
-export class Body extends jspb.Message { 
+    setTimestamp(value: number): Block;
+    getLogsBloom(): Uint8Array | string;
+    getLogsBloom_asU8(): Uint8Array;
+    getLogsBloom_asB64(): string;
+    setLogsBloom(value: Uint8Array | string): Block;
+    getBaseFeePerGas(): Uint8Array | string;
+    getBaseFeePerGas_asU8(): Uint8Array;
+    getBaseFeePerGas_asB64(): string;
+    setBaseFeePerGas(value: Uint8Array | string): Block;
     clearTransactionsList(): void;
     getTransactionsList(): Array<Transaction>;
-    setTransactionsList(value: Array<Transaction>): Body;
+    setTransactionsList(value: Array<Transaction>): Block;
     addTransactions(value?: Transaction, index?: number): Transaction;
-    clearOmmersList(): void;
-    getOmmersList(): Array<Uint8Array | string>;
-    getOmmersList_asU8(): Array<Uint8Array>;
-    getOmmersList_asB64(): Array<string>;
-    setOmmersList(value: Array<Uint8Array | string>): Body;
-    addOmmers(value: Uint8Array | string, index?: number): Uint8Array | string;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): Body.AsObject;
-    static toObject(includeInstance: boolean, msg: Body): Body.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: Body, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): Body;
-    static deserializeBinaryFromReader(message: Body, reader: jspb.BinaryReader): Body;
-}
-
-export namespace Body {
-    export type AsObject = {
-        transactionsList: Array<Transaction.AsObject>,
-        ommersList: Array<Uint8Array | string>,
-    }
-}
-
-export class Block extends jspb.Message { 
-
-    hasHeader(): boolean;
-    clearHeader(): void;
-    getHeader(): Header | undefined;
-    setHeader(value?: Header): Block;
-
-    hasBody(): boolean;
-    clearBody(): void;
-    getBody(): Body | undefined;
-    setBody(value?: Body): Block;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): Block.AsObject;
@@ -428,7 +329,19 @@ export class Block extends jspb.Message {
 
 export namespace Block {
     export type AsObject = {
-        header?: Header.AsObject,
-        body?: Body.AsObject,
+        number: number,
+        hash: Uint8Array | string,
+        parentHash: Uint8Array | string,
+        prevRandao: Uint8Array | string,
+        stateRoot: Uint8Array | string,
+        receiptRoot: Uint8Array | string,
+        feeRecipient: Uint8Array | string,
+        extraData: Uint8Array | string,
+        gasLimit: number,
+        gasUsed: number,
+        timestamp: number,
+        logsBloom: Uint8Array | string,
+        baseFeePerGas: Uint8Array | string,
+        transactionsList: Array<Transaction.AsObject>,
     }
 }

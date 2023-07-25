@@ -4,39 +4,7 @@
 var grpc = require('@grpc/grpc-js');
 var api_pb = require('./api_pb.js');
 var eth_pb = require('./eth_pb.js');
-
-function serialize_api_BackrunMsg(arg) {
-  if (!(arg instanceof api_pb.BackrunMsg)) {
-    throw new Error('Expected argument of type api.BackrunMsg');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_api_BackrunMsg(buffer_arg) {
-  return api_pb.BackrunMsg.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
-function serialize_api_BlockFilter(arg) {
-  if (!(arg instanceof api_pb.BlockFilter)) {
-    throw new Error('Expected argument of type api.BlockFilter');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_api_BlockFilter(buffer_arg) {
-  return api_pb.BlockFilter.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
-function serialize_api_RawBackrunMsg(arg) {
-  if (!(arg instanceof api_pb.RawBackrunMsg)) {
-    throw new Error('Expected argument of type api.RawBackrunMsg');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_api_RawBackrunMsg(buffer_arg) {
-  return api_pb.RawBackrunMsg.deserializeBinary(new Uint8Array(buffer_arg));
-}
+var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
 
 function serialize_api_RawTxMsg(arg) {
   if (!(arg instanceof api_pb.RawTxMsg)) {
@@ -47,6 +15,17 @@ function serialize_api_RawTxMsg(arg) {
 
 function deserialize_api_RawTxMsg(buffer_arg) {
   return api_pb.RawTxMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_RawTxSequenceMsg(arg) {
+  if (!(arg instanceof api_pb.RawTxSequenceMsg)) {
+    throw new Error('Expected argument of type api.RawTxSequenceMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_RawTxSequenceMsg(buffer_arg) {
+  return api_pb.RawTxSequenceMsg.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_TransactionResponse(arg) {
@@ -71,15 +50,26 @@ function deserialize_api_TxFilter(buffer_arg) {
   return api_pb.TxFilter.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_api_TxFilterV2(arg) {
-  if (!(arg instanceof api_pb.TxFilterV2)) {
-    throw new Error('Expected argument of type api.TxFilterV2');
+function serialize_api_TxSequenceMsg(arg) {
+  if (!(arg instanceof api_pb.TxSequenceMsg)) {
+    throw new Error('Expected argument of type api.TxSequenceMsg');
   }
   return Buffer.from(arg.serializeBinary());
 }
 
-function deserialize_api_TxFilterV2(buffer_arg) {
-  return api_pb.TxFilterV2.deserializeBinary(new Uint8Array(buffer_arg));
+function deserialize_api_TxSequenceMsg(buffer_arg) {
+  return api_pb.TxSequenceMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_TxSequenceResponse(arg) {
+  if (!(arg instanceof api_pb.TxSequenceResponse)) {
+    throw new Error('Expected argument of type api.TxSequenceResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_TxSequenceResponse(buffer_arg) {
+  return api_pb.TxSequenceResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_eth_Block(arg) {
@@ -104,9 +94,21 @@ function deserialize_eth_Transaction(buffer_arg) {
   return eth_pb.Transaction.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_google_protobuf_Empty(arg) {
+  if (!(arg instanceof google_protobuf_empty_pb.Empty)) {
+    throw new Error('Expected argument of type google.protobuf.Empty');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_google_protobuf_Empty(buffer_arg) {
+  return google_protobuf_empty_pb.Empty.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var APIService = exports.APIService = {
-  subscribeNewTxs: {
+  // Opens a new transaction stream with the given filter.
+subscribeNewTxs: {
     path: '/api.API/SubscribeNewTxs',
     requestStream: false,
     responseStream: true,
@@ -117,117 +119,65 @@ var APIService = exports.APIService = {
     responseSerialize: serialize_eth_Transaction,
     responseDeserialize: deserialize_eth_Transaction,
   },
-  subscribeNewTxsV2: {
-    path: '/api.API/SubscribeNewTxsV2',
-    requestStream: false,
+  // Sends a signed transaction to the network.
+sendTransaction: {
+    path: '/api.API/SendTransaction',
+    requestStream: true,
     responseStream: true,
-    requestType: api_pb.TxFilterV2,
-    responseType: eth_pb.Transaction,
-    requestSerialize: serialize_api_TxFilterV2,
-    requestDeserialize: deserialize_api_TxFilterV2,
-    responseSerialize: serialize_eth_Transaction,
-    responseDeserialize: deserialize_eth_Transaction,
+    requestType: eth_pb.Transaction,
+    responseType: api_pb.TransactionResponse,
+    requestSerialize: serialize_eth_Transaction,
+    requestDeserialize: deserialize_eth_Transaction,
+    responseSerialize: serialize_api_TransactionResponse,
+    responseDeserialize: deserialize_api_TransactionResponse,
   },
-  subscribeNewBlocks: {
+  // Sends a signed, RLP encoded transaction to the network
+sendRawTransaction: {
+    path: '/api.API/SendRawTransaction',
+    requestStream: true,
+    responseStream: true,
+    requestType: api_pb.RawTxMsg,
+    responseType: api_pb.TransactionResponse,
+    requestSerialize: serialize_api_RawTxMsg,
+    requestDeserialize: deserialize_api_RawTxMsg,
+    responseSerialize: serialize_api_TransactionResponse,
+    responseDeserialize: deserialize_api_TransactionResponse,
+  },
+  // Sends a sequence of signed transactions to the network.
+sendTransactionSequence: {
+    path: '/api.API/SendTransactionSequence',
+    requestStream: true,
+    responseStream: true,
+    requestType: api_pb.TxSequenceMsg,
+    responseType: api_pb.TxSequenceResponse,
+    requestSerialize: serialize_api_TxSequenceMsg,
+    requestDeserialize: deserialize_api_TxSequenceMsg,
+    responseSerialize: serialize_api_TxSequenceResponse,
+    responseDeserialize: deserialize_api_TxSequenceResponse,
+  },
+  // Sends a sequence of signed, RLP encoded transactions to the network.
+sendRawTransactionSequence: {
+    path: '/api.API/SendRawTransactionSequence',
+    requestStream: true,
+    responseStream: true,
+    requestType: api_pb.RawTxSequenceMsg,
+    responseType: api_pb.TxSequenceResponse,
+    requestSerialize: serialize_api_RawTxSequenceMsg,
+    requestDeserialize: deserialize_api_RawTxSequenceMsg,
+    responseSerialize: serialize_api_TxSequenceResponse,
+    responseDeserialize: deserialize_api_TxSequenceResponse,
+  },
+  // Opens a new block stream.
+subscribeNewBlocks: {
     path: '/api.API/SubscribeNewBlocks',
     requestStream: false,
     responseStream: true,
-    requestType: api_pb.BlockFilter,
+    requestType: google_protobuf_empty_pb.Empty,
     responseType: eth_pb.Block,
-    requestSerialize: serialize_api_BlockFilter,
-    requestDeserialize: deserialize_api_BlockFilter,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
     responseSerialize: serialize_eth_Block,
     responseDeserialize: deserialize_eth_Block,
-  },
-  sendTransaction: {
-    path: '/api.API/SendTransaction',
-    requestStream: false,
-    responseStream: false,
-    requestType: eth_pb.Transaction,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_eth_Transaction,
-    requestDeserialize: deserialize_eth_Transaction,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  sendRawTransaction: {
-    path: '/api.API/SendRawTransaction',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_pb.RawTxMsg,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_api_RawTxMsg,
-    requestDeserialize: deserialize_api_RawTxMsg,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  // Backrun is the RPC method for backrunning a transaction.
-backrun: {
-    path: '/api.API/Backrun',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_pb.BackrunMsg,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_api_BackrunMsg,
-    requestDeserialize: deserialize_api_BackrunMsg,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  rawBackrun: {
-    path: '/api.API/RawBackrun',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_pb.RawBackrunMsg,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_api_RawBackrunMsg,
-    requestDeserialize: deserialize_api_RawBackrunMsg,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  sendTransactionStream: {
-    path: '/api.API/SendTransactionStream',
-    requestStream: true,
-    responseStream: true,
-    requestType: eth_pb.Transaction,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_eth_Transaction,
-    requestDeserialize: deserialize_eth_Transaction,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  sendRawTransactionStream: {
-    path: '/api.API/SendRawTransactionStream',
-    requestStream: true,
-    responseStream: true,
-    requestType: api_pb.RawTxMsg,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_api_RawTxMsg,
-    requestDeserialize: deserialize_api_RawTxMsg,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  // Backrun is the RPC method for backrunning a transaction.
-backrunStream: {
-    path: '/api.API/BackrunStream',
-    requestStream: true,
-    responseStream: true,
-    requestType: api_pb.BackrunMsg,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_api_BackrunMsg,
-    requestDeserialize: deserialize_api_BackrunMsg,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
-  },
-  rawBackrunStream: {
-    path: '/api.API/RawBackrunStream',
-    requestStream: true,
-    responseStream: true,
-    requestType: api_pb.RawBackrunMsg,
-    responseType: api_pb.TransactionResponse,
-    requestSerialize: serialize_api_RawBackrunMsg,
-    requestDeserialize: deserialize_api_RawBackrunMsg,
-    responseSerialize: serialize_api_TransactionResponse,
-    responseDeserialize: deserialize_api_TransactionResponse,
   },
 };
 

@@ -1,10 +1,10 @@
 /// <reference types="node" />
-import { APIClient } from '../protobuf/api_grpc_pb';
-import { Metadata } from '@grpc/grpc-js';
-import { TxFilterV2 } from '../protobuf/api_pb';
-import { EventEmitter } from 'events';
-import { ethers } from 'ethers';
-import { TypedTransaction } from '@ethereumjs/tx';
+import { EventEmitter } from "events";
+import { ethers } from "ethers";
+import { Metadata } from "@grpc/grpc-js";
+import { TypedTransaction } from "@ethereumjs/tx";
+import { APIClient } from "../protobuf/api_grpc_pb";
+import { TxFilter } from "../protobuf/api_pb";
 export interface TransactionResponse {
     hash: string;
     timestamp: number;
@@ -25,7 +25,7 @@ interface Node {
 interface Filter {
     Root: Node;
 }
-declare type FilterOp = (f: Filter, n?: Node) => void;
+type FilterOp = (f: Filter, n?: Node) => void;
 export declare function or(...ops: FilterOp[]): FilterOp;
 export declare function and(...ops: FilterOp[]): FilterOp;
 export declare function to(to: string): FilterOp;
@@ -43,8 +43,8 @@ export declare class Client {
     private _md;
     private _txStream;
     private _rawTxStream;
-    private _backrunStream;
-    private _rawBackrunStream;
+    private _txSequenceStream;
+    private _rawTxSequenceStream;
     constructor(target: string, apiKey: string);
     waitForReady(seconds: number): Promise<void>;
     /**
@@ -65,40 +65,40 @@ export declare class Client {
     sendTransaction(tx: TypedTransaction): Promise<TransactionResponse>;
     /**
      * sends a transaction
-     * @param rawtx a serialized RLP encoded signed transaction in hexadecimal
-     * @returns response containing hash and timestamp
+     * @param rawtx an array of serialized RLP encoded signed transactions in hexadecimal
+     * @returns response containing array of hashes and timestamps
      */
     sendRawTransaction(rawtx: string): Promise<TransactionResponse>;
     /**
      *
-     * @param hash hash of target transaction
-     * @param tx a signed! typed transaction
-     * @returns response containing hash and timestamp
+     * @param txs an array of signed! typed transactions
+     * @returns response containing array of hashes and timestamps
      */
-    backrunTransaction(hash: string, tx: TypedTransaction): Promise<TransactionResponse>;
+    sendTransactionSequence(txs: TypedTransaction[]): Promise<TransactionResponse[]>;
     /**
-     * @param hash hash of target transaction
-     * @param rawtx a signed and serialized transaction
-     * @returns response containing hash and timestamp
+     * @param rawTxs an array of signed and serialized transactions
+     * @returns response containing array of hashes and timestamps
      */
-    rawBackrunTransaction(hash: string, rawtx: string): Promise<TransactionResponse>;
+    sendRawTransactionSequence(rawTxs: string[]): Promise<TransactionResponse[]>;
 }
 declare class TxStream extends EventEmitter {
-    constructor(_client: APIClient, _md: Metadata, _filter: TxFilterV2);
-    retry(_client: APIClient, _md: Metadata, _filter: TxFilterV2): Promise<void>;
+    constructor(_client: APIClient, _md: Metadata, _filter: TxFilter);
+    retry(_client: APIClient, _md: Metadata, _filter: TxFilter): Promise<void>;
 }
 export interface Block {
+    number: number;
     hash: string;
     parentHash: string;
-    number: number;
-    nonce: number;
-    timestamp: number;
-    difficulty: number;
-    totalDifficulty: ethers.BigNumber;
+    prevRandao: string;
+    stateRoot: string;
+    receiptRoot: string;
+    feeRecipient: string;
+    extraData: string;
     gasLimit: ethers.BigNumber;
     gasUsed: ethers.BigNumber;
-    coinbase: string;
-    extraData: string;
+    timestamp: number;
+    logsBloom: string;
+    baseFeePerGas: ethers.BigNumber;
     transactions: TypedTransaction[];
 }
 declare class BlockStream extends EventEmitter {
