@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { ethers } from "ethers";
 
+import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
 import { Address } from "@ethereumjs/util";
 import {
@@ -13,7 +14,6 @@ import {
 import eth from "../protobuf/eth_pb";
 import { APIClient } from "../protobuf/api_grpc_pb";
 import {
-  BlockFilter,
   RawTxMsg,
   TransactionResponse as PbResponse,
   TxSequenceMsg,
@@ -522,14 +522,18 @@ class BlockStream extends EventEmitter {
       });
     });
 
-    const _blockStream = _client.subscribeNewBlocks(new BlockFilter(), _md);
+    const _blockStream = _client.subscribeNewBlocks(
+      new google_protobuf_empty_pb.Empty(),
+      _md
+    );
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
     _blockStream.on("data", (data: eth.Block) =>
       this.emit("block", this.handleBlock(data))
     );
 
-    _blockStream.on("error", async () => {
+    _blockStream.on("error", async (err) => {
+      console.error("transmission error", err);
       this.retry(_client, _md);
     });
   }
