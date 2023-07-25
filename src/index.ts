@@ -472,17 +472,13 @@ class TxStream extends EventEmitter {
     _txStream.on("close", () => this.emit("close"));
     _txStream.on("end", () => this.emit("end"));
     _txStream.on("data", (data: eth.Transaction) =>
-      this.emit("tx", fromProto(data))
+      this.emit("data", fromProto(data))
     );
 
     _txStream.on("error", async (err) => {
       console.error(err);
       this.retry(_client, _md, _filter);
     });
-  }
-
-  onData(cb: (tx: TypedTransaction) => void) {
-    this.on("tx", cb);
   }
 }
 
@@ -529,7 +525,7 @@ class BlockStream extends EventEmitter {
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
     _blockStream.on("data", (data: eth.Block) =>
-      this.emit("block", this.handleBlock(data))
+      this.emit("data", this.handleBlock(data))
     );
 
     _blockStream.on("error", async (err) => {
@@ -561,10 +557,6 @@ class BlockStream extends EventEmitter {
       baseFeePerGas: ethers.BigNumber.from(block.getBaseFeePerGas()),
       transactions: txList,
     };
-  }
-
-  onData(cb: (block: Block) => void) {
-    this.on("block", cb);
   }
 }
 
