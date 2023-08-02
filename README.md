@@ -63,9 +63,9 @@ sub.on("data", (tx: TypedTransaction) => {
 });
 ```
 
-#### Blocks
+#### Execution Headers (new block headers without transactions)
 
-Blocks have their own type: `fiber-ts.Block`. The list of transactions are once again `TypedTransaction`s.
+Headers have their own type: `fiber-ts.ExecutionPayloadHeader`. 
 
 ```ts
 import { Client, Block } from "fiber-ts";
@@ -75,10 +75,51 @@ const client = new Client("fiber.example.io", "YOUR_API_KEY");
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const sub = client.subscribeNewBlocks();
+const sub = client.subscribeNewExecutionHeaders();
 
-sub.on("data", (block: Block) => {
+sub.on("data", (block: ExecutionPayloadHeader) => {
+  handleBlockHeader(block);
+});
+```
+
+#### Execution Payloads (new blocks with transactions)
+
+Payloads have their own type: `fiber-ts.ExecutionPayload`. 
+The list of transactions are once again `TypedTransaction`s.
+
+```ts
+import { Client, Block } from "fiber-ts";
+
+const client = new Client("fiber.example.io", "YOUR_API_KEY");
+
+// Wait 10 seconds for the client to connect.
+await client.waitForReady(10);
+
+const sub = client.subscribeNewExecutionPayloads();
+
+sub.on("data", (block: ExecutionPayload) => {
   handleBlock(block);
+});
+```
+
+#### Beacon Blocks
+
+Beacon blocks follow the [Consensus specs](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#beaconblock) have their own type: `fiber-ts.BeaconBlock`. 
+The execution payload is not included to provide a faster stream, use the `SubscribeNewExecutionPayloads` stream 
+if you need it.
+
+```ts
+import { Client, Block } from "fiber-ts";
+
+const client = new Client("fiber.example.io", "YOUR_API_KEY");
+
+// Wait 10 seconds for the client to connect.
+await client.waitForReady(10);
+
+const sub = client.subscribeNewBeaconBlocks();
+
+sub.on("data", (block: BeaconBlock) => {
+  handleBeaconBlock(block);
 });
 ```
 

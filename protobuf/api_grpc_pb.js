@@ -72,15 +72,37 @@ function deserialize_api_TxSequenceResponse(buffer_arg) {
   return api_pb.TxSequenceResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_eth_Block(arg) {
-  if (!(arg instanceof eth_pb.Block)) {
-    throw new Error('Expected argument of type eth.Block');
+function serialize_eth_CompactBeaconBlock(arg) {
+  if (!(arg instanceof eth_pb.CompactBeaconBlock)) {
+    throw new Error('Expected argument of type eth.CompactBeaconBlock');
   }
   return Buffer.from(arg.serializeBinary());
 }
 
-function deserialize_eth_Block(buffer_arg) {
-  return eth_pb.Block.deserializeBinary(new Uint8Array(buffer_arg));
+function deserialize_eth_CompactBeaconBlock(buffer_arg) {
+  return eth_pb.CompactBeaconBlock.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_eth_ExecutionPayload(arg) {
+  if (!(arg instanceof eth_pb.ExecutionPayload)) {
+    throw new Error('Expected argument of type eth.ExecutionPayload');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_eth_ExecutionPayload(buffer_arg) {
+  return eth_pb.ExecutionPayload.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_eth_ExecutionPayloadHeader(arg) {
+  if (!(arg instanceof eth_pb.ExecutionPayloadHeader)) {
+    throw new Error('Expected argument of type eth.ExecutionPayloadHeader');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_eth_ExecutionPayloadHeader(buffer_arg) {
+  return eth_pb.ExecutionPayloadHeader.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_eth_Transaction(arg) {
@@ -167,17 +189,42 @@ sendRawTransactionSequence: {
     responseSerialize: serialize_api_TxSequenceResponse,
     responseDeserialize: deserialize_api_TxSequenceResponse,
   },
-  // Opens a new block stream.
-subscribeNewBlocks: {
-    path: '/api.API/SubscribeNewBlocks',
+  // Opens a stream of new execution payloads.
+subscribeExecutionPayloads: {
+    path: '/api.API/SubscribeExecutionPayloads',
     requestStream: false,
     responseStream: true,
     requestType: google_protobuf_empty_pb.Empty,
-    responseType: eth_pb.Block,
+    responseType: eth_pb.ExecutionPayload,
     requestSerialize: serialize_google_protobuf_Empty,
     requestDeserialize: deserialize_google_protobuf_Empty,
-    responseSerialize: serialize_eth_Block,
-    responseDeserialize: deserialize_eth_Block,
+    responseSerialize: serialize_eth_ExecutionPayload,
+    responseDeserialize: deserialize_eth_ExecutionPayload,
+  },
+  // Opens a stream of new execution payload headers.
+subscribeExecutionHeaders: {
+    path: '/api.API/SubscribeExecutionHeaders',
+    requestStream: false,
+    responseStream: true,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: eth_pb.ExecutionPayloadHeader,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
+    responseSerialize: serialize_eth_ExecutionPayloadHeader,
+    responseDeserialize: deserialize_eth_ExecutionPayloadHeader,
+  },
+  // Opens a stream of new beacon blocks. The beacon blocks are "compacted", meaning that the
+// execution payload is not included.
+subscribeBeaconBlocks: {
+    path: '/api.API/SubscribeBeaconBlocks',
+    requestStream: false,
+    responseStream: true,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: eth_pb.CompactBeaconBlock,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
+    responseSerialize: serialize_eth_CompactBeaconBlock,
+    responseDeserialize: deserialize_eth_CompactBeaconBlock,
   },
 };
 
