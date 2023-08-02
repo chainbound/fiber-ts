@@ -1,15 +1,8 @@
 import { EventEmitter } from "events";
-import { ethers } from "ethers";
 
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
-import { Address } from "@ethereumjs/util";
-import {
-  FeeMarketEIP1559Transaction,
-  Transaction,
-  TransactionFactory,
-  TypedTransaction,
-} from "@ethereumjs/tx";
+import { TypedTransaction } from "@ethereumjs/tx";
 
 import eth from "../protobuf/eth_pb";
 import { APIClient } from "../protobuf/api_grpc_pb";
@@ -21,245 +14,17 @@ import {
   RawTxSequenceMsg,
   TxFilter,
 } from "../protobuf/api_pb";
-
-export interface TransactionResponse {
-  hash: string;
-  timestamp: number;
-}
-
-enum Operator {
-  AND = 1,
-  OR = 2,
-}
-
-interface FilterKV {
-  Key: string;
-  Value: string;
-}
-
-interface Node {
-  Operand?: FilterKV;
-  Operator?: Operator;
-  Nodes?: Array<Node>;
-}
-
-interface Filter {
-  Root: Node;
-}
-
-type FilterOp = (f: Filter, n?: Node) => void;
-
-export function or(...ops: FilterOp[]): FilterOp {
-  return function (f, n) {
-    let newNode = {
-      Operator: Operator.OR,
-    };
-    if (!n) {
-      f.Root = newNode;
-    } else {
-      if (n.Nodes) {
-        n.Nodes.push(newNode);
-      } else {
-        n.Nodes = new Array(newNode);
-      }
-    }
-
-    for (let op of ops) {
-      op(f, newNode);
-    }
-  };
-}
-
-export function and(...ops: FilterOp[]): FilterOp {
-  return function (f, n) {
-    let newNode = {
-      Operator: Operator.AND,
-    };
-    if (!n) {
-      f.Root = newNode;
-    } else {
-      if (n.Nodes) {
-        n.Nodes.push(newNode);
-      } else {
-        n.Nodes = new Array(newNode);
-      }
-    }
-
-    for (let op of ops) {
-      op(f, newNode);
-    }
-  };
-}
-
-export function to(to: string): FilterOp {
-  return function (f, n) {
-    let newNode = {
-      Operand: {
-        Key: "to",
-        Value: hexToBase64(to),
-      },
-    };
-
-    if (!n) {
-      f.Root = newNode;
-    } else {
-      if (n.Nodes) {
-        n.Nodes.push(newNode);
-      } else {
-        n.Nodes = new Array(newNode);
-      }
-    }
-  };
-}
-
-export function from(from: string): FilterOp {
-  return function (f, n) {
-    let newNode = {
-      Operand: {
-        Key: "from",
-        Value: hexToBase64(from),
-      },
-    };
-
-    if (!n) {
-      f.Root = newNode;
-    } else {
-      if (n.Nodes) {
-        n.Nodes.push(newNode);
-      } else {
-        n.Nodes = new Array(newNode);
-      }
-    }
-  };
-}
-
-export class FilterBuilder {
-  private _filter: Filter;
-  private _next: Node | undefined;
-  private _last: Node | undefined;
-
-  public constructor(rootOp: FilterOp) {
-    let f = {} as Filter;
-
-    rootOp(f, undefined);
-    this._filter = f;
-  }
-
-  // public get or(): FilterBuilder {
-  //   let newNode = {
-  //     Operator: Operator.OR,
-  //   };
-
-  //   if (!this._filter.Root) {
-  //     this._filter.Root = newNode;
-  //   } else {
-  //     if (this._next!.Nodes) {
-  //       this._next!.Nodes.push(newNode);
-  //     } else {
-  //       this._next!.Nodes = new Array();
-  //       this._next!.Nodes.push(newNode);
-  //     }
-  //   }
-
-  //   this._last = this._next;
-  //   this._next = newNode;
-
-  //   return this;
-  // }
-
-  // public get and(): FilterBuilder {
-  //   let newNode = {
-  //     Operator: Operator.AND,
-  //   };
-
-  //   if (!this._filter.Root) {
-  //     this._filter.Root = newNode;
-  //   } else {
-  //     if (this._next!.Nodes) {
-  //       this._next!.Nodes.push(newNode);
-  //     } else {
-  //       this._next!.Nodes = new Array();
-  //       this._next!.Nodes.push(newNode);
-  //     }
-  //   }
-
-  //   this._last = this._next;
-  //   this._next = newNode;
-
-  //   return this;
-  // }
-
-  // public get exit(): FilterBuilder {
-  //   this._next = this._last;
-  //   return this;
-  // }
-
-  // public from(address: string): FilterBuilder {
-  //   address = hexToBase64(address);
-
-  //   let newNode = {
-  //     Operand: {
-  //       Key: 'from',
-  //       Value: address,
-  //     },
-  //   };
-
-  //   // If there's no root yet, set it here
-  //   if (!this._filter.Root) {
-  //     this._filter.Root = newNode;
-  //     this._next = newNode;
-  //   } else {
-  //     // Else append as a child
-  //     // If we get here, we can be sure that this._next is defined
-  //     if (this._next!.Nodes) {
-  //       this._next!.Nodes.push(newNode);
-  //     } else {
-  //       this._next!.Nodes = new Array();
-  //       this._next!.Nodes.push(newNode);
-  //     }
-
-  //   }
-
-  //   return this;
-  // }
-
-  // public to(address: string): FilterBuilder {
-  //   address = hexToBase64(address);
-
-  //   let newNode = {
-  //     Operand: {
-  //       Key: 'to',
-  //       Value: address,
-  //     },
-  //   };
-
-  //   // If there's no root yet, set it here
-  //   if (!this._filter.Root) {
-  //     this._filter.Root = newNode;
-  //     this._next = newNode;
-  //   } else {
-  //     // Else append as a child
-  //     // If we get here, we can be sure that this._next is defined
-  //     if (this._next!.Nodes) {
-  //       this._next!.Nodes.push(newNode);
-  //     } else {
-  //       this._next!.Nodes = new Array();
-  //       this._next!.Nodes.push(newNode);
-  //     }
-
-  //   }
-
-  //   return this;
-  // }
-
-  public toString(): string {
-    return JSON.stringify(this._filter, null, 2);
-  }
-
-  build(): Uint8Array {
-    return new Uint8Array(Buffer.from(JSON.stringify(this._filter)));
-  }
-}
+import { FilterBuilder } from "./filter";
+import {
+  BeaconBlock,
+  ExecutionPayload,
+  ExecutionPayloadHeader,
+  fromProtoBeaconBlock,
+  fromProtoExecutionHeader,
+  fromProtoTx,
+  toProtoTx,
+  TransactionResponse,
+} from "./types";
 
 export class Client {
   private _client: APIClient;
@@ -317,11 +82,27 @@ export class Client {
   }
 
   /**
-   * subscribes to the new blocks stream.
-   * @returns {BlockStream} - emits new blocks as events
+   * subscribes to the new execution headers stream.
+   * @returns {ExecutionHeaderStream} - emits new blocks as events (without transactions)
    */
-  subscribeNewBlocks(): BlockStream {
-    return new BlockStream(this._client, this._md);
+  subscribeNewExecutionHeaders(): ExecutionHeaderStream {
+    return new ExecutionHeaderStream(this._client, this._md);
+  }
+
+  /**
+   * subscribes to the new execution payloads stream.
+   * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
+   */
+  subscribeNewExecutionPayloads(): ExecutionPayloadStream {
+    return new ExecutionPayloadStream(this._client, this._md);
+  }
+
+  /**
+   * subscribes to the new beacon blocks stream.
+   * @returns {BeaconBlockStream} - emits new beacon blocks as events
+   */
+  subscribeNewBeaconBlocks(): BeaconBlockStream {
+    return new BeaconBlockStream(this._client, this._md);
   }
 
   /**
@@ -331,7 +112,7 @@ export class Client {
    */
   async sendTransaction(tx: TypedTransaction): Promise<TransactionResponse> {
     return new Promise((resolve, reject) => {
-      this._txStream.write(toProto(tx), this._md, (err: Error) => {
+      this._txStream.write(toProtoTx(tx), this._md, (err: Error) => {
         if (err) {
           reject(err);
         } else {
@@ -384,7 +165,7 @@ export class Client {
     txs: TypedTransaction[]
   ): Promise<TransactionResponse[]> {
     const sequenceMsg = new TxSequenceMsg();
-    sequenceMsg.setSequenceList(txs.map(toProto));
+    sequenceMsg.setSequenceList(txs.map(toProtoTx));
 
     return new Promise((resolve, reject) => {
       this._txSequenceStream.write(sequenceMsg, this._md, (err: Error) => {
@@ -472,7 +253,7 @@ class TxStream extends EventEmitter {
     _txStream.on("close", () => this.emit("close"));
     _txStream.on("end", () => this.emit("end"));
     _txStream.on("data", (data: eth.Transaction) =>
-      this.emit("data", fromProto(data))
+      this.emit("data", fromProtoTx(data))
     );
 
     _txStream.on("error", async (err) => {
@@ -482,24 +263,7 @@ class TxStream extends EventEmitter {
   }
 }
 
-export interface Block {
-  number: number;
-  hash: string;
-  parentHash: string;
-  prevRandao: string;
-  stateRoot: string;
-  receiptRoot: string;
-  feeRecipient: string;
-  extraData: string;
-  gasLimit: ethers.BigNumber;
-  gasUsed: ethers.BigNumber;
-  timestamp: number;
-  logsBloom: string;
-  baseFeePerGas: ethers.BigNumber;
-  transactions: TypedTransaction[];
-}
-
-class BlockStream extends EventEmitter {
+class ExecutionHeaderStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {
     super();
     this.retry(_client, _md);
@@ -518,14 +282,15 @@ class BlockStream extends EventEmitter {
       });
     });
 
-    const _blockStream = _client.subscribeNewBlocks(
+    const _blockStream = _client.subscribeExecutionHeaders(
       new google_protobuf_empty_pb.Empty(),
       _md
     );
+
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
-    _blockStream.on("data", (data: eth.Block) =>
-      this.emit("data", this.handleBlock(data))
+    _blockStream.on("data", (data: eth.ExecutionPayloadHeader) =>
+      this.emit("data", this.handleExecutionPayloadHeader(data))
     );
 
     _blockStream.on("error", async (err) => {
@@ -534,138 +299,98 @@ class BlockStream extends EventEmitter {
     });
   }
 
-  private handleBlock(block: eth.Block): Block {
-    const txList: TypedTransaction[] = [];
+  private handleExecutionPayloadHeader(
+    block: eth.ExecutionPayloadHeader
+  ): ExecutionPayloadHeader {
+    return fromProtoExecutionHeader(block);
+  }
+}
 
-    for (let tx of block.getTransactionsList()) {
-      txList.push(fromProto(tx));
-    }
+class ExecutionPayloadStream extends EventEmitter {
+  constructor(_client: APIClient, _md: Metadata) {
+    super();
+    this.retry(_client, _md);
+  }
+
+  async retry(_client: APIClient, _md: Metadata) {
+    const now = new Date();
+    const deadline = new Date(now.getTime() + 60 * 1000);
+    await new Promise<void>((resolve, reject) => {
+      _client.waitForReady(deadline, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    const _blockStream = _client.subscribeExecutionPayloads(
+      new google_protobuf_empty_pb.Empty(),
+      _md
+    );
+
+    _blockStream.on("close", () => this.emit("close"));
+    _blockStream.on("end", () => this.emit("end"));
+    _blockStream.on("data", (data: eth.ExecutionPayload) =>
+      this.emit("data", this.handleExecutionPayload(data))
+    );
+
+    _blockStream.on("error", async (err) => {
+      console.error("transmission error", err);
+      this.retry(_client, _md);
+    });
+  }
+
+  private handleExecutionPayload(
+    block: eth.ExecutionPayload
+  ): ExecutionPayload {
+    const header = fromProtoExecutionHeader(block.getHeader()!);
+    const transactions = block.getTransactionsList().map(fromProtoTx);
 
     return {
-      hash: bytesToHex(block.getHash()),
-      parentHash: bytesToHex(block.getParentHash()),
-      number: block.getNumber(),
-      timestamp: block.getTimestamp(),
-      prevRandao: bytesToHex(block.getPrevRandao()),
-      stateRoot: bytesToHex(block.getStateRoot()),
-      receiptRoot: bytesToHex(block.getReceiptRoot()),
-      feeRecipient: bytesToHex(block.getFeeRecipient()),
-      extraData: bytesToHex(block.getExtraData()),
-      gasLimit: ethers.BigNumber.from(block.getGasLimit()),
-      gasUsed: ethers.BigNumber.from(block.getGasUsed()),
-      logsBloom: bytesToHex(block.getLogsBloom()),
-      baseFeePerGas: ethers.BigNumber.from(block.getBaseFeePerGas()),
-      transactions: txList,
+      header,
+      transactions,
     };
   }
 }
 
-function fromProto(tx: eth.Transaction): TypedTransaction {
-  let value = 0n;
-  if (tx.getValue()) {
-    value = BigInt("0x" + Buffer.from(tx.getValue()).toString("hex"));
+class BeaconBlockStream extends EventEmitter {
+  constructor(_client: APIClient, _md: Metadata) {
+    super();
+    this.retry(_client, _md);
   }
 
-  let to;
-  if (tx.getTo().length !== 0) {
-    to = new Address(Buffer.from(tx.getTo()));
-  } else {
-    to = Address.zero();
+  async retry(_client: APIClient, _md: Metadata) {
+    const now = new Date();
+    const deadline = new Date(now.getTime() + 60 * 1000);
+    await new Promise<void>((resolve, reject) => {
+      _client.waitForReady(deadline, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    const _blockStream = _client.subscribeBeaconBlocks(
+      new google_protobuf_empty_pb.Empty(),
+      _md
+    );
+    _blockStream.on("close", () => this.emit("close"));
+    _blockStream.on("end", () => this.emit("end"));
+    _blockStream.on("data", (data: eth.CompactBeaconBlock) =>
+      this.emit("data", this.handleBeaconBlock(data))
+    );
+
+    _blockStream.on("error", async (err) => {
+      console.error("transmission error", err);
+      this.retry(_client, _md);
+    });
   }
 
-  return TransactionFactory.fromTxData({
-    // hash: tx.getHash(),
-    // from: bytesToHex(tx.getFrom()),
-    to: to,
-    type: tx.getType(),
-    nonce: BigInt(tx.getNonce()),
-    gasLimit: BigInt(tx.getGas()),
-    data: Buffer.from(tx.getInput()),
-    chainId: BigInt(tx.getChainid()),
-    value: value,
-    gasPrice: BigInt(tx.getGasPrice()),
-    v: BigInt(tx.getV()),
-    r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
-    s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
-  });
-}
-
-// WARNING: if transaction is legacy, it will only work on Ethereum mainnet.
-function toProto(tx: TypedTransaction): eth.Transaction {
-  const proto = new eth.Transaction();
-
-  if (tx.type == 0) {
-    const legacy = tx as Transaction;
-    proto.setHash(legacy.hash());
-    proto.setFrom(legacy.getSenderAddress().buf);
-    if (legacy.to) {
-      proto.setTo(legacy.to.buf);
-    }
-    proto.setType(tx.type);
-    proto.setNonce(Number(tx.nonce));
-    if (tx.data) {
-      proto.setInput(tx.data);
-    }
-
-    proto.setChainid(1);
-    proto.setValue(hexToBytes("0x" + tx.value.toString(16)));
-    proto.setGas(Number(tx.gasLimit));
-    proto.setGasPrice(Number(legacy.gasPrice));
-    proto.setV(Number(tx.v!));
-    proto.setR(hexToBytes("0x" + tx.r!.toString(16)));
-    proto.setS(hexToBytes("0x" + tx.s!.toString(16)));
-  } else {
-    const newtx = tx as FeeMarketEIP1559Transaction;
-    proto.setHash(newtx.hash());
-    proto.setFrom(newtx.getSenderAddress().buf);
-    if (newtx.to) {
-      proto.setTo(newtx.to.buf);
-    }
-
-    proto.setType(tx.type);
-    proto.setNonce(Number(tx.nonce));
-    if (tx.data) {
-      proto.setInput(newtx.data);
-    }
-
-    proto.setChainid(Number(newtx.chainId));
-    proto.setValue(hexToBytes("0x" + newtx.value.toString(16)));
-    proto.setGas(Number(newtx.gasLimit));
-    proto.setMaxFee(Number(newtx.maxFeePerGas));
-    proto.setPriorityFee(Number(newtx.maxPriorityFeePerGas));
-    proto.setV(Number(tx.v!));
-    proto.setR(hexToBytes("0x" + tx.r!.toString(16)));
-    proto.setS(hexToBytes("0x" + tx.s!.toString(16)));
+  private handleBeaconBlock(block: eth.CompactBeaconBlock): BeaconBlock {
+    return fromProtoBeaconBlock(block);
   }
-
-  return proto;
-}
-
-export function bytesToHex(b: string | Uint8Array): string {
-  return "0x" + Buffer.from(b).toString("hex");
-}
-
-export function hexToBytes(str: string) {
-  if (!str) {
-    return new Uint8Array();
-  }
-
-  if (str.substring(0, 2) !== "0x") {
-    str = "0x" + str;
-  }
-
-  const a = [];
-  for (let i = 2, len = str.length; i < len; i += 2) {
-    a.push(parseInt(str.substr(i, 2), 16));
-  }
-
-  return new Uint8Array(a);
-}
-
-function hexToBase64(str: string) {
-  if (str.substring(0, 2) == "0x") {
-    str = str.slice(2);
-  }
-
-  return Buffer.from(str, "hex").toString("base64");
 }

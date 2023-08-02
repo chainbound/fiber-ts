@@ -15,7 +15,9 @@ interface IAPIService extends grpc.ServiceDefinition<grpc.UntypedServiceImplemen
     sendRawTransaction: IAPIService_ISendRawTransaction;
     sendTransactionSequence: IAPIService_ISendTransactionSequence;
     sendRawTransactionSequence: IAPIService_ISendRawTransactionSequence;
-    subscribeNewBlocks: IAPIService_ISubscribeNewBlocks;
+    subscribeExecutionPayloads: IAPIService_ISubscribeExecutionPayloads;
+    subscribeExecutionHeaders: IAPIService_ISubscribeExecutionHeaders;
+    subscribeBeaconBlocks: IAPIService_ISubscribeBeaconBlocks;
 }
 
 interface IAPIService_ISubscribeNewTxs extends grpc.MethodDefinition<api_pb.TxFilter, eth_pb.Transaction> {
@@ -63,14 +65,32 @@ interface IAPIService_ISendRawTransactionSequence extends grpc.MethodDefinition<
     responseSerialize: grpc.serialize<api_pb.TxSequenceResponse>;
     responseDeserialize: grpc.deserialize<api_pb.TxSequenceResponse>;
 }
-interface IAPIService_ISubscribeNewBlocks extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, eth_pb.Block> {
-    path: "/api.API/SubscribeNewBlocks";
+interface IAPIService_ISubscribeExecutionPayloads extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, eth_pb.ExecutionPayload> {
+    path: "/api.API/SubscribeExecutionPayloads";
     requestStream: false;
     responseStream: true;
     requestSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
     requestDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
-    responseSerialize: grpc.serialize<eth_pb.Block>;
-    responseDeserialize: grpc.deserialize<eth_pb.Block>;
+    responseSerialize: grpc.serialize<eth_pb.ExecutionPayload>;
+    responseDeserialize: grpc.deserialize<eth_pb.ExecutionPayload>;
+}
+interface IAPIService_ISubscribeExecutionHeaders extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, eth_pb.ExecutionPayloadHeader> {
+    path: "/api.API/SubscribeExecutionHeaders";
+    requestStream: false;
+    responseStream: true;
+    requestSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
+    requestDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
+    responseSerialize: grpc.serialize<eth_pb.ExecutionPayloadHeader>;
+    responseDeserialize: grpc.deserialize<eth_pb.ExecutionPayloadHeader>;
+}
+interface IAPIService_ISubscribeBeaconBlocks extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, eth_pb.CompactBeaconBlock> {
+    path: "/api.API/SubscribeBeaconBlocks";
+    requestStream: false;
+    responseStream: true;
+    requestSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
+    requestDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
+    responseSerialize: grpc.serialize<eth_pb.CompactBeaconBlock>;
+    responseDeserialize: grpc.deserialize<eth_pb.CompactBeaconBlock>;
 }
 
 export const APIService: IAPIService;
@@ -81,7 +101,9 @@ export interface IAPIServer extends grpc.UntypedServiceImplementation {
     sendRawTransaction: grpc.handleBidiStreamingCall<api_pb.RawTxMsg, api_pb.TransactionResponse>;
     sendTransactionSequence: grpc.handleBidiStreamingCall<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse>;
     sendRawTransactionSequence: grpc.handleBidiStreamingCall<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
-    subscribeNewBlocks: grpc.handleServerStreamingCall<google_protobuf_empty_pb.Empty, eth_pb.Block>;
+    subscribeExecutionPayloads: grpc.handleServerStreamingCall<google_protobuf_empty_pb.Empty, eth_pb.ExecutionPayload>;
+    subscribeExecutionHeaders: grpc.handleServerStreamingCall<google_protobuf_empty_pb.Empty, eth_pb.ExecutionPayloadHeader>;
+    subscribeBeaconBlocks: grpc.handleServerStreamingCall<google_protobuf_empty_pb.Empty, eth_pb.CompactBeaconBlock>;
 }
 
 export interface IAPIClient {
@@ -99,8 +121,12 @@ export interface IAPIClient {
     sendRawTransactionSequence(): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
     sendRawTransactionSequence(options: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
     sendRawTransactionSequence(metadata: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
-    subscribeNewBlocks(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
-    subscribeNewBlocks(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
+    subscribeExecutionPayloads(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
+    subscribeExecutionPayloads(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
+    subscribeExecutionHeaders(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
+    subscribeExecutionHeaders(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
+    subscribeBeaconBlocks(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
+    subscribeBeaconBlocks(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
 }
 
 export class APIClient extends grpc.Client implements IAPIClient {
@@ -115,6 +141,10 @@ export class APIClient extends grpc.Client implements IAPIClient {
     public sendTransactionSequence(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse>;
     public sendRawTransactionSequence(options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
     public sendRawTransactionSequence(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
-    public subscribeNewBlocks(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
-    public subscribeNewBlocks(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.Block>;
+    public subscribeExecutionPayloads(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
+    public subscribeExecutionPayloads(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
+    public subscribeExecutionHeaders(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
+    public subscribeExecutionHeaders(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
+    public subscribeBeaconBlocks(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
+    public subscribeBeaconBlocks(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
 }
