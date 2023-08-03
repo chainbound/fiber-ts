@@ -63,7 +63,7 @@ async function main() {
     console.log(signed);
 
     try {
-      const res = await client.sendRawTransactionSequence(tx.rawTransaction, signed);
+      const res = await client.sendRawTransactionSequence([tx.rawTransaction, signed]);
       console.log(Date.now(), "backrun sent");
       console.log(res);
     } catch (err) {
