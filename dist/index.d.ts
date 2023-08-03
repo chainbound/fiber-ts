@@ -1,43 +1,11 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
-import { ethers } from "ethers";
 import { Metadata } from "@grpc/grpc-js";
 import { TypedTransaction } from "@ethereumjs/tx";
 import { APIClient } from "../protobuf/api_grpc_pb";
 import { TxFilter } from "../protobuf/api_pb";
-export interface TransactionResponse {
-    hash: string;
-    timestamp: number;
-}
-declare enum Operator {
-    AND = 1,
-    OR = 2
-}
-interface FilterKV {
-    Key: string;
-    Value: string;
-}
-interface Node {
-    Operand?: FilterKV;
-    Operator?: Operator;
-    Nodes?: Array<Node>;
-}
-interface Filter {
-    Root: Node;
-}
-type FilterOp = (f: Filter, n?: Node) => void;
-export declare function or(...ops: FilterOp[]): FilterOp;
-export declare function and(...ops: FilterOp[]): FilterOp;
-export declare function to(to: string): FilterOp;
-export declare function from(from: string): FilterOp;
-export declare class FilterBuilder {
-    private _filter;
-    private _next;
-    private _last;
-    constructor(rootOp: FilterOp);
-    toString(): string;
-    build(): Uint8Array;
-}
+import { FilterBuilder } from "./filter";
+import { TransactionResponse } from "./types";
 export declare class Client {
     private _client;
     private _md;
@@ -53,10 +21,20 @@ export declare class Client {
      */
     subscribeNewTxs(filter?: FilterBuilder): TxStream;
     /**
-     * subscribes to the new blocks stream.
-     * @returns {BlockStream} - emits new blocks as events
+     * subscribes to the new execution headers stream.
+     * @returns {ExecutionHeaderStream} - emits new blocks as events (without transactions)
      */
-    subscribeNewBlocks(): BlockStream;
+    subscribeNewExecutionHeaders(): ExecutionHeaderStream;
+    /**
+     * subscribes to the new execution payloads stream.
+     * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
+     */
+    subscribeNewExecutionPayloads(): ExecutionPayloadStream;
+    /**
+     * subscribes to the new beacon blocks stream.
+     * @returns {BeaconBlockStream} - emits new beacon blocks as events
+     */
+    subscribeNewBeaconBlocks(): BeaconBlockStream;
     /**
      * sends a transaction
      * @param tx a signed! typed transaction
@@ -85,27 +63,19 @@ declare class TxStream extends EventEmitter {
     constructor(_client: APIClient, _md: Metadata, _filter: TxFilter);
     retry(_client: APIClient, _md: Metadata, _filter: TxFilter): Promise<void>;
 }
-export interface Block {
-    number: number;
-    hash: string;
-    parentHash: string;
-    prevRandao: string;
-    stateRoot: string;
-    receiptRoot: string;
-    feeRecipient: string;
-    extraData: string;
-    gasLimit: ethers.BigNumber;
-    gasUsed: ethers.BigNumber;
-    timestamp: number;
-    logsBloom: string;
-    baseFeePerGas: ethers.BigNumber;
-    transactions: TypedTransaction[];
-}
-declare class BlockStream extends EventEmitter {
+declare class ExecutionHeaderStream extends EventEmitter {
     constructor(_client: APIClient, _md: Metadata);
     retry(_client: APIClient, _md: Metadata): Promise<void>;
-    private handleBlock;
+    private handleExecutionPayloadHeader;
 }
-export declare function bytesToHex(b: string | Uint8Array): string;
-export declare function hexToBytes(str: string): Uint8Array;
+declare class ExecutionPayloadStream extends EventEmitter {
+    constructor(_client: APIClient, _md: Metadata);
+    retry(_client: APIClient, _md: Metadata): Promise<void>;
+    private handleExecutionPayload;
+}
+declare class BeaconBlockStream extends EventEmitter {
+    constructor(_client: APIClient, _md: Metadata);
+    retry(_client: APIClient, _md: Metadata): Promise<void>;
+    private handleBeaconBlock;
+}
 export {};
