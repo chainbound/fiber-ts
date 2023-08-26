@@ -16,7 +16,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@ethereumjs/common": "^5.0.0",
+    "@ethereumjs/common": "^4.0.0",
     "@ethereumjs/tx": "^5.0.0",
     "@ethereumjs/util": "^9.0.0",
     "@grpc/grpc-js": "^1.6.12",

@@ -394,3 +394,5 @@ class BeaconBlockStream extends EventEmitter {
     return fromProtoBeaconBlock(block);
   }
 }
+
+export { FilterBuilder };

@@ -9,7 +9,7 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@ethereumjs/common@^4.0.0", "@ethereumjs/common@^5.0.0":
+"@ethereumjs/common@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@ethereumjs/common/-/common-4.0.0.tgz#da99cdc822041da02753867d4773683f91e5854f"
   integrity sha512-eVa0/nC15mpotD8HOq6jB883SCWUkLjibr2jLPmPrx4FfmewXqFeh4drgR2sHjq3qWKxpCLK+5qsSJgtXwIzJQ==

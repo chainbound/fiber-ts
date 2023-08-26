@@ -28,6 +28,14 @@ function hexToBytes(str) {
 }
 exports.hexToBytes = hexToBytes;
 // ============== TRANSACTION CONVERSION UTILS ==============
+function convertAccessList(list) {
+    return list.map((tuple) => {
+        return {
+            address: "0x" + Buffer.from(tuple.getAddress()).toString("hex"),
+            storageKeys: tuple.getStorageKeysList().map((key) => "0x" + Buffer.from(key).toString("hex")),
+        };
+    });
+}
 function fromProtoTx(tx) {
     let value = 0n;
     if (tx.getValue()) {
@@ -40,32 +48,61 @@ function fromProtoTx(tx) {
     else {
         to = util_1.Address.zero();
     }
-    return tx_1.TransactionFactory.fromTxData({
-        // hash: tx.getHash(),
-        // from: bytesToHex(tx.getFrom()),
-        to: to,
-        type: tx.getType(),
-        nonce: BigInt(tx.getNonce()),
-        gasLimit: BigInt(tx.getGas()),
-        data: Buffer.from(tx.getInput()),
-        chainId: BigInt(tx.getChainid()),
-        value: value,
-        gasPrice: BigInt(tx.getGasPrice()),
-        v: BigInt(tx.getV()),
-        r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
-        s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
-    });
+    switch (tx.getType()) {
+        case tx_1.TransactionType.Legacy:
+            return tx_1.LegacyTransaction.fromTxData({
+                to: to,
+                type: tx.getType(),
+                nonce: BigInt(tx.getNonce()),
+                gasLimit: BigInt(tx.getGas()),
+                data: Buffer.from(tx.getInput()),
+                value: value,
+                gasPrice: BigInt(tx.getGasPrice()),
+                v: BigInt(tx.getV()),
+                r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
+                s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
+            });
+        case tx_1.TransactionType.AccessListEIP2930:
+            return tx_1.AccessListEIP2930Transaction.fromTxData({
+                to: to,
+                type: tx.getType(),
+                nonce: BigInt(tx.getNonce()),
+                gasLimit: BigInt(tx.getGas()),
+                data: Buffer.from(tx.getInput()),
+                value: value,
+                gasPrice: BigInt(tx.getGasPrice()),
+                accessList: convertAccessList(tx.getAccessListList()),
+                v: BigInt(tx.getV()),
+                r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
+                s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
+            });
+        case tx_1.TransactionType.FeeMarketEIP1559:
+            return tx_1.FeeMarketEIP1559Transaction.fromTxData({
+                to: to,
+                type: tx.getType(),
+                nonce: BigInt(tx.getNonce()),
+                gasLimit: BigInt(tx.getGas()),
+                data: Buffer.from(tx.getInput()),
+                value: value,
+                maxFeePerGas: BigInt(tx.getMaxFee()),
+                maxPriorityFeePerGas: BigInt(tx.getPriorityFee()),
+                accessList: convertAccessList(tx.getAccessListList()),
+                v: BigInt(tx.getV()),
+                r: BigInt("0x" + Buffer.from(tx.getR()).toString("hex")),
+                s: BigInt("0x" + Buffer.from(tx.getS()).toString("hex")),
+            });
+    }
+    return tx_1.TransactionFactory.fromTxData({});
 }
 exports.fromProtoTx = fromProtoTx;
 // WARNING: if transaction is legacy, it will only work on Ethereum mainnet.
 function toProtoTx(tx) {
     const proto = new eth_pb_1.default.Transaction();
-    if (tx.type == 0) {
-        const legacy = tx;
-        proto.setHash(legacy.hash());
-        proto.setFrom(legacy.getSenderAddress().buf);
-        if (legacy.to) {
-            proto.setTo(legacy.to.buf);
+    if ((0, tx_1.isLegacyTx)(tx)) {
+        proto.setHash(tx.hash());
+        proto.setFrom(tx.getSenderAddress().toBytes());
+        if (tx.to) {
+            proto.setTo(tx.to.toBytes());
         }
         proto.setType(tx.type);
         proto.setNonce(Number(tx.nonce));
@@ -75,28 +112,46 @@ function toProtoTx(tx) {
         proto.setChainid(1);
         proto.setValue(hexToBytes("0x" + tx.value.toString(16)));
         proto.setGas(Number(tx.gasLimit));
-        proto.setGasPrice(Number(legacy.gasPrice));
+        proto.setGasPrice(Number(tx.gasPrice));
         proto.setV(Number(tx.v));
         proto.setR(hexToBytes("0x" + tx.r.toString(16)));
         proto.setS(hexToBytes("0x" + tx.s.toString(16)));
     }
-    else {
-        const newtx = tx;
-        proto.setHash(newtx.hash());
-        proto.setFrom(newtx.getSenderAddress().buf);
-        if (newtx.to) {
-            proto.setTo(newtx.to.buf);
+    else if ((0, tx_1.isAccessListEIP2930Tx)(tx)) {
+        proto.setHash(tx.hash());
+        proto.setFrom(tx.getSenderAddress().toBytes());
+        if (tx.to) {
+            proto.setTo(tx.to.toBytes());
         }
         proto.setType(tx.type);
         proto.setNonce(Number(tx.nonce));
         if (tx.data) {
-            proto.setInput(newtx.data);
+            proto.setInput(tx.data);
         }
-        proto.setChainid(Number(newtx.chainId));
-        proto.setValue(hexToBytes("0x" + newtx.value.toString(16)));
-        proto.setGas(Number(newtx.gasLimit));
-        proto.setMaxFee(Number(newtx.maxFeePerGas));
-        proto.setPriorityFee(Number(newtx.maxPriorityFeePerGas));
+        proto.setChainid(Number(tx.chainId));
+        proto.setValue(hexToBytes("0x" + tx.value.toString(16)));
+        proto.setGas(Number(tx.gasLimit));
+        proto.setGasPrice(Number(tx.gasPrice));
+        proto.setV(Number(tx.v));
+        proto.setR(hexToBytes("0x" + tx.r.toString(16)));
+        proto.setS(hexToBytes("0x" + tx.s.toString(16)));
+    }
+    else if ((0, tx_1.isFeeMarketEIP1559Tx)(tx)) {
+        proto.setHash(tx.hash());
+        proto.setFrom(tx.getSenderAddress().toBytes());
+        if (tx.to) {
+            proto.setTo(tx.to.toBytes());
+        }
+        proto.setType(tx.type);
+        proto.setNonce(Number(tx.nonce));
+        if (tx.data) {
+            proto.setInput(tx.data);
+        }
+        proto.setChainid(Number(tx.chainId));
+        proto.setValue(hexToBytes("0x" + tx.value.toString(16)));
+        proto.setGas(Number(tx.gasLimit));
+        proto.setMaxFee(Number(tx.maxFeePerGas));
+        proto.setPriorityFee(Number(tx.maxPriorityFeePerGas));
         proto.setV(Number(tx.v));
         proto.setR(hexToBytes("0x" + tx.r.toString(16)));
         proto.setS(hexToBytes("0x" + tx.s.toString(16)));
