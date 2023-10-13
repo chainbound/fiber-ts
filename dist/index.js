@@ -23,12 +23,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Client = void 0;
+exports.FilterBuilder = exports.Client = void 0;
 const events_1 = require("events");
 const google_protobuf_empty_pb = __importStar(require("google-protobuf/google/protobuf/empty_pb"));
 const grpc_js_1 = require("@grpc/grpc-js");
 const api_grpc_pb_1 = require("../protobuf/api_grpc_pb");
 const api_pb_1 = require("../protobuf/api_pb");
+const filter_1 = require("./filter");
+Object.defineProperty(exports, "FilterBuilder", { enumerable: true, get: function () { return filter_1.FilterBuilder; } });
 const types_1 = require("./types");
 class Client {
     constructor(target, apiKey) {

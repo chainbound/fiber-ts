@@ -14,6 +14,7 @@ import {
 } from "@ethereumjs/tx";
 
 import eth, { AccessTuple } from "../protobuf/eth_pb";
+import { RLP } from "ethers/lib/utils";
 
 export interface TransactionResponse {
   hash: string;
@@ -173,7 +174,9 @@ function convertAccessList(list: Array<AccessTuple>): Array<AccessListItem> {
 export function fromProtoTx(tx: eth.Transaction): TypedTransaction {
   let value = 0n;
   if (tx.getValue()) {
-    value = BigInt("0x" + Buffer.from(tx.getValue()).toString("hex"));
+    if (tx.getValue().length > 0) {
+      value = RLP.decode(tx.getValue());
+    }
   }
 
   let to;

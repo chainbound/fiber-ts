@@ -78,4 +78,4 @@ declare class BeaconBlockStream extends EventEmitter {
     retry(_client: APIClient, _md: Metadata): Promise<void>;
     private handleBeaconBlock;
 }
-export {};
+export { FilterBuilder };
