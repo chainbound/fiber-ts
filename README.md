@@ -1,4 +1,5 @@
 # Fiber TypeScript Client
+[![Version](https://img.shields.io/npm/v/fiber-ts.svg)](https://www.npmjs.com/package/fiber-ts)
 
 This package contains a JS/TS client for connecting to the Fiber Network.
 

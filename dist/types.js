@@ -8,6 +8,7 @@ const util_1 = require("@ethereumjs/util");
 const ethers_1 = require("ethers");
 const tx_1 = require("@ethereumjs/tx");
 const eth_pb_1 = __importDefault(require("../protobuf/eth_pb"));
+const utils_1 = require("ethers/lib/utils");
 // ============= TYPE CONVERSION UTILS ==============
 function bytesToHex(b) {
     return "0x" + Buffer.from(b).toString("hex");
@@ -39,7 +40,9 @@ function convertAccessList(list) {
 function fromProtoTx(tx) {
     let value = 0n;
     if (tx.getValue()) {
-        value = BigInt("0x" + Buffer.from(tx.getValue()).toString("hex"));
+        if (tx.getValue().length > 0) {
+            value = utils_1.RLP.decode(tx.getValue());
+        }
     }
     let to;
     if (tx.getTo().length !== 0) {
