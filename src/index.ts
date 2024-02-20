@@ -1,9 +1,9 @@
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
 import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
-import { Block, BlockHeader } from "@ethereumjs/block";
-import { BeaconBlock, ssz } from "@lodestar/types/allForks";
 import { Address, Withdrawal } from "@ethereumjs/util";
+import { Block, BlockHeader } from "@ethereumjs/block";
+import { allForks, ssz } from "@lodestar/types";
 import { EventEmitter } from "events";
 
 import { APIClient } from "../protobuf/api_grpc_pb";
@@ -479,7 +479,7 @@ class BeaconBlockStream extends EventEmitter {
     });
   }
 
-  private handleBeaconBlock(block: BeaconBlockMsg): BeaconBlock {
+  private handleBeaconBlock(block: BeaconBlockMsg): allForks.BeaconBlock {
     const version = block.getDataVersion();
 
     const sszEncodedBeaconBlock = block.getSszBlock() as Uint8Array;
@@ -499,21 +499,25 @@ class BeaconBlockStream extends EventEmitter {
     }
   }
 
-  private decodeBellatrix(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
+  private decodeBellatrix(
+    sszEncodedBeaconBlock: Uint8Array
+  ): allForks.BeaconBlock {
     const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(
       sszEncodedBeaconBlock
     );
     return decoded.message;
   }
 
-  private decodeCapella(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
+  private decodeCapella(
+    sszEncodedBeaconBlock: Uint8Array
+  ): allForks.BeaconBlock {
     const decoded = ssz.allForks.capella.SignedBeaconBlock.deserialize(
       sszEncodedBeaconBlock
     );
     return decoded.message;
   }
 
-  private decodeDeneb(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
+  private decodeDeneb(sszEncodedBeaconBlock: Uint8Array): allForks.BeaconBlock {
     const decoded = ssz.allForks.deneb.SignedBeaconBlock.deserialize(
       sszEncodedBeaconBlock
     );
