@@ -482,12 +482,41 @@ class BeaconBlockStream extends EventEmitter {
   private handleBeaconBlock(block: BeaconBlockMsg): BeaconBlock {
     const version = block.getDataVersion();
 
-    // TODO: decode based on hardfork version
     const sszEncodedBeaconBlock = block.getSszBlock() as Uint8Array;
+    switch (version) {
+      case 3: {
+        return this.decodeBellatrix(sszEncodedBeaconBlock);
+      }
+      case 4: {
+        return this.decodeCapella(sszEncodedBeaconBlock);
+      }
+      case 5: {
+        return this.decodeDeneb(sszEncodedBeaconBlock);
+      }
+      default: {
+        return this.decodeCapella(sszEncodedBeaconBlock);
+      }
+    }
+  }
+
+  private decodeBellatrix(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
     const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(
       sszEncodedBeaconBlock
     );
+    return decoded.message;
+  }
 
+  private decodeCapella(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
+    const decoded = ssz.allForks.capella.SignedBeaconBlock.deserialize(
+      sszEncodedBeaconBlock
+    );
+    return decoded.message;
+  }
+
+  private decodeDeneb(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
+    const decoded = ssz.allForks.deneb.SignedBeaconBlock.deserialize(
+      sszEncodedBeaconBlock
+    );
     return decoded.message;
   }
 }
