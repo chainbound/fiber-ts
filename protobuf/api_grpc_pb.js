@@ -6,6 +6,50 @@ var api_pb = require('./api_pb.js');
 var eth_pb = require('./eth_pb.js');
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
 
+function serialize_api_BeaconBlockMsg(arg) {
+  if (!(arg instanceof api_pb.BeaconBlockMsg)) {
+    throw new Error('Expected argument of type api.BeaconBlockMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_BeaconBlockMsg(buffer_arg) {
+  return api_pb.BeaconBlockMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_BlockSubmissionMsg(arg) {
+  if (!(arg instanceof api_pb.BlockSubmissionMsg)) {
+    throw new Error('Expected argument of type api.BlockSubmissionMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_BlockSubmissionMsg(buffer_arg) {
+  return api_pb.BlockSubmissionMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_BlockSubmissionResponse(arg) {
+  if (!(arg instanceof api_pb.BlockSubmissionResponse)) {
+    throw new Error('Expected argument of type api.BlockSubmissionResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_BlockSubmissionResponse(buffer_arg) {
+  return api_pb.BlockSubmissionResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_ExecutionPayloadMsg(arg) {
+  if (!(arg instanceof api_pb.ExecutionPayloadMsg)) {
+    throw new Error('Expected argument of type api.ExecutionPayloadMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_ExecutionPayloadMsg(buffer_arg) {
+  return api_pb.ExecutionPayloadMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_api_RawTxMsg(arg) {
   if (!(arg instanceof api_pb.RawTxMsg)) {
     throw new Error('Expected argument of type api.RawTxMsg');
@@ -28,6 +72,17 @@ function deserialize_api_RawTxSequenceMsg(buffer_arg) {
   return api_pb.RawTxSequenceMsg.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_api_TransactionMsg(arg) {
+  if (!(arg instanceof api_pb.TransactionMsg)) {
+    throw new Error('Expected argument of type api.TransactionMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_TransactionMsg(buffer_arg) {
+  return api_pb.TransactionMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_api_TransactionResponse(arg) {
   if (!(arg instanceof api_pb.TransactionResponse)) {
     throw new Error('Expected argument of type api.TransactionResponse');
@@ -37,6 +92,17 @@ function serialize_api_TransactionResponse(arg) {
 
 function deserialize_api_TransactionResponse(buffer_arg) {
   return api_pb.TransactionResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_TransactionWithSenderMsg(arg) {
+  if (!(arg instanceof api_pb.TransactionWithSenderMsg)) {
+    throw new Error('Expected argument of type api.TransactionWithSenderMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_TransactionWithSenderMsg(buffer_arg) {
+  return api_pb.TransactionWithSenderMsg.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_TxFilter(arg) {
@@ -59,6 +125,17 @@ function serialize_api_TxSequenceMsg(arg) {
 
 function deserialize_api_TxSequenceMsg(buffer_arg) {
   return api_pb.TxSequenceMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_api_TxSequenceMsgV2(arg) {
+  if (!(arg instanceof api_pb.TxSequenceMsgV2)) {
+    throw new Error('Expected argument of type api.TxSequenceMsgV2');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_api_TxSequenceMsgV2(buffer_arg) {
+  return api_pb.TxSequenceMsgV2.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_TxSequenceResponse(arg) {
@@ -130,6 +207,7 @@ function deserialize_google_protobuf_Empty(buffer_arg) {
 
 var APIService = exports.APIService = {
   // Opens a new transaction stream with the given filter.
+// TODO: Deprecate
 subscribeNewTxs: {
     path: '/api.API/SubscribeNewTxs',
     requestStream: false,
@@ -141,7 +219,20 @@ subscribeNewTxs: {
     responseSerialize: serialize_eth_Transaction,
     responseDeserialize: deserialize_eth_Transaction,
   },
+  // Opens a new transaction stream with the given filter.
+subscribeNewTxsV2: {
+    path: '/api.API/SubscribeNewTxsV2',
+    requestStream: false,
+    responseStream: true,
+    requestType: api_pb.TxFilter,
+    responseType: api_pb.TransactionWithSenderMsg,
+    requestSerialize: serialize_api_TxFilter,
+    requestDeserialize: deserialize_api_TxFilter,
+    responseSerialize: serialize_api_TransactionWithSenderMsg,
+    responseDeserialize: deserialize_api_TransactionWithSenderMsg,
+  },
   // Sends a signed transaction to the network.
+// TODO: Deprecate
 sendTransaction: {
     path: '/api.API/SendTransaction',
     requestStream: true,
@@ -154,6 +245,7 @@ sendTransaction: {
     responseDeserialize: deserialize_api_TransactionResponse,
   },
   // Sends a signed, RLP encoded transaction to the network
+// TODO: Deprecate
 sendRawTransaction: {
     path: '/api.API/SendRawTransaction',
     requestStream: true,
@@ -165,7 +257,19 @@ sendRawTransaction: {
     responseSerialize: serialize_api_TransactionResponse,
     responseDeserialize: deserialize_api_TransactionResponse,
   },
+  sendTransactionV2: {
+    path: '/api.API/SendTransactionV2',
+    requestStream: true,
+    responseStream: true,
+    requestType: api_pb.TransactionMsg,
+    responseType: api_pb.TransactionResponse,
+    requestSerialize: serialize_api_TransactionMsg,
+    requestDeserialize: deserialize_api_TransactionMsg,
+    responseSerialize: serialize_api_TransactionResponse,
+    responseDeserialize: deserialize_api_TransactionResponse,
+  },
   // Sends a sequence of signed transactions to the network.
+// TODO: Deprecate
 sendTransactionSequence: {
     path: '/api.API/SendTransactionSequence',
     requestStream: true,
@@ -174,6 +278,17 @@ sendTransactionSequence: {
     responseType: api_pb.TxSequenceResponse,
     requestSerialize: serialize_api_TxSequenceMsg,
     requestDeserialize: deserialize_api_TxSequenceMsg,
+    responseSerialize: serialize_api_TxSequenceResponse,
+    responseDeserialize: deserialize_api_TxSequenceResponse,
+  },
+  sendTransactionSequenceV2: {
+    path: '/api.API/SendTransactionSequenceV2',
+    requestStream: true,
+    responseStream: true,
+    requestType: api_pb.TxSequenceMsgV2,
+    responseType: api_pb.TxSequenceResponse,
+    requestSerialize: serialize_api_TxSequenceMsgV2,
+    requestDeserialize: deserialize_api_TxSequenceMsgV2,
     responseSerialize: serialize_api_TxSequenceResponse,
     responseDeserialize: deserialize_api_TxSequenceResponse,
   },
@@ -190,6 +305,7 @@ sendRawTransactionSequence: {
     responseDeserialize: deserialize_api_TxSequenceResponse,
   },
   // Opens a stream of new execution payloads.
+// TODO: Deprecate
 subscribeExecutionPayloads: {
     path: '/api.API/SubscribeExecutionPayloads',
     requestStream: false,
@@ -201,7 +317,19 @@ subscribeExecutionPayloads: {
     responseSerialize: serialize_eth_ExecutionPayload,
     responseDeserialize: deserialize_eth_ExecutionPayload,
   },
+  subscribeExecutionPayloadsV2: {
+    path: '/api.API/SubscribeExecutionPayloadsV2',
+    requestStream: false,
+    responseStream: true,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: api_pb.ExecutionPayloadMsg,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
+    responseSerialize: serialize_api_ExecutionPayloadMsg,
+    responseDeserialize: deserialize_api_ExecutionPayloadMsg,
+  },
   // Opens a stream of new execution payload headers.
+// TODO: Deprecate
 subscribeExecutionHeaders: {
     path: '/api.API/SubscribeExecutionHeaders',
     requestStream: false,
@@ -225,6 +353,32 @@ subscribeBeaconBlocks: {
     requestDeserialize: deserialize_google_protobuf_Empty,
     responseSerialize: serialize_eth_CompactBeaconBlock,
     responseDeserialize: deserialize_eth_CompactBeaconBlock,
+  },
+  // Opens a stream of new beacon blocks.
+subscribeBeaconBlocksV2: {
+    path: '/api.API/SubscribeBeaconBlocksV2',
+    requestStream: false,
+    responseStream: true,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: api_pb.BeaconBlockMsg,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
+    responseSerialize: serialize_api_BeaconBlockMsg,
+    responseDeserialize: deserialize_api_BeaconBlockMsg,
+  },
+  // Opens a bi-directional stream for new block submissions. The client stream is used to send
+// SSZ-encoded beacon blocks, and the server stream is used to send back the state_root, slot and
+// a local timestamp as a confirmation that the block was seen and handled.
+submitBlockStream: {
+    path: '/api.API/SubmitBlockStream',
+    requestStream: true,
+    responseStream: true,
+    requestType: api_pb.BlockSubmissionMsg,
+    responseType: api_pb.BlockSubmissionResponse,
+    requestSerialize: serialize_api_BlockSubmissionMsg,
+    requestDeserialize: deserialize_api_BlockSubmissionMsg,
+    responseSerialize: serialize_api_BlockSubmissionResponse,
+    responseDeserialize: deserialize_api_BlockSubmissionResponse,
   },
 };
 

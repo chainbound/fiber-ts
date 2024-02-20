@@ -1,43 +1,36 @@
-import { EventEmitter } from "events";
-
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
 import { TypedTransaction } from "@ethereumjs/tx";
+import { Address } from "@ethereumjs/util";
+import { bellatrix, ssz } from "@chainsafe/lodestar-types";
+import { EventEmitter } from "events";
 
-import eth from "../protobuf/eth_pb";
 import { APIClient } from "../protobuf/api_grpc_pb";
 import {
-  RawTxMsg,
   TransactionResponse as PbResponse,
-  TxSequenceMsg,
   TxSequenceResponse,
-  RawTxSequenceMsg,
   TxFilter,
+  TransactionMsg,
+  TxSequenceMsgV2,
+  TransactionWithSenderMsg,
+  ExecutionPayloadMsg,
+  BeaconBlockMsg,
 } from "../protobuf/api_pb";
 import { FilterBuilder } from "./filter";
 import {
-  BeaconBlock,
   ExecutionPayload,
-  ExecutionPayloadHeader,
-  fromProtoBeaconBlock,
-  fromProtoExecutionHeader,
-  fromProtoTx,
-  toProtoTx,
+  fromRLPTransaction,
   TransactionResponse,
+  TransactionWithSender,
 } from "./types";
 
 export class Client {
   private _client: APIClient;
   private _md: Metadata;
 
-  private _txStream: ClientDuplexStream<eth.Transaction, PbResponse>;
-  private _rawTxStream: ClientDuplexStream<RawTxMsg, PbResponse>;
+  private _txStream: ClientDuplexStream<TransactionMsg, PbResponse>;
   private _txSequenceStream: ClientDuplexStream<
-    TxSequenceMsg,
-    TxSequenceResponse
-  >;
-  private _rawTxSequenceStream: ClientDuplexStream<
-    RawTxSequenceMsg,
+    TxSequenceMsgV2,
     TxSequenceResponse
   >;
 
@@ -46,12 +39,8 @@ export class Client {
     this._md = new Metadata();
     this._md.add("x-api-key", apiKey);
 
-    this._txStream = this._client.sendTransaction(this._md);
-    this._rawTxStream = this._client.sendRawTransaction(this._md);
-    this._txSequenceStream = this._client.sendTransactionSequence(this._md);
-    this._rawTxSequenceStream = this._client.sendRawTransactionSequence(
-      this._md
-    );
+    this._txStream = this._client.sendTransactionV2(this._md);
+    this._txSequenceStream = this._client.sendTransactionSequenceV2(this._md);
   }
 
   waitForReady(seconds: number): Promise<void> {
@@ -82,14 +71,6 @@ export class Client {
   }
 
   /**
-   * subscribes to the new execution headers stream.
-   * @returns {ExecutionHeaderStream} - emits new blocks as events (without transactions)
-   */
-  subscribeNewExecutionHeaders(): ExecutionHeaderStream {
-    return new ExecutionHeaderStream(this._client, this._md);
-  }
-
-  /**
    * subscribes to the new execution payloads stream.
    * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
    */
@@ -111,8 +92,11 @@ export class Client {
    * @returns response containing hash and timestamp
    */
   async sendTransaction(tx: TypedTransaction): Promise<TransactionResponse> {
+    let message = new TransactionMsg();
+    message.setRlpTransaction(tx.serialize());
+
     return new Promise((resolve, reject) => {
-      this._txStream.write(toProtoTx(tx), this._md, (err: Error) => {
+      this._txStream.write(message, this._md, (err: Error) => {
         if (err) {
           reject(err);
         } else {
@@ -133,19 +117,19 @@ export class Client {
    * @returns response containing array of hashes and timestamps
    */
   async sendRawTransaction(rawtx: string): Promise<TransactionResponse> {
-    const rawMsg = new RawTxMsg();
+    const rawMsg = new TransactionMsg();
 
     if (rawtx.substring(0, 2) === "0x") {
       rawtx = rawtx.substring(2);
     }
 
-    rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, "hex")));
+    rawMsg.setRlpTransaction(Uint8Array.from(Buffer.from(rawtx, "hex")));
     return new Promise((resolve, reject) => {
-      this._rawTxStream.write(rawMsg, (err: Error) => {
+      this._txStream.write(rawMsg, (err: Error) => {
         if (err) {
           reject(err);
         } else {
-          this._rawTxStream.on("data", (res: PbResponse) => {
+          this._txStream.on("data", (res: PbResponse) => {
             resolve({
               hash: res.getHash(),
               timestamp: res.getTimestamp(),
@@ -164,8 +148,8 @@ export class Client {
   async sendTransactionSequence(
     txs: TypedTransaction[]
   ): Promise<TransactionResponse[]> {
-    const sequenceMsg = new TxSequenceMsg();
-    sequenceMsg.setSequenceList(txs.map(toProtoTx));
+    const sequenceMsg = new TxSequenceMsgV2();
+    sequenceMsg.setSequenceList(txs.map((tx) => tx.serialize()));
 
     return new Promise((resolve, reject) => {
       this._txSequenceStream.write(sequenceMsg, this._md, (err: Error) => {
@@ -195,7 +179,7 @@ export class Client {
   async sendRawTransactionSequence(
     rawTxs: string[]
   ): Promise<TransactionResponse[]> {
-    const sequenceMsg = new RawTxSequenceMsg();
+    const sequenceMsg = new TxSequenceMsgV2();
 
     // remove 0x prefix if present
     for (const [idx, rawtx] of rawTxs.entries()) {
@@ -204,16 +188,16 @@ export class Client {
       }
     }
 
-    sequenceMsg.setRawTxsList(
+    sequenceMsg.setSequenceList(
       rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex")))
     );
 
     return new Promise((resolve, reject) => {
-      this._rawTxSequenceStream.write(sequenceMsg, this._md, (err: Error) => {
+      this._txSequenceStream.write(sequenceMsg, this._md, (err: Error) => {
         if (err) {
           reject(err);
         } else {
-          this._rawTxSequenceStream.on("data", (res: TxSequenceResponse) => {
+          this._txSequenceStream.on("data", (res: TxSequenceResponse) => {
             let response: TransactionResponse[] = [];
             for (let r of res.getSequenceResponseList()) {
               response.push({
@@ -249,60 +233,22 @@ class TxStream extends EventEmitter {
       });
     });
 
-    const _txStream = _client.subscribeNewTxs(_filter, _md);
+    const _txStream = _client.subscribeNewTxsV2(_filter, _md);
     _txStream.on("close", () => this.emit("close"));
     _txStream.on("end", () => this.emit("end"));
-    _txStream.on("data", (data: eth.Transaction) =>
-      this.emit("data", fromProtoTx(data))
-    );
+    _txStream.on("data", (data: TransactionWithSenderMsg) => {
+      let res: TransactionWithSender = {
+        sender: Address.fromString(data.getSender() as string),
+        transaction: fromRLPTransaction(data.getRlpTransaction()),
+      };
+
+      this.emit("data", res);
+    });
 
     _txStream.on("error", async (err) => {
       console.error(err);
       this.retry(_client, _md, _filter);
     });
-  }
-}
-
-class ExecutionHeaderStream extends EventEmitter {
-  constructor(_client: APIClient, _md: Metadata) {
-    super();
-    this.retry(_client, _md);
-  }
-
-  async retry(_client: APIClient, _md: Metadata) {
-    const now = new Date();
-    const deadline = new Date(now.getTime() + 60 * 1000);
-    await new Promise<void>((resolve, reject) => {
-      _client.waitForReady(deadline, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-
-    const _blockStream = _client.subscribeExecutionHeaders(
-      new google_protobuf_empty_pb.Empty(),
-      _md
-    );
-
-    _blockStream.on("close", () => this.emit("close"));
-    _blockStream.on("end", () => this.emit("end"));
-    _blockStream.on("data", (data: eth.ExecutionPayloadHeader) =>
-      this.emit("data", this.handleExecutionPayloadHeader(data))
-    );
-
-    _blockStream.on("error", async (err) => {
-      console.error("transmission error", err);
-      this.retry(_client, _md);
-    });
-  }
-
-  private handleExecutionPayloadHeader(
-    block: eth.ExecutionPayloadHeader
-  ): ExecutionPayloadHeader {
-    return fromProtoExecutionHeader(block);
   }
 }
 
@@ -325,14 +271,14 @@ class ExecutionPayloadStream extends EventEmitter {
       });
     });
 
-    const _blockStream = _client.subscribeExecutionPayloads(
+    const _blockStream = _client.subscribeExecutionPayloadsV2(
       new google_protobuf_empty_pb.Empty(),
       _md
     );
 
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
-    _blockStream.on("data", (data: eth.ExecutionPayload) =>
+    _blockStream.on("data", (data: ExecutionPayloadMsg) =>
       this.emit("data", this.handleExecutionPayload(data))
     );
 
@@ -342,11 +288,22 @@ class ExecutionPayloadStream extends EventEmitter {
     });
   }
 
-  private handleExecutionPayload(
-    block: eth.ExecutionPayload
-  ): ExecutionPayload {
-    const header = fromProtoExecutionHeader(block.getHeader()!);
-    const transactions = block.getTransactionsList().map(fromProtoTx);
+  private handleExecutionPayload(block: ExecutionPayloadMsg): ExecutionPayload {
+    const version = block.getDataVersion();
+
+    // TODO: decode block based on hardfork version
+    const sszEncodedBeaconBlock = block.getSszPayload() as Uint8Array;
+    const decoded = ssz.bellatrix.ExecutionPayload.deserialize(
+      sszEncodedBeaconBlock
+    );
+
+    const header: bellatrix.ExecutionPayloadHeader = {
+      ...decoded,
+      transactionsRoot: Uint8Array.from([]),
+    };
+
+    const transactions: TypedTransaction[] =
+      decoded.transactions.map(fromRLPTransaction);
 
     return {
       header,
@@ -374,13 +331,13 @@ class BeaconBlockStream extends EventEmitter {
       });
     });
 
-    const _blockStream = _client.subscribeBeaconBlocks(
+    const _blockStream = _client.subscribeBeaconBlocksV2(
       new google_protobuf_empty_pb.Empty(),
       _md
     );
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
-    _blockStream.on("data", (data: eth.CompactBeaconBlock) =>
+    _blockStream.on("data", (data: BeaconBlockMsg) =>
       this.emit("data", this.handleBeaconBlock(data))
     );
 
@@ -390,8 +347,16 @@ class BeaconBlockStream extends EventEmitter {
     });
   }
 
-  private handleBeaconBlock(block: eth.CompactBeaconBlock): BeaconBlock {
-    return fromProtoBeaconBlock(block);
+  private handleBeaconBlock(block: BeaconBlockMsg): bellatrix.BeaconBlock {
+    const version = block.getDataVersion();
+
+    // TODO: decode based on hardfork version
+    const sszEncodedBeaconBlock = block.getSszBlock() as Uint8Array;
+    const decoded = ssz.bellatrix.SignedBeaconBlock.deserialize(
+      sszEncodedBeaconBlock
+    );
+
+    return decoded.message;
   }
 }
 
