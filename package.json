@@ -16,13 +16,14 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@chainsafe/lodestar-types": "^0.39.0",
     "@chainsafe/ssz": "^0.14.3",
+    "@ethereumjs/block": "^5.1.1",
     "@ethereumjs/common": "^4.0.0",
     "@ethereumjs/rlp": "^5.0.2",
-    "@ethereumjs/tx": "^5.0.0",
+    "@ethereumjs/tx": "^5.2.1",
     "@ethereumjs/util": "^9.0.0",
     "@grpc/grpc-js": "^1.6.12",
+    "@lodestar/types": "^1.15.1",
     "ethers": "^5.7.0",
     "google-protobuf": "^3.21.0"
   },

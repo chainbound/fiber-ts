@@ -1,8 +1,9 @@
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
-import { TypedTransaction } from "@ethereumjs/tx";
-import { Address } from "@ethereumjs/util";
-import { bellatrix, ssz } from "@chainsafe/lodestar-types";
+import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
+import { Block, BlockHeader } from "@ethereumjs/block";
+import { BeaconBlock, ssz } from "@lodestar/types/allForks";
+import { Address, Withdrawal } from "@ethereumjs/util";
 import { EventEmitter } from "events";
 
 import { APIClient } from "../protobuf/api_grpc_pb";
@@ -18,7 +19,6 @@ import {
 } from "../protobuf/api_pb";
 import { FilterBuilder } from "./filter";
 import {
-  ExecutionPayload,
   fromRLPTransaction,
   TransactionResponse,
   TransactionWithSender,
@@ -288,27 +288,159 @@ class ExecutionPayloadStream extends EventEmitter {
     });
   }
 
-  private handleExecutionPayload(block: ExecutionPayloadMsg): ExecutionPayload {
+  private handleExecutionPayload(block: ExecutionPayloadMsg): Block {
     const version = block.getDataVersion();
-
-    // TODO: decode block based on hardfork version
     const sszEncodedBeaconBlock = block.getSszPayload() as Uint8Array;
-    const decoded = ssz.bellatrix.ExecutionPayload.deserialize(
-      sszEncodedBeaconBlock
-    );
 
-    const header: bellatrix.ExecutionPayloadHeader = {
-      ...decoded,
-      transactionsRoot: Uint8Array.from([]),
-    };
+    let header: BlockHeader | undefined;
+    let withdrawals: Withdrawal[] | undefined;
+    let transactions: TypedTransaction[] | undefined;
 
-    const transactions: TypedTransaction[] =
-      decoded.transactions.map(fromRLPTransaction);
+    switch (version) {
+      case 3: {
+        // BELLATRIX DATA VERSION
+        const decoded =
+          ssz.allForksExecution.bellatrix.ExecutionPayload.deserialize(
+            sszEncodedBeaconBlock
+          );
+        header = BlockHeader.fromHeaderData({
+          parentHash: decoded.parentHash,
+          uncleHash: Uint8Array.from([]),
+          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          stateRoot: decoded.stateRoot,
+          transactionsTrie: undefined, // TODO: document that this will be always empty
+          receiptTrie: decoded.receiptsRoot,
+          logsBloom: decoded.logsBloom,
+          difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+          number: BigInt(decoded.blockNumber),
+          gasLimit: BigInt(decoded.gasLimit),
+          gasUsed: BigInt(decoded.gasUsed),
+          timestamp: BigInt(decoded.timestamp),
+          extraData: decoded.extraData,
+          mixHash: decoded.prevRandao,
+          nonce: undefined, // TODO: document that this will be always empty (post merge)
+          baseFeePerGas: decoded.baseFeePerGas,
+        });
+        transactions = decoded.transactions.map(fromRLPTransaction);
+        break;
+      }
+      case 4: {
+        // CAPELLA DATA VERSION
+        const decoded =
+          ssz.allForksExecution.capella.ExecutionPayload.deserialize(
+            sszEncodedBeaconBlock
+          );
+        header = BlockHeader.fromHeaderData({
+          parentHash: decoded.parentHash,
+          uncleHash: Uint8Array.from([]),
+          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          stateRoot: decoded.stateRoot,
+          transactionsTrie: undefined, // TODO: document that this will be always empty
+          receiptTrie: decoded.receiptsRoot,
+          logsBloom: decoded.logsBloom,
+          difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+          number: BigInt(decoded.blockNumber),
+          gasLimit: BigInt(decoded.gasLimit),
+          gasUsed: BigInt(decoded.gasUsed),
+          timestamp: BigInt(decoded.timestamp),
+          extraData: decoded.extraData,
+          mixHash: decoded.prevRandao,
+          nonce: undefined, // TODO: document that this will be always empty (post merge)
+          baseFeePerGas: decoded.baseFeePerGas,
+          withdrawalsRoot: undefined, // TODO: document that this will be always null
+        });
+        transactions = decoded.transactions.map(fromRLPTransaction);
+        withdrawals = decoded.withdrawals.map((w) => {
+          let t = new Withdrawal(
+            BigInt(w.index),
+            BigInt(w.validatorIndex),
+            Address.fromPublicKey(w.address),
+            w.amount
+          );
+          return t;
+        });
+        break;
+      }
+      case 5: {
+        // DENEB DATA VERSION
+        const decoded =
+          ssz.allForksExecution.deneb.ExecutionPayload.deserialize(
+            sszEncodedBeaconBlock
+          );
+        header = BlockHeader.fromHeaderData({
+          parentHash: decoded.parentHash,
+          uncleHash: Uint8Array.from([]),
+          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          stateRoot: decoded.stateRoot,
+          transactionsTrie: undefined, // TODO: document that this will be always empty
+          receiptTrie: decoded.receiptsRoot,
+          logsBloom: decoded.logsBloom,
+          difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+          number: BigInt(decoded.blockNumber),
+          gasLimit: BigInt(decoded.gasLimit),
+          gasUsed: BigInt(decoded.gasUsed),
+          timestamp: BigInt(decoded.timestamp),
+          extraData: decoded.extraData,
+          mixHash: decoded.prevRandao,
+          nonce: undefined, // TODO: document that this will be always empty (post merge)
+          baseFeePerGas: decoded.baseFeePerGas,
+          withdrawalsRoot: undefined, // TODO: document that this will be always null
+          blobGasUsed: BigInt(decoded.blobGasUsed),
+          excessBlobGas: BigInt(decoded.excessBlobGas),
+          parentBeaconBlockRoot: undefined, // TODO: document that this will be always empty
+        });
+        transactions = decoded.transactions.map(fromRLPTransaction);
+        withdrawals = decoded.withdrawals.map((w) => {
+          let t = new Withdrawal(
+            BigInt(w.index),
+            BigInt(w.validatorIndex),
+            Address.fromPublicKey(w.address),
+            w.amount
+          );
+          return t;
+        });
+        break;
+      }
+      default: {
+        // just try using capella if the version doesn't match
+        const decoded =
+          ssz.allForksExecution.capella.ExecutionPayload.deserialize(
+            sszEncodedBeaconBlock
+          );
+        header = BlockHeader.fromHeaderData({
+          parentHash: decoded.parentHash,
+          uncleHash: Uint8Array.from([]),
+          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          stateRoot: decoded.stateRoot,
+          transactionsTrie: undefined, // TODO: document that this will be always empty
+          receiptTrie: decoded.receiptsRoot,
+          logsBloom: decoded.logsBloom,
+          difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+          number: BigInt(decoded.blockNumber),
+          gasLimit: BigInt(decoded.gasLimit),
+          gasUsed: BigInt(decoded.gasUsed),
+          timestamp: BigInt(decoded.timestamp),
+          extraData: decoded.extraData,
+          mixHash: decoded.prevRandao,
+          nonce: undefined, // TODO: document that this will be always empty (post merge)
+          baseFeePerGas: decoded.baseFeePerGas,
+          withdrawalsRoot: undefined, // TODO: document that this will be always null
+        });
+        transactions = decoded.transactions.map(fromRLPTransaction);
+        withdrawals = decoded.withdrawals.map((w) => {
+          let t = new Withdrawal(
+            BigInt(w.index),
+            BigInt(w.validatorIndex),
+            Address.fromPublicKey(w.address),
+            w.amount
+          );
+          return t;
+        });
+        break;
+      }
+    }
 
-    return {
-      header,
-      transactions,
-    };
+    return new Block(header, transactions, undefined, withdrawals);
   }
 }
 
@@ -347,12 +479,12 @@ class BeaconBlockStream extends EventEmitter {
     });
   }
 
-  private handleBeaconBlock(block: BeaconBlockMsg): bellatrix.BeaconBlock {
+  private handleBeaconBlock(block: BeaconBlockMsg): BeaconBlock {
     const version = block.getDataVersion();
 
     // TODO: decode based on hardfork version
     const sszEncodedBeaconBlock = block.getSszBlock() as Uint8Array;
-    const decoded = ssz.bellatrix.SignedBeaconBlock.deserialize(
+    const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(
       sszEncodedBeaconBlock
     );
 

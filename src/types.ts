@@ -1,8 +1,6 @@
 import rlp from "@ethereumjs/rlp";
 import { TransactionFactory, TypedTransaction } from "@ethereumjs/tx";
-
 import { Address } from "@ethereumjs/util";
-import { bellatrix } from "@chainsafe/lodestar-types";
 
 export interface TransactionWithSender {
   sender: Address;
@@ -14,11 +12,11 @@ export interface TransactionResponse {
   timestamp: number;
 }
 
-export interface ExecutionPayload {
-  header: bellatrix.ExecutionPayloadHeader;
-  transactions: TypedTransaction[];
-}
-
+/**
+ *
+ * @param raw a raw transaction in RLP format
+ * @returns an Ethereumjs TypedTransaction object
+ */
 export function fromRLPTransaction(raw: string | Uint8Array): TypedTransaction {
   let decodedRawTransaction = rlp.decode(raw) as Uint8Array;
   return TransactionFactory.fromSerializedData(decodedRawTransaction);
