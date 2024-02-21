@@ -1,13 +1,17 @@
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
+import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
 import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
 import { Block, BlockHeader } from "@ethereumjs/block";
-import { BeaconBlock, ssz } from "@lodestar/types/allForks";
+import { ssz, allForks } from "@lodestar/types";
 import { Address, Withdrawal } from "@ethereumjs/util";
 import { EventEmitter } from "events";
 
-import { APIClient } from "../protobuf/api_grpc_pb";
-import {
+type BeaconBlock = allForks.BeaconBlock;
+
+import type { APIClient } from "../protobuf/api_grpc_pb.cjs";
+const ProtoBufApiGrpcPb = await import("../protobuf/api_grpc_pb.cjs");
+
+import type {
   TransactionResponse as PbResponse,
   TxSequenceResponse,
   TxFilter,
@@ -16,13 +20,16 @@ import {
   TransactionWithSenderMsg,
   ExecutionPayloadMsg,
   BeaconBlockMsg,
-} from "../protobuf/api_pb";
-import { FilterBuilder } from "./filter";
+} from "../protobuf/api_pb.cjs";
+
+const ProtobufApiPb = (await import("../protobuf/api_pb.cjs")).default;
+
+import { FilterBuilder } from "./filter.js";
 import {
   fromRLPTransaction,
   TransactionResponse,
   TransactionWithSender,
-} from "./types";
+} from "./types.js";
 
 export class Client {
   private _client: APIClient;
@@ -35,7 +42,10 @@ export class Client {
   >;
 
   constructor(target: string, apiKey: string) {
-    this._client = new APIClient(target, credentials.createInsecure());
+    this._client = new ProtoBufApiGrpcPb.APIClient(
+      target,
+      credentials.createInsecure(),
+    );
     this._md = new Metadata();
     this._md.add("x-api-key", apiKey);
 
@@ -65,7 +75,7 @@ export class Client {
   subscribeNewTxs(filter?: FilterBuilder): TxStream {
     const f = filter ? filter.build() : new Uint8Array();
 
-    const protoFilter = new TxFilter();
+    const protoFilter = new ProtobufApiPb.TxFilter();
     protoFilter.setEncoded(f);
     return new TxStream(this._client, this._md, protoFilter);
   }
@@ -92,7 +102,7 @@ export class Client {
    * @returns response containing hash and timestamp
    */
   async sendTransaction(tx: TypedTransaction): Promise<TransactionResponse> {
-    let message = new TransactionMsg();
+    let message = new ProtobufApiPb.TransactionMsg();
     message.setRlpTransaction(tx.serialize());
 
     return new Promise((resolve, reject) => {
@@ -117,7 +127,7 @@ export class Client {
    * @returns response containing array of hashes and timestamps
    */
   async sendRawTransaction(rawtx: string): Promise<TransactionResponse> {
-    const rawMsg = new TransactionMsg();
+    const rawMsg = new ProtobufApiPb.TransactionMsg();
 
     if (rawtx.substring(0, 2) === "0x") {
       rawtx = rawtx.substring(2);
@@ -146,9 +156,9 @@ export class Client {
    * @returns response containing array of hashes and timestamps
    */
   async sendTransactionSequence(
-    txs: TypedTransaction[]
+    txs: TypedTransaction[],
   ): Promise<TransactionResponse[]> {
-    const sequenceMsg = new TxSequenceMsgV2();
+    const sequenceMsg = new ProtobufApiPb.TxSequenceMsgV2();
     sequenceMsg.setSequenceList(txs.map((tx) => tx.serialize()));
 
     return new Promise((resolve, reject) => {
@@ -177,9 +187,9 @@ export class Client {
    * @returns response containing array of hashes and timestamps
    */
   async sendRawTransactionSequence(
-    rawTxs: string[]
+    rawTxs: string[],
   ): Promise<TransactionResponse[]> {
-    const sequenceMsg = new TxSequenceMsgV2();
+    const sequenceMsg = new ProtobufApiPb.TxSequenceMsgV2();
 
     // remove 0x prefix if present
     for (const [idx, rawtx] of rawTxs.entries()) {
@@ -189,7 +199,7 @@ export class Client {
     }
 
     sequenceMsg.setSequenceList(
-      rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex")))
+      rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex"))),
     );
 
     return new Promise((resolve, reject) => {
@@ -273,13 +283,13 @@ class ExecutionPayloadStream extends EventEmitter {
 
     const _blockStream = _client.subscribeExecutionPayloadsV2(
       new google_protobuf_empty_pb.Empty(),
-      _md
+      _md,
     );
 
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
     _blockStream.on("data", (data: ExecutionPayloadMsg) =>
-      this.emit("data", this.handleExecutionPayload(data))
+      this.emit("data", this.handleExecutionPayload(data)),
     );
 
     _blockStream.on("error", async (err) => {
@@ -301,7 +311,7 @@ class ExecutionPayloadStream extends EventEmitter {
         // BELLATRIX DATA VERSION
         const decoded =
           ssz.allForksExecution.bellatrix.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock
+            sszEncodedBeaconBlock,
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -328,7 +338,7 @@ class ExecutionPayloadStream extends EventEmitter {
         // CAPELLA DATA VERSION
         const decoded =
           ssz.allForksExecution.capella.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock
+            sszEncodedBeaconBlock,
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -355,7 +365,7 @@ class ExecutionPayloadStream extends EventEmitter {
             BigInt(w.index),
             BigInt(w.validatorIndex),
             Address.fromPublicKey(w.address),
-            w.amount
+            w.amount,
           );
           return t;
         });
@@ -365,7 +375,7 @@ class ExecutionPayloadStream extends EventEmitter {
         // DENEB DATA VERSION
         const decoded =
           ssz.allForksExecution.deneb.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock
+            sszEncodedBeaconBlock,
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -395,7 +405,7 @@ class ExecutionPayloadStream extends EventEmitter {
             BigInt(w.index),
             BigInt(w.validatorIndex),
             Address.fromPublicKey(w.address),
-            w.amount
+            w.amount,
           );
           return t;
         });
@@ -405,7 +415,7 @@ class ExecutionPayloadStream extends EventEmitter {
         // just try using capella if the version doesn't match
         const decoded =
           ssz.allForksExecution.capella.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock
+            sszEncodedBeaconBlock,
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -432,7 +442,7 @@ class ExecutionPayloadStream extends EventEmitter {
             BigInt(w.index),
             BigInt(w.validatorIndex),
             Address.fromPublicKey(w.address),
-            w.amount
+            w.amount,
           );
           return t;
         });
@@ -465,12 +475,12 @@ class BeaconBlockStream extends EventEmitter {
 
     const _blockStream = _client.subscribeBeaconBlocksV2(
       new google_protobuf_empty_pb.Empty(),
-      _md
+      _md,
     );
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
     _blockStream.on("data", (data: BeaconBlockMsg) =>
-      this.emit("data", this.handleBeaconBlock(data))
+      this.emit("data", this.handleBeaconBlock(data)),
     );
 
     _blockStream.on("error", async (err) => {
@@ -501,21 +511,21 @@ class BeaconBlockStream extends EventEmitter {
 
   private decodeBellatrix(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
     const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(
-      sszEncodedBeaconBlock
+      sszEncodedBeaconBlock,
     );
     return decoded.message;
   }
 
   private decodeCapella(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
     const decoded = ssz.allForks.capella.SignedBeaconBlock.deserialize(
-      sszEncodedBeaconBlock
+      sszEncodedBeaconBlock,
     );
     return decoded.message;
   }
 
   private decodeDeneb(sszEncodedBeaconBlock: Uint8Array): BeaconBlock {
     const decoded = ssz.allForks.deneb.SignedBeaconBlock.deserialize(
-      sszEncodedBeaconBlock
+      sszEncodedBeaconBlock,
     );
     return decoded.message;
   }
