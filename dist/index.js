@@ -1,46 +1,24 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FilterBuilder = exports.Client = void 0;
-const events_1 = require("events");
-const google_protobuf_empty_pb = __importStar(require("google-protobuf/google/protobuf/empty_pb"));
-const grpc_js_1 = require("@grpc/grpc-js");
-const api_grpc_pb_1 = require("../protobuf/api_grpc_pb");
-const api_pb_1 = require("../protobuf/api_pb");
-const filter_1 = require("./filter");
-Object.defineProperty(exports, "FilterBuilder", { enumerable: true, get: function () { return filter_1.FilterBuilder; } });
-const types_1 = require("./types");
-class Client {
+import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import { credentials, Metadata } from "@grpc/grpc-js";
+import { Block, BlockHeader } from "@ethereumjs/block";
+import { ssz } from "@lodestar/types";
+import { Address, Withdrawal } from "@ethereumjs/util";
+import { EventEmitter } from "events";
+const ProtoBufApiGrpcPb = await import("../protobuf/api_grpc_pb.cjs");
+const ProtobufApiPb = (await import("../protobuf/api_pb.cjs")).default;
+import { FilterBuilder } from "./filter.js";
+import { fromRLPTransaction, } from "./types.js";
+export class Client {
+    _client;
+    _md;
+    _txStream;
+    _txSequenceStream;
     constructor(target, apiKey) {
-        this._client = new api_grpc_pb_1.APIClient(target, grpc_js_1.credentials.createInsecure());
-        this._md = new grpc_js_1.Metadata();
+        this._client = new ProtoBufApiGrpcPb.APIClient(target, credentials.createInsecure());
+        this._md = new Metadata();
         this._md.add("x-api-key", apiKey);
-        this._txStream = this._client.sendTransaction(this._md);
-        this._rawTxStream = this._client.sendRawTransaction(this._md);
-        this._txSequenceStream = this._client.sendTransactionSequence(this._md);
-        this._rawTxSequenceStream = this._client.sendRawTransactionSequence(this._md);
+        this._txStream = this._client.sendTransactionV2(this._md);
+        this._txSequenceStream = this._client.sendTransactionSequenceV2(this._md);
     }
     waitForReady(seconds) {
         const now = new Date();
@@ -62,16 +40,9 @@ class Client {
      */
     subscribeNewTxs(filter) {
         const f = filter ? filter.build() : new Uint8Array();
-        const protoFilter = new api_pb_1.TxFilter();
+        const protoFilter = new ProtobufApiPb.TxFilter();
         protoFilter.setEncoded(f);
         return new TxStream(this._client, this._md, protoFilter);
-    }
-    /**
-     * subscribes to the new execution headers stream.
-     * @returns {ExecutionHeaderStream} - emits new blocks as events (without transactions)
-     */
-    subscribeNewExecutionHeaders() {
-        return new ExecutionHeaderStream(this._client, this._md);
     }
     /**
      * subscribes to the new execution payloads stream.
@@ -93,8 +64,10 @@ class Client {
      * @returns response containing hash and timestamp
      */
     async sendTransaction(tx) {
+        let message = new ProtobufApiPb.TransactionMsg();
+        message.setRlpTransaction(tx.serialize());
         return new Promise((resolve, reject) => {
-            this._txStream.write((0, types_1.toProtoTx)(tx), this._md, (err) => {
+            this._txStream.write(message, this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
@@ -115,18 +88,18 @@ class Client {
      * @returns response containing array of hashes and timestamps
      */
     async sendRawTransaction(rawtx) {
-        const rawMsg = new api_pb_1.RawTxMsg();
+        const rawMsg = new ProtobufApiPb.TransactionMsg();
         if (rawtx.substring(0, 2) === "0x") {
             rawtx = rawtx.substring(2);
         }
-        rawMsg.setRawtx(Uint8Array.from(Buffer.from(rawtx, "hex")));
+        rawMsg.setRlpTransaction(Uint8Array.from(Buffer.from(rawtx, "hex")));
         return new Promise((resolve, reject) => {
-            this._rawTxStream.write(rawMsg, (err) => {
+            this._txStream.write(rawMsg, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    this._rawTxStream.on("data", (res) => {
+                    this._txStream.on("data", (res) => {
                         resolve({
                             hash: res.getHash(),
                             timestamp: res.getTimestamp(),
@@ -142,8 +115,8 @@ class Client {
      * @returns response containing array of hashes and timestamps
      */
     async sendTransactionSequence(txs) {
-        const sequenceMsg = new api_pb_1.TxSequenceMsg();
-        sequenceMsg.setSequenceList(txs.map(types_1.toProtoTx));
+        const sequenceMsg = new ProtobufApiPb.TxSequenceMsgV2();
+        sequenceMsg.setSequenceList(txs.map((tx) => tx.serialize()));
         return new Promise((resolve, reject) => {
             this._txSequenceStream.write(sequenceMsg, this._md, (err) => {
                 if (err) {
@@ -169,21 +142,21 @@ class Client {
      * @returns response containing array of hashes and timestamps
      */
     async sendRawTransactionSequence(rawTxs) {
-        const sequenceMsg = new api_pb_1.RawTxSequenceMsg();
+        const sequenceMsg = new ProtobufApiPb.TxSequenceMsgV2();
         // remove 0x prefix if present
         for (const [idx, rawtx] of rawTxs.entries()) {
             if (rawtx.substring(0, 2) === "0x") {
                 rawTxs[idx] = rawtx.substring(2);
             }
         }
-        sequenceMsg.setRawTxsList(rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex"))));
+        sequenceMsg.setSequenceList(rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex"))));
         return new Promise((resolve, reject) => {
-            this._rawTxSequenceStream.write(sequenceMsg, this._md, (err) => {
+            this._txSequenceStream.write(sequenceMsg, this._md, (err) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    this._rawTxSequenceStream.on("data", (res) => {
+                    this._txSequenceStream.on("data", (res) => {
                         let response = [];
                         for (let r of res.getSequenceResponseList()) {
                             response.push({
@@ -198,8 +171,7 @@ class Client {
         });
     }
 }
-exports.Client = Client;
-class TxStream extends events_1.EventEmitter {
+class TxStream extends EventEmitter {
     constructor(_client, _md, _filter) {
         super();
         this.retry(_client, _md, _filter);
@@ -217,17 +189,23 @@ class TxStream extends events_1.EventEmitter {
                 }
             });
         });
-        const _txStream = _client.subscribeNewTxs(_filter, _md);
+        const _txStream = _client.subscribeNewTxsV2(_filter, _md);
         _txStream.on("close", () => this.emit("close"));
         _txStream.on("end", () => this.emit("end"));
-        _txStream.on("data", (data) => this.emit("data", (0, types_1.fromProtoTx)(data)));
+        _txStream.on("data", (data) => {
+            let res = {
+                sender: Address.fromString(data.getSender()),
+                transaction: fromRLPTransaction(data.getRlpTransaction()),
+            };
+            this.emit("data", res);
+        });
         _txStream.on("error", async (err) => {
             console.error(err);
             this.retry(_client, _md, _filter);
         });
     }
 }
-class ExecutionHeaderStream extends events_1.EventEmitter {
+class ExecutionPayloadStream extends EventEmitter {
     constructor(_client, _md) {
         super();
         this.retry(_client, _md);
@@ -245,38 +223,7 @@ class ExecutionHeaderStream extends events_1.EventEmitter {
                 }
             });
         });
-        const _blockStream = _client.subscribeExecutionHeaders(new google_protobuf_empty_pb.Empty(), _md);
-        _blockStream.on("close", () => this.emit("close"));
-        _blockStream.on("end", () => this.emit("end"));
-        _blockStream.on("data", (data) => this.emit("data", this.handleExecutionPayloadHeader(data)));
-        _blockStream.on("error", async (err) => {
-            console.error("transmission error", err);
-            this.retry(_client, _md);
-        });
-    }
-    handleExecutionPayloadHeader(block) {
-        return (0, types_1.fromProtoExecutionHeader)(block);
-    }
-}
-class ExecutionPayloadStream extends events_1.EventEmitter {
-    constructor(_client, _md) {
-        super();
-        this.retry(_client, _md);
-    }
-    async retry(_client, _md) {
-        const now = new Date();
-        const deadline = new Date(now.getTime() + 60 * 1000);
-        await new Promise((resolve, reject) => {
-            _client.waitForReady(deadline, (err) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve();
-                }
-            });
-        });
-        const _blockStream = _client.subscribeExecutionPayloads(new google_protobuf_empty_pb.Empty(), _md);
+        const _blockStream = _client.subscribeExecutionPayloadsV2(new google_protobuf_empty_pb.Empty(), _md);
         _blockStream.on("close", () => this.emit("close"));
         _blockStream.on("end", () => this.emit("end"));
         _blockStream.on("data", (data) => this.emit("data", this.handleExecutionPayload(data)));
@@ -286,15 +233,131 @@ class ExecutionPayloadStream extends events_1.EventEmitter {
         });
     }
     handleExecutionPayload(block) {
-        const header = (0, types_1.fromProtoExecutionHeader)(block.getHeader());
-        const transactions = block.getTransactionsList().map(types_1.fromProtoTx);
-        return {
-            header,
-            transactions,
-        };
+        const version = block.getDataVersion();
+        const sszEncodedBeaconBlock = block.getSszPayload();
+        let header;
+        let withdrawals;
+        let transactions;
+        switch (version) {
+            case 3: {
+                // BELLATRIX DATA VERSION
+                const decoded = ssz.allForksExecution.bellatrix.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
+                header = BlockHeader.fromHeaderData({
+                    parentHash: decoded.parentHash,
+                    uncleHash: Uint8Array.from([]),
+                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    stateRoot: decoded.stateRoot,
+                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    receiptTrie: decoded.receiptsRoot,
+                    logsBloom: decoded.logsBloom,
+                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    number: BigInt(decoded.blockNumber),
+                    gasLimit: BigInt(decoded.gasLimit),
+                    gasUsed: BigInt(decoded.gasUsed),
+                    timestamp: BigInt(decoded.timestamp),
+                    extraData: decoded.extraData,
+                    mixHash: decoded.prevRandao,
+                    nonce: undefined, // TODO: document that this will be always empty (post merge)
+                    baseFeePerGas: decoded.baseFeePerGas,
+                });
+                transactions = decoded.transactions.map(fromRLPTransaction);
+                break;
+            }
+            case 4: {
+                // CAPELLA DATA VERSION
+                const decoded = ssz.allForksExecution.capella.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
+                header = BlockHeader.fromHeaderData({
+                    parentHash: decoded.parentHash,
+                    uncleHash: Uint8Array.from([]),
+                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    stateRoot: decoded.stateRoot,
+                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    receiptTrie: decoded.receiptsRoot,
+                    logsBloom: decoded.logsBloom,
+                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    number: BigInt(decoded.blockNumber),
+                    gasLimit: BigInt(decoded.gasLimit),
+                    gasUsed: BigInt(decoded.gasUsed),
+                    timestamp: BigInt(decoded.timestamp),
+                    extraData: decoded.extraData,
+                    mixHash: decoded.prevRandao,
+                    nonce: undefined, // TODO: document that this will be always empty (post merge)
+                    baseFeePerGas: decoded.baseFeePerGas,
+                    withdrawalsRoot: undefined, // TODO: document that this will be always null
+                });
+                transactions = decoded.transactions.map(fromRLPTransaction);
+                withdrawals = decoded.withdrawals.map((w) => {
+                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromPublicKey(w.address), w.amount);
+                    return t;
+                });
+                break;
+            }
+            case 5: {
+                // DENEB DATA VERSION
+                const decoded = ssz.allForksExecution.deneb.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
+                header = BlockHeader.fromHeaderData({
+                    parentHash: decoded.parentHash,
+                    uncleHash: Uint8Array.from([]),
+                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    stateRoot: decoded.stateRoot,
+                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    receiptTrie: decoded.receiptsRoot,
+                    logsBloom: decoded.logsBloom,
+                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    number: BigInt(decoded.blockNumber),
+                    gasLimit: BigInt(decoded.gasLimit),
+                    gasUsed: BigInt(decoded.gasUsed),
+                    timestamp: BigInt(decoded.timestamp),
+                    extraData: decoded.extraData,
+                    mixHash: decoded.prevRandao,
+                    nonce: undefined, // TODO: document that this will be always empty (post merge)
+                    baseFeePerGas: decoded.baseFeePerGas,
+                    withdrawalsRoot: undefined, // TODO: document that this will be always null
+                    blobGasUsed: BigInt(decoded.blobGasUsed),
+                    excessBlobGas: BigInt(decoded.excessBlobGas),
+                    parentBeaconBlockRoot: undefined, // TODO: document that this will be always empty
+                });
+                transactions = decoded.transactions.map(fromRLPTransaction);
+                withdrawals = decoded.withdrawals.map((w) => {
+                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromPublicKey(w.address), w.amount);
+                    return t;
+                });
+                break;
+            }
+            default: {
+                // just try using capella if the version doesn't match
+                const decoded = ssz.allForksExecution.capella.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
+                header = BlockHeader.fromHeaderData({
+                    parentHash: decoded.parentHash,
+                    uncleHash: Uint8Array.from([]),
+                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    stateRoot: decoded.stateRoot,
+                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    receiptTrie: decoded.receiptsRoot,
+                    logsBloom: decoded.logsBloom,
+                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    number: BigInt(decoded.blockNumber),
+                    gasLimit: BigInt(decoded.gasLimit),
+                    gasUsed: BigInt(decoded.gasUsed),
+                    timestamp: BigInt(decoded.timestamp),
+                    extraData: decoded.extraData,
+                    mixHash: decoded.prevRandao,
+                    nonce: undefined, // TODO: document that this will be always empty (post merge)
+                    baseFeePerGas: decoded.baseFeePerGas,
+                    withdrawalsRoot: undefined, // TODO: document that this will be always null
+                });
+                transactions = decoded.transactions.map(fromRLPTransaction);
+                withdrawals = decoded.withdrawals.map((w) => {
+                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromPublicKey(w.address), w.amount);
+                    return t;
+                });
+                break;
+            }
+        }
+        return new Block(header, transactions, undefined, withdrawals);
     }
 }
-class BeaconBlockStream extends events_1.EventEmitter {
+class BeaconBlockStream extends EventEmitter {
     constructor(_client, _md) {
         super();
         this.retry(_client, _md);
@@ -312,7 +375,7 @@ class BeaconBlockStream extends events_1.EventEmitter {
                 }
             });
         });
-        const _blockStream = _client.subscribeBeaconBlocks(new google_protobuf_empty_pb.Empty(), _md);
+        const _blockStream = _client.subscribeBeaconBlocksV2(new google_protobuf_empty_pb.Empty(), _md);
         _blockStream.on("close", () => this.emit("close"));
         _blockStream.on("end", () => this.emit("end"));
         _blockStream.on("data", (data) => this.emit("data", this.handleBeaconBlock(data)));
@@ -322,6 +385,34 @@ class BeaconBlockStream extends events_1.EventEmitter {
         });
     }
     handleBeaconBlock(block) {
-        return (0, types_1.fromProtoBeaconBlock)(block);
+        const version = block.getDataVersion();
+        const sszEncodedBeaconBlock = block.getSszBlock();
+        switch (version) {
+            case 3: {
+                return this.decodeBellatrix(sszEncodedBeaconBlock);
+            }
+            case 4: {
+                return this.decodeCapella(sszEncodedBeaconBlock);
+            }
+            case 5: {
+                return this.decodeDeneb(sszEncodedBeaconBlock);
+            }
+            default: {
+                return this.decodeCapella(sszEncodedBeaconBlock);
+            }
+        }
+    }
+    decodeBellatrix(sszEncodedBeaconBlock) {
+        const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+        return decoded.message;
+    }
+    decodeCapella(sszEncodedBeaconBlock) {
+        const decoded = ssz.allForks.capella.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+        return decoded.message;
+    }
+    decodeDeneb(sszEncodedBeaconBlock) {
+        const decoded = ssz.allForks.deneb.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+        return decoded.message;
     }
 }
+export { FilterBuilder };

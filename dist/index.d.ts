@@ -1,18 +1,16 @@
-/// <reference types="node" />
-import { EventEmitter } from "events";
+/// <reference types="node" resolution-mode="require"/>
 import { Metadata } from "@grpc/grpc-js";
-import { TypedTransaction } from "@ethereumjs/tx";
-import { APIClient } from "../protobuf/api_grpc_pb";
-import { TxFilter } from "../protobuf/api_pb";
-import { FilterBuilder } from "./filter";
-import { TransactionResponse } from "./types";
+import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
+import { EventEmitter } from "events";
+import type { APIClient } from "../protobuf/api_grpc_pb.cjs";
+import type { TxFilter } from "../protobuf/api_pb.cjs";
+import { FilterBuilder } from "./filter.js";
+import { TransactionResponse } from "./types.js";
 export declare class Client {
     private _client;
     private _md;
     private _txStream;
-    private _rawTxStream;
     private _txSequenceStream;
-    private _rawTxSequenceStream;
     constructor(target: string, apiKey: string);
     waitForReady(seconds: number): Promise<void>;
     /**
@@ -20,11 +18,6 @@ export declare class Client {
      * @returns {TxStream} - emits new txs as events
      */
     subscribeNewTxs(filter?: FilterBuilder): TxStream;
-    /**
-     * subscribes to the new execution headers stream.
-     * @returns {ExecutionHeaderStream} - emits new blocks as events (without transactions)
-     */
-    subscribeNewExecutionHeaders(): ExecutionHeaderStream;
     /**
      * subscribes to the new execution payloads stream.
      * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
@@ -63,11 +56,6 @@ declare class TxStream extends EventEmitter {
     constructor(_client: APIClient, _md: Metadata, _filter: TxFilter);
     retry(_client: APIClient, _md: Metadata, _filter: TxFilter): Promise<void>;
 }
-declare class ExecutionHeaderStream extends EventEmitter {
-    constructor(_client: APIClient, _md: Metadata);
-    retry(_client: APIClient, _md: Metadata): Promise<void>;
-    private handleExecutionPayloadHeader;
-}
 declare class ExecutionPayloadStream extends EventEmitter {
     constructor(_client: APIClient, _md: Metadata);
     retry(_client: APIClient, _md: Metadata): Promise<void>;
@@ -77,5 +65,8 @@ declare class BeaconBlockStream extends EventEmitter {
     constructor(_client: APIClient, _md: Metadata);
     retry(_client: APIClient, _md: Metadata): Promise<void>;
     private handleBeaconBlock;
+    private decodeBellatrix;
+    private decodeCapella;
+    private decodeDeneb;
 }
 export { FilterBuilder };
