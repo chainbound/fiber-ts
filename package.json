@@ -1,9 +1,21 @@
 {
-  "name": "lodestar_test",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "name": "fiber-ts",
+  "version": "1.9.2",
+  "description": "Client package for connecting to Fiber Network",
+  "repository": {
+    "url": "https://github.com/chainbound/fiber-ts"
+  },
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "mempirate",
+  "keywords": [
+    "ethereum",
+    "mempool",
+    "mev",
+    "networking"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@types/google-protobuf": "^3.15.6",
     "@types/node": "^20.11.19",
@@ -25,6 +37,8 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build",
-    "start": "yarn build && node dist/index.js"
+    "clean": "rm -rf dist && tsc --build --clean",
+    "proto": "bash ./build.sh",
+    "test": "yarn build && node dist/test.js"
   }
 }
