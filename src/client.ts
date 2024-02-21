@@ -14,13 +14,15 @@ import type {
 
 const ProtobufApiPb = (await import("../protobuf/api_pb.cjs")).default;
 
+import {
+  TxStream,
+  ExecutionPayloadStream,
+  BeaconBlockStream,
+  TxRawStream,
+  BeaconBlockRawStream,
+} from "./stream/index.js";
 import { FilterBuilder } from "./filter.js";
 import { TransactionResponse } from "./types.js";
-import { TxStream } from "./stream/tx.js";
-import { ExecutionPayloadStream } from "./stream/executionPayload.js";
-import { BeaconBlockStream } from "./stream/beaconBlock.js";
-import { TxRawStream } from "./stream/txRaw.js";
-import { BeaconBlockRawStream } from "./stream/beaconBlockRaw.js";
 
 export class Client {
   private _client: APIClient;

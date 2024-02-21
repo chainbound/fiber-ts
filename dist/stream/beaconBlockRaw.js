@@ -1,4 +1,4 @@
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { EventEmitter } from "events";
 export class BeaconBlockRawStream extends EventEmitter {
     constructor(_client, _md) {

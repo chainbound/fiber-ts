@@ -2,11 +2,7 @@ import { credentials, Metadata } from "@grpc/grpc-js";
 import { default as Package } from "../package.json" with { type: "json" };
 const ProtobufApiGrpcPb = await import("../protobuf/api_grpc_pb.cjs");
 const ProtobufApiPb = (await import("../protobuf/api_pb.cjs")).default;
-import { TxStream } from "./stream/tx.js";
-import { ExecutionPayloadStream } from "./stream/executionPayload.js";
-import { BeaconBlockStream } from "./stream/beaconBlock.js";
-import { TxRawStream } from "./stream/txRaw.js";
-import { BeaconBlockRawStream } from "./stream/beaconBlockRaw.js";
+import { TxStream, ExecutionPayloadStream, BeaconBlockStream, TxRawStream, BeaconBlockRawStream, } from "./stream/index.js";
 export class Client {
     _client;
     _md;

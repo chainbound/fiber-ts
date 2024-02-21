@@ -1,4 +1,4 @@
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { Address, Withdrawal } from "@ethereumjs/util";
 import { Block, BlockHeader } from "@ethereumjs/block";
 import { EventEmitter } from "events";

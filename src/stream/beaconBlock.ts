@@ -1,4 +1,4 @@
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { Metadata } from "@grpc/grpc-js";
 import { ssz, allForks } from "@lodestar/types";
 import { EventEmitter } from "events";

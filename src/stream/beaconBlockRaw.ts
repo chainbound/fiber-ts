@@ -1,4 +1,4 @@
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
 import type { BeaconBlockMsg } from "../../protobuf/api_pb.cjs";
 import { EventEmitter } from "events";

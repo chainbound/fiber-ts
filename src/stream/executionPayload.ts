@@ -1,4 +1,4 @@
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
 import type { ExecutionPayloadMsg } from "../../protobuf/api_pb.cjs";
 import { Address, Withdrawal } from "@ethereumjs/util";
@@ -30,13 +30,13 @@ export class ExecutionPayloadStream extends EventEmitter {
 
     const _blockStream = _client.subscribeExecutionPayloadsV2(
       new google_protobuf_empty_pb.Empty(),
-      _md,
+      _md
     );
 
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
     _blockStream.on("data", (data: ExecutionPayloadMsg) =>
-      this.emit("data", this.handleExecutionPayload(data)),
+      this.emit("data", this.handleExecutionPayload(data))
     );
 
     _blockStream.on("error", async (err) => {
@@ -58,7 +58,7 @@ export class ExecutionPayloadStream extends EventEmitter {
         // BELLATRIX DATA VERSION
         const decoded =
           ssz.allForksExecution.bellatrix.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock,
+            sszEncodedBeaconBlock
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -85,7 +85,7 @@ export class ExecutionPayloadStream extends EventEmitter {
         // CAPELLA DATA VERSION
         const decoded =
           ssz.allForksExecution.capella.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock,
+            sszEncodedBeaconBlock
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -112,7 +112,7 @@ export class ExecutionPayloadStream extends EventEmitter {
             BigInt(w.index),
             BigInt(w.validatorIndex),
             Address.fromPublicKey(w.address),
-            w.amount,
+            w.amount
           );
           return t;
         });
@@ -121,9 +121,7 @@ export class ExecutionPayloadStream extends EventEmitter {
       case 5: {
         // DENEB DATA VERSION
         const decoded =
-          ssz.allForksExecution.deneb.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock,
-          );
+          ssz.allForksExecution.deneb.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
           uncleHash: Uint8Array.from([]),
@@ -152,7 +150,7 @@ export class ExecutionPayloadStream extends EventEmitter {
             BigInt(w.index),
             BigInt(w.validatorIndex),
             Address.fromPublicKey(w.address),
-            w.amount,
+            w.amount
           );
           return t;
         });
@@ -162,7 +160,7 @@ export class ExecutionPayloadStream extends EventEmitter {
         // just try using capella if the version doesn't match
         const decoded =
           ssz.allForksExecution.capella.ExecutionPayload.deserialize(
-            sszEncodedBeaconBlock,
+            sszEncodedBeaconBlock
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
@@ -189,7 +187,7 @@ export class ExecutionPayloadStream extends EventEmitter {
             BigInt(w.index),
             BigInt(w.validatorIndex),
             Address.fromPublicKey(w.address),
-            w.amount,
+            w.amount
           );
           return t;
         });
