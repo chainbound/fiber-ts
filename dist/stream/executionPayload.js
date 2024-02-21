@@ -1,9 +1,9 @@
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
-import { Block, BlockHeader } from "@ethereumjs/block";
-import { ssz } from "@lodestar/types";
 import { Address, Withdrawal } from "@ethereumjs/util";
+import { Block, BlockHeader } from "@ethereumjs/block";
 import { EventEmitter } from "events";
 import { fromRLPTransaction } from "../types.js";
+import { ssz } from "@lodestar/types";
 export class ExecutionPayloadStream extends EventEmitter {
     constructor(_client, _md) {
         super();

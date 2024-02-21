@@ -1,22 +1,13 @@
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb.js";
+import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
+import type { ExecutionPayloadMsg } from "../../protobuf/api_pb.cjs";
+import { Address, Withdrawal } from "@ethereumjs/util";
+import { Block, BlockHeader } from "@ethereumjs/block";
+import { EventEmitter } from "events";
 import { Metadata } from "@grpc/grpc-js";
 import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
-import { Block, BlockHeader } from "@ethereumjs/block";
-import { ssz, allForks } from "@lodestar/types";
-import { Address, Withdrawal } from "@ethereumjs/util";
-import { EventEmitter } from "events";
-
-type BeaconBlock = allForks.BeaconBlock;
-
-import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
-
-import type {
-  ExecutionPayloadMsg,
-  BeaconBlockMsg,
-} from "../../protobuf/api_pb.cjs";
-
-import { FilterBuilder } from "../filter.js";
 import { fromRLPTransaction } from "../types.js";
+import { ssz } from "@lodestar/types";
 
 export class ExecutionPayloadStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {

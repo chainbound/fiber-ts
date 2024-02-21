@@ -9,8 +9,7 @@ import * as api_pb from "./api_pb.d.cts";
 import * as eth_pb from "./eth_pb.d.cts";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
-interface IAPIService
-  extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
+interface IAPIService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
   subscribeNewTxs: IAPIService_ISubscribeNewTxs;
   subscribeNewTxsV2: IAPIService_ISubscribeNewTxsV2;
   sendTransaction: IAPIService_ISendTransaction;
@@ -38,10 +37,7 @@ interface IAPIService_ISubscribeNewTxs
   responseDeserialize: grpc.deserialize<eth_pb.Transaction>;
 }
 interface IAPIService_ISubscribeNewTxsV2
-  extends grpc.MethodDefinition<
-    api_pb.TxFilter,
-    api_pb.TransactionWithSenderMsg
-  > {
+  extends grpc.MethodDefinition<api_pb.TxFilter, api_pb.TransactionWithSenderMsg> {
   path: "/api.API/SubscribeNewTxsV2";
   requestStream: false;
   responseStream: true;
@@ -51,10 +47,7 @@ interface IAPIService_ISubscribeNewTxsV2
   responseDeserialize: grpc.deserialize<api_pb.TransactionWithSenderMsg>;
 }
 interface IAPIService_ISendTransaction
-  extends grpc.MethodDefinition<
-    eth_pb.Transaction,
-    api_pb.TransactionResponse
-  > {
+  extends grpc.MethodDefinition<eth_pb.Transaction, api_pb.TransactionResponse> {
   path: "/api.API/SendTransaction";
   requestStream: true;
   responseStream: true;
@@ -74,10 +67,7 @@ interface IAPIService_ISendRawTransaction
   responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
 }
 interface IAPIService_ISendTransactionV2
-  extends grpc.MethodDefinition<
-    api_pb.TransactionMsg,
-    api_pb.TransactionResponse
-  > {
+  extends grpc.MethodDefinition<api_pb.TransactionMsg, api_pb.TransactionResponse> {
   path: "/api.API/SendTransactionV2";
   requestStream: true;
   responseStream: true;
@@ -87,10 +77,7 @@ interface IAPIService_ISendTransactionV2
   responseDeserialize: grpc.deserialize<api_pb.TransactionResponse>;
 }
 interface IAPIService_ISendTransactionSequence
-  extends grpc.MethodDefinition<
-    api_pb.TxSequenceMsg,
-    api_pb.TxSequenceResponse
-  > {
+  extends grpc.MethodDefinition<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse> {
   path: "/api.API/SendTransactionSequence";
   requestStream: true;
   responseStream: true;
@@ -100,10 +87,7 @@ interface IAPIService_ISendTransactionSequence
   responseDeserialize: grpc.deserialize<api_pb.TxSequenceResponse>;
 }
 interface IAPIService_ISendTransactionSequenceV2
-  extends grpc.MethodDefinition<
-    api_pb.TxSequenceMsgV2,
-    api_pb.TxSequenceResponse
-  > {
+  extends grpc.MethodDefinition<api_pb.TxSequenceMsgV2, api_pb.TxSequenceResponse> {
   path: "/api.API/SendTransactionSequenceV2";
   requestStream: true;
   responseStream: true;
@@ -113,10 +97,7 @@ interface IAPIService_ISendTransactionSequenceV2
   responseDeserialize: grpc.deserialize<api_pb.TxSequenceResponse>;
 }
 interface IAPIService_ISendRawTransactionSequence
-  extends grpc.MethodDefinition<
-    api_pb.RawTxSequenceMsg,
-    api_pb.TxSequenceResponse
-  > {
+  extends grpc.MethodDefinition<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse> {
   path: "/api.API/SendRawTransactionSequence";
   requestStream: true;
   responseStream: true;
@@ -126,10 +107,7 @@ interface IAPIService_ISendRawTransactionSequence
   responseDeserialize: grpc.deserialize<api_pb.TxSequenceResponse>;
 }
 interface IAPIService_ISubscribeExecutionPayloads
-  extends grpc.MethodDefinition<
-    google_protobuf_empty_pb.Empty,
-    eth_pb.ExecutionPayload
-  > {
+  extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, eth_pb.ExecutionPayload> {
   path: "/api.API/SubscribeExecutionPayloads";
   requestStream: false;
   responseStream: true;
@@ -178,10 +156,7 @@ interface IAPIService_ISubscribeBeaconBlocks
   responseDeserialize: grpc.deserialize<eth_pb.CompactBeaconBlock>;
 }
 interface IAPIService_ISubscribeBeaconBlocksV2
-  extends grpc.MethodDefinition<
-    google_protobuf_empty_pb.Empty,
-    api_pb.BeaconBlockMsg
-  > {
+  extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, api_pb.BeaconBlockMsg> {
   path: "/api.API/SubscribeBeaconBlocksV2";
   requestStream: false;
   responseStream: true;
@@ -207,10 +182,7 @@ interface IAPIService_ISubmitBlockStream
 export const APIService: IAPIService;
 
 export interface IAPIServer extends grpc.UntypedServiceImplementation {
-  subscribeNewTxs: grpc.handleServerStreamingCall<
-    api_pb.TxFilter,
-    eth_pb.Transaction
-  >;
+  subscribeNewTxs: grpc.handleServerStreamingCall<api_pb.TxFilter, eth_pb.Transaction>;
   subscribeNewTxsV2: grpc.handleServerStreamingCall<
     api_pb.TxFilter,
     api_pb.TransactionWithSenderMsg
@@ -268,286 +240,262 @@ export interface IAPIServer extends grpc.UntypedServiceImplementation {
 export interface IAPIClient {
   subscribeNewTxs(
     request: api_pb.TxFilter,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.Transaction>;
   subscribeNewTxs(
     request: api_pb.TxFilter,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.Transaction>;
   subscribeNewTxsV2(
     request: api_pb.TxFilter,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
   subscribeNewTxsV2(
     request: api_pb.TxFilter,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
   sendTransaction(): grpc.ClientDuplexStream<
     eth_pb.Transaction,
     api_pb.TransactionResponse
   >;
   sendTransaction(
-    options: Partial<grpc.CallOptions>,
+    options: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
   sendTransaction(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
   sendRawTransaction(): grpc.ClientDuplexStream<
     api_pb.RawTxMsg,
     api_pb.TransactionResponse
   >;
   sendRawTransaction(
-    options: Partial<grpc.CallOptions>,
+    options: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
   sendRawTransaction(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
   sendTransactionV2(): grpc.ClientDuplexStream<
     api_pb.TransactionMsg,
     api_pb.TransactionResponse
   >;
   sendTransactionV2(
-    options: Partial<grpc.CallOptions>,
+    options: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TransactionMsg, api_pb.TransactionResponse>;
   sendTransactionV2(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TransactionMsg, api_pb.TransactionResponse>;
   sendTransactionSequence(): grpc.ClientDuplexStream<
     api_pb.TxSequenceMsg,
     api_pb.TxSequenceResponse
   >;
   sendTransactionSequence(
-    options: Partial<grpc.CallOptions>,
+    options: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse>;
   sendTransactionSequence(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse>;
   sendTransactionSequenceV2(): grpc.ClientDuplexStream<
     api_pb.TxSequenceMsgV2,
     api_pb.TxSequenceResponse
   >;
   sendTransactionSequenceV2(
-    options: Partial<grpc.CallOptions>,
+    options: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsgV2, api_pb.TxSequenceResponse>;
   sendTransactionSequenceV2(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsgV2, api_pb.TxSequenceResponse>;
   sendRawTransactionSequence(): grpc.ClientDuplexStream<
     api_pb.RawTxSequenceMsg,
     api_pb.TxSequenceResponse
   >;
   sendRawTransactionSequence(
-    options: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.RawTxSequenceMsg,
-    api_pb.TxSequenceResponse
-  >;
+    options: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
   sendRawTransactionSequence(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.RawTxSequenceMsg,
-    api_pb.TxSequenceResponse
-  >;
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
   subscribeExecutionPayloads(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
   subscribeExecutionPayloads(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
   subscribeExecutionPayloadsV2(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.ExecutionPayloadMsg>;
   subscribeExecutionPayloadsV2(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.ExecutionPayloadMsg>;
   subscribeExecutionHeaders(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
   subscribeExecutionHeaders(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
   subscribeBeaconBlocks(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
   subscribeBeaconBlocks(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
   subscribeBeaconBlocksV2(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.BeaconBlockMsg>;
   subscribeBeaconBlocksV2(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.BeaconBlockMsg>;
   submitBlockStream(): grpc.ClientDuplexStream<
     api_pb.BlockSubmissionMsg,
     api_pb.BlockSubmissionResponse
   >;
   submitBlockStream(
-    options: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.BlockSubmissionMsg,
-    api_pb.BlockSubmissionResponse
-  >;
+    options: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.BlockSubmissionMsg, api_pb.BlockSubmissionResponse>;
   submitBlockStream(
     metadata: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.BlockSubmissionMsg,
-    api_pb.BlockSubmissionResponse
-  >;
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.BlockSubmissionMsg, api_pb.BlockSubmissionResponse>;
 }
 
 export class APIClient extends grpc.Client implements IAPIClient {
   constructor(
     address: string,
     credentials: grpc.ChannelCredentials,
-    options?: Partial<grpc.ClientOptions>,
+    options?: Partial<grpc.ClientOptions>
   );
   public subscribeNewTxs(
     request: api_pb.TxFilter,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.Transaction>;
   public subscribeNewTxs(
     request: api_pb.TxFilter,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.Transaction>;
   public subscribeNewTxsV2(
     request: api_pb.TxFilter,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
   public subscribeNewTxsV2(
     request: api_pb.TxFilter,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
   public sendTransaction(
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
   public sendTransaction(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<eth_pb.Transaction, api_pb.TransactionResponse>;
   public sendRawTransaction(
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
   public sendRawTransaction(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.RawTxMsg, api_pb.TransactionResponse>;
   public sendTransactionV2(
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TransactionMsg, api_pb.TransactionResponse>;
   public sendTransactionV2(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TransactionMsg, api_pb.TransactionResponse>;
   public sendTransactionSequence(
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse>;
   public sendTransactionSequence(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsg, api_pb.TxSequenceResponse>;
   public sendTransactionSequenceV2(
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsgV2, api_pb.TxSequenceResponse>;
   public sendTransactionSequenceV2(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientDuplexStream<api_pb.TxSequenceMsgV2, api_pb.TxSequenceResponse>;
   public sendRawTransactionSequence(
-    options?: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.RawTxSequenceMsg,
-    api_pb.TxSequenceResponse
-  >;
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
   public sendRawTransactionSequence(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.RawTxSequenceMsg,
-    api_pb.TxSequenceResponse
-  >;
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.RawTxSequenceMsg, api_pb.TxSequenceResponse>;
   public subscribeExecutionPayloads(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
   public subscribeExecutionPayloads(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayload>;
   public subscribeExecutionPayloadsV2(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.ExecutionPayloadMsg>;
   public subscribeExecutionPayloadsV2(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.ExecutionPayloadMsg>;
   public subscribeExecutionHeaders(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
   public subscribeExecutionHeaders(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.ExecutionPayloadHeader>;
   public subscribeBeaconBlocks(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
   public subscribeBeaconBlocks(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<eth_pb.CompactBeaconBlock>;
   public subscribeBeaconBlocksV2(
     request: google_protobuf_empty_pb.Empty,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.BeaconBlockMsg>;
   public subscribeBeaconBlocksV2(
     request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
+    options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.BeaconBlockMsg>;
   public submitBlockStream(
-    options?: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.BlockSubmissionMsg,
-    api_pb.BlockSubmissionResponse
-  >;
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.BlockSubmissionMsg, api_pb.BlockSubmissionResponse>;
   public submitBlockStream(
     metadata?: grpc.Metadata,
-    options?: Partial<grpc.CallOptions>,
-  ): grpc.ClientDuplexStream<
-    api_pb.BlockSubmissionMsg,
-    api_pb.BlockSubmissionResponse
-  >;
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientDuplexStream<api_pb.BlockSubmissionMsg, api_pb.BlockSubmissionResponse>;
 }

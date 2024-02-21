@@ -4,6 +4,8 @@ import { TransactionResponse } from "./types.js";
 import { TxStream } from "./stream/tx.js";
 import { ExecutionPayloadStream } from "./stream/executionPayload.js";
 import { BeaconBlockStream } from "./stream/beaconBlock.js";
+import { TxRawStream } from "./stream/txRaw.js";
+import { BeaconBlockRawStream } from "./stream/beaconBlockRaw.js";
 export declare class Client {
     private _client;
     private _md;
@@ -17,6 +19,11 @@ export declare class Client {
      */
     subscribeNewTxs(filter?: FilterBuilder): TxStream;
     /**
+     * subscribes to the new transactions stream.
+     * @returns {TxRawStream} - emits new raw txs as events
+     */
+    subscribeNewRawTxs(filter?: FilterBuilder): TxRawStream;
+    /**
      * subscribes to the new execution payloads stream.
      * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
      */
@@ -26,6 +33,11 @@ export declare class Client {
      * @returns {BeaconBlockStream} - emits new beacon blocks as events
      */
     subscribeNewBeaconBlocks(): BeaconBlockStream;
+    /**
+     * subscribes to the new raw beacon blocks stream.
+     * @returns {BeaconBlockRawStream} - emits new raw beacon blocks as events
+     */
+    subscribeNewRawBeaconBlocks(): BeaconBlockRawStream;
     /**
      * sends a transaction
      * @param tx a signed! typed transaction

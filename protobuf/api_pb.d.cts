@@ -16,22 +16,16 @@ export class TxSequenceMsg extends jspb.Message {
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): TxSequenceMsg.AsObject;
-  static toObject(
-    includeInstance: boolean,
-    msg: TxSequenceMsg,
-  ): TxSequenceMsg.AsObject;
+  static toObject(includeInstance: boolean, msg: TxSequenceMsg): TxSequenceMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
   };
-  static serializeBinaryToWriter(
-    message: TxSequenceMsg,
-    writer: jspb.BinaryWriter,
-  ): void;
+  static serializeBinaryToWriter(message: TxSequenceMsg, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): TxSequenceMsg;
   static deserializeBinaryFromReader(
     message: TxSequenceMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TxSequenceMsg;
 }
 
@@ -53,7 +47,7 @@ export class TxSequenceMsgV2 extends jspb.Message {
   toObject(includeInstance?: boolean): TxSequenceMsgV2.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: TxSequenceMsgV2,
+    msg: TxSequenceMsgV2
   ): TxSequenceMsgV2.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -61,12 +55,12 @@ export class TxSequenceMsgV2 extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: TxSequenceMsgV2,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): TxSequenceMsgV2;
   static deserializeBinaryFromReader(
     message: TxSequenceMsgV2,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TxSequenceMsgV2;
 }
 
@@ -88,7 +82,7 @@ export class RawTxSequenceMsg extends jspb.Message {
   toObject(includeInstance?: boolean): RawTxSequenceMsg.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: RawTxSequenceMsg,
+    msg: RawTxSequenceMsg
   ): RawTxSequenceMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -96,12 +90,12 @@ export class RawTxSequenceMsg extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: RawTxSequenceMsg,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): RawTxSequenceMsg;
   static deserializeBinaryFromReader(
     message: RawTxSequenceMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): RawTxSequenceMsg;
 }
 
@@ -114,19 +108,14 @@ export namespace RawTxSequenceMsg {
 export class TxSequenceResponse extends jspb.Message {
   clearSequenceResponseList(): void;
   getSequenceResponseList(): Array<TransactionResponse>;
-  setSequenceResponseList(
-    value: Array<TransactionResponse>,
-  ): TxSequenceResponse;
-  addSequenceResponse(
-    value?: TransactionResponse,
-    index?: number,
-  ): TransactionResponse;
+  setSequenceResponseList(value: Array<TransactionResponse>): TxSequenceResponse;
+  addSequenceResponse(value?: TransactionResponse, index?: number): TransactionResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): TxSequenceResponse.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: TxSequenceResponse,
+    msg: TxSequenceResponse
   ): TxSequenceResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -134,12 +123,12 @@ export class TxSequenceResponse extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: TxSequenceResponse,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): TxSequenceResponse;
   static deserializeBinaryFromReader(
     message: TxSequenceResponse,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TxSequenceResponse;
 }
 
@@ -162,14 +151,11 @@ export class TxFilter extends jspb.Message {
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
   };
-  static serializeBinaryToWriter(
-    message: TxFilter,
-    writer: jspb.BinaryWriter,
-  ): void;
+  static serializeBinaryToWriter(message: TxFilter, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): TxFilter;
   static deserializeBinaryFromReader(
     message: TxFilter,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TxFilter;
 }
 
@@ -185,22 +171,16 @@ export class BlockFilter extends jspb.Message {
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): BlockFilter.AsObject;
-  static toObject(
-    includeInstance: boolean,
-    msg: BlockFilter,
-  ): BlockFilter.AsObject;
+  static toObject(includeInstance: boolean, msg: BlockFilter): BlockFilter.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
   };
-  static serializeBinaryToWriter(
-    message: BlockFilter,
-    writer: jspb.BinaryWriter,
-  ): void;
+  static serializeBinaryToWriter(message: BlockFilter, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): BlockFilter;
   static deserializeBinaryFromReader(
     message: BlockFilter,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): BlockFilter;
 }
 
@@ -223,14 +203,11 @@ export class RawTxMsg extends jspb.Message {
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
   };
-  static serializeBinaryToWriter(
-    message: RawTxMsg,
-    writer: jspb.BinaryWriter,
-  ): void;
+  static serializeBinaryToWriter(message: RawTxMsg, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): RawTxMsg;
   static deserializeBinaryFromReader(
     message: RawTxMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): RawTxMsg;
 }
 
@@ -250,7 +227,7 @@ export class BlockSubmissionMsg extends jspb.Message {
   toObject(includeInstance?: boolean): BlockSubmissionMsg.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: BlockSubmissionMsg,
+    msg: BlockSubmissionMsg
   ): BlockSubmissionMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -258,12 +235,12 @@ export class BlockSubmissionMsg extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: BlockSubmissionMsg,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): BlockSubmissionMsg;
   static deserializeBinaryFromReader(
     message: BlockSubmissionMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): BlockSubmissionMsg;
 }
 
@@ -281,22 +258,19 @@ export class TransactionMsg extends jspb.Message {
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): TransactionMsg.AsObject;
-  static toObject(
-    includeInstance: boolean,
-    msg: TransactionMsg,
-  ): TransactionMsg.AsObject;
+  static toObject(includeInstance: boolean, msg: TransactionMsg): TransactionMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
   };
   static serializeBinaryToWriter(
     message: TransactionMsg,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): TransactionMsg;
   static deserializeBinaryFromReader(
     message: TransactionMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TransactionMsg;
 }
 
@@ -320,7 +294,7 @@ export class TransactionWithSenderMsg extends jspb.Message {
   toObject(includeInstance?: boolean): TransactionWithSenderMsg.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: TransactionWithSenderMsg,
+    msg: TransactionWithSenderMsg
   ): TransactionWithSenderMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -328,12 +302,12 @@ export class TransactionWithSenderMsg extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: TransactionWithSenderMsg,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): TransactionWithSenderMsg;
   static deserializeBinaryFromReader(
     message: TransactionWithSenderMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TransactionWithSenderMsg;
 }
 
@@ -356,7 +330,7 @@ export class ExecutionPayloadMsg extends jspb.Message {
   toObject(includeInstance?: boolean): ExecutionPayloadMsg.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: ExecutionPayloadMsg,
+    msg: ExecutionPayloadMsg
   ): ExecutionPayloadMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -364,12 +338,12 @@ export class ExecutionPayloadMsg extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: ExecutionPayloadMsg,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): ExecutionPayloadMsg;
   static deserializeBinaryFromReader(
     message: ExecutionPayloadMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): ExecutionPayloadMsg;
 }
 
@@ -390,22 +364,19 @@ export class BeaconBlockMsg extends jspb.Message {
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): BeaconBlockMsg.AsObject;
-  static toObject(
-    includeInstance: boolean,
-    msg: BeaconBlockMsg,
-  ): BeaconBlockMsg.AsObject;
+  static toObject(includeInstance: boolean, msg: BeaconBlockMsg): BeaconBlockMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
   };
   static serializeBinaryToWriter(
     message: BeaconBlockMsg,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): BeaconBlockMsg;
   static deserializeBinaryFromReader(
     message: BeaconBlockMsg,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): BeaconBlockMsg;
 }
 
@@ -430,7 +401,7 @@ export class BlockSubmissionResponse extends jspb.Message {
   toObject(includeInstance?: boolean): BlockSubmissionResponse.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: BlockSubmissionResponse,
+    msg: BlockSubmissionResponse
   ): BlockSubmissionResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -438,12 +409,12 @@ export class BlockSubmissionResponse extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: BlockSubmissionResponse,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): BlockSubmissionResponse;
   static deserializeBinaryFromReader(
     message: BlockSubmissionResponse,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): BlockSubmissionResponse;
 }
 
@@ -465,7 +436,7 @@ export class TransactionResponse extends jspb.Message {
   toObject(includeInstance?: boolean): TransactionResponse.AsObject;
   static toObject(
     includeInstance: boolean,
-    msg: TransactionResponse,
+    msg: TransactionResponse
   ): TransactionResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
@@ -473,12 +444,12 @@ export class TransactionResponse extends jspb.Message {
   };
   static serializeBinaryToWriter(
     message: TransactionResponse,
-    writer: jspb.BinaryWriter,
+    writer: jspb.BinaryWriter
   ): void;
   static deserializeBinary(bytes: Uint8Array): TransactionResponse;
   static deserializeBinaryFromReader(
     message: TransactionResponse,
-    reader: jspb.BinaryReader,
+    reader: jspb.BinaryReader
   ): TransactionResponse;
 }
 

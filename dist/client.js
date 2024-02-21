@@ -5,6 +5,8 @@ const ProtobufApiPb = (await import("../protobuf/api_pb.cjs")).default;
 import { TxStream } from "./stream/tx.js";
 import { ExecutionPayloadStream } from "./stream/executionPayload.js";
 import { BeaconBlockStream } from "./stream/beaconBlock.js";
+import { TxRawStream } from "./stream/txRaw.js";
+import { BeaconBlockRawStream } from "./stream/beaconBlockRaw.js";
 export class Client {
     _client;
     _md;
@@ -43,6 +45,16 @@ export class Client {
         return new TxStream(this._client, this._md, protoFilter);
     }
     /**
+     * subscribes to the new transactions stream.
+     * @returns {TxRawStream} - emits new raw txs as events
+     */
+    subscribeNewRawTxs(filter) {
+        const f = filter ? filter.build() : new Uint8Array();
+        const protoFilter = new ProtobufApiPb.TxFilter();
+        protoFilter.setEncoded(f);
+        return new TxRawStream(this._client, this._md, protoFilter);
+    }
+    /**
      * subscribes to the new execution payloads stream.
      * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
      */
@@ -55,6 +67,13 @@ export class Client {
      */
     subscribeNewBeaconBlocks() {
         return new BeaconBlockStream(this._client, this._md);
+    }
+    /**
+     * subscribes to the new raw beacon blocks stream.
+     * @returns {BeaconBlockRawStream} - emits new raw beacon blocks as events
+     */
+    subscribeNewRawBeaconBlocks() {
+        return new BeaconBlockRawStream(this._client, this._md);
     }
     /**
      * sends a transaction

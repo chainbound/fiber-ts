@@ -19,22 +19,18 @@ import { TransactionResponse } from "./types.js";
 import { TxStream } from "./stream/tx.js";
 import { ExecutionPayloadStream } from "./stream/executionPayload.js";
 import { BeaconBlockStream } from "./stream/beaconBlock.js";
+import { TxRawStream } from "./stream/txRaw.js";
+import { BeaconBlockRawStream } from "./stream/beaconBlockRaw.js";
 
 export class Client {
   private _client: APIClient;
   private _md: Metadata;
 
   private _txStream: ClientDuplexStream<TransactionMsg, PbResponse>;
-  private _txSequenceStream: ClientDuplexStream<
-    TxSequenceMsgV2,
-    TxSequenceResponse
-  >;
+  private _txSequenceStream: ClientDuplexStream<TxSequenceMsgV2, TxSequenceResponse>;
 
   constructor(target: string, apiKey: string) {
-    this._client = new ProtobufApiGrpcPb.APIClient(
-      target,
-      credentials.createInsecure(),
-    );
+    this._client = new ProtobufApiGrpcPb.APIClient(target, credentials.createInsecure());
     this._md = new Metadata();
     this._md.add("x-api-key", apiKey);
     this._md.add("x-client-version", `${Package.name}/v${Package.version}`);
@@ -71,6 +67,18 @@ export class Client {
   }
 
   /**
+   * subscribes to the new transactions stream.
+   * @returns {TxRawStream} - emits new raw txs as events
+   */
+  subscribeNewRawTxs(filter?: FilterBuilder): TxRawStream {
+    const f = filter ? filter.build() : new Uint8Array();
+
+    const protoFilter = new ProtobufApiPb.TxFilter();
+    protoFilter.setEncoded(f);
+    return new TxRawStream(this._client, this._md, protoFilter);
+  }
+
+  /**
    * subscribes to the new execution payloads stream.
    * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
    */
@@ -84,6 +92,14 @@ export class Client {
    */
   subscribeNewBeaconBlocks(): BeaconBlockStream {
     return new BeaconBlockStream(this._client, this._md);
+  }
+
+  /**
+   * subscribes to the new raw beacon blocks stream.
+   * @returns {BeaconBlockRawStream} - emits new raw beacon blocks as events
+   */
+  subscribeNewRawBeaconBlocks(): BeaconBlockRawStream {
+    return new BeaconBlockRawStream(this._client, this._md);
   }
 
   /**
@@ -145,9 +161,7 @@ export class Client {
    * @param txs an array of signed! typed transactions
    * @returns response containing array of hashes and timestamps
    */
-  async sendTransactionSequence(
-    txs: TypedTransaction[],
-  ): Promise<TransactionResponse[]> {
+  async sendTransactionSequence(txs: TypedTransaction[]): Promise<TransactionResponse[]> {
     const sequenceMsg = new ProtobufApiPb.TxSequenceMsgV2();
     sequenceMsg.setSequenceList(txs.map((tx) => tx.serialize()));
 
@@ -176,9 +190,7 @@ export class Client {
    * @param rawTxs an array of signed and serialized transactions
    * @returns response containing array of hashes and timestamps
    */
-  async sendRawTransactionSequence(
-    rawTxs: string[],
-  ): Promise<TransactionResponse[]> {
+  async sendRawTransactionSequence(rawTxs: string[]): Promise<TransactionResponse[]> {
     const sequenceMsg = new ProtobufApiPb.TxSequenceMsgV2();
 
     // remove 0x prefix if present
@@ -189,7 +201,7 @@ export class Client {
     }
 
     sequenceMsg.setSequenceList(
-      rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex"))),
+      rawTxs.map((rawtx) => Uint8Array.from(Buffer.from(rawtx, "hex")))
     );
 
     return new Promise((resolve, reject) => {

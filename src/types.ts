@@ -7,6 +7,11 @@ export interface TransactionWithSender {
   transaction: TypedTransaction;
 }
 
+export interface TransactionRawWithSender {
+  sender: Address;
+  transaction: Uint8Array;
+}
+
 export interface TransactionResponse {
   hash: string;
   timestamp: number;
