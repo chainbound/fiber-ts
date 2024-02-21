@@ -4,7 +4,7 @@ import { Address, bytesToHex } from "@ethereumjs/util";
 import { Metadata } from "@grpc/grpc-js";
 import { TransactionWithSender } from "../types.js";
 import { TransactionWithSenderMsg, TxFilter } from "../../protobuf/api_pb.cjs";
-import { fromRLPTransaction } from "src/utils.js";
+import { fromRLPTransaction } from "../utils.js";
 
 export class TxStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata, _filter: TxFilter) {

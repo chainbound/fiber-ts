@@ -2,8 +2,9 @@ import { default as google_protobuf_empty_pb } from "google-protobuf/google/prot
 import { Address, Withdrawal, bytesToHex } from "@ethereumjs/util";
 import { Block, BlockHeader } from "@ethereumjs/block";
 import { EventEmitter } from "events";
-import { fromRLPTransaction } from "../types.js";
 import { ssz } from "@lodestar/types";
+import { fromRLPTransaction } from "../utils.js";
+const TOTAL_TERMINAL_DIFFICULTY = BigInt("58750003716598352816469");
 export class ExecutionPayloadStream extends EventEmitter {
     constructor(_client, _md) {
         super();
@@ -48,7 +49,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
-                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    difficulty: TOTAL_TERMINAL_DIFFICULTY,
                     number: BigInt(decoded.blockNumber),
                     gasLimit: BigInt(decoded.gasLimit),
                     gasUsed: BigInt(decoded.gasUsed),
@@ -71,7 +72,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
-                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    difficulty: TOTAL_TERMINAL_DIFFICULTY,
                     number: BigInt(decoded.blockNumber),
                     gasLimit: BigInt(decoded.gasLimit),
                     gasUsed: BigInt(decoded.gasUsed),
@@ -99,7 +100,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
-                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    difficulty: TOTAL_TERMINAL_DIFFICULTY,
                     number: BigInt(decoded.blockNumber),
                     gasLimit: BigInt(decoded.gasLimit),
                     gasUsed: BigInt(decoded.gasUsed),
@@ -130,7 +131,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
-                    difficulty: undefined, // TODO: put the actual terminal merge difficulty here
+                    difficulty: TOTAL_TERMINAL_DIFFICULTY,
                     number: BigInt(decoded.blockNumber),
                     gasLimit: BigInt(decoded.gasLimit),
                     gasUsed: BigInt(decoded.gasUsed),

@@ -1,10 +1,10 @@
 import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { Metadata } from "@grpc/grpc-js";
-import { ssz, allForks } from "@lodestar/types";
+import { ssz } from "@lodestar/types";
+import { BeaconBlock } from "@lodestar/types/allForks";
 import { EventEmitter } from "events";
 import type { BeaconBlockMsg } from "../../protobuf/api_pb.cjs";
 import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
-type BeaconBlock = allForks.BeaconBlock;
 
 export class BeaconBlockStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {

@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import { Address, bytesToHex } from "@ethereumjs/util";
-import { fromRLPTransaction } from "../types.js";
+import { fromRLPTransaction } from "../utils.js";
 export class TxStream extends EventEmitter {
     constructor(_client, _md, _filter) {
         super();
