@@ -1,4 +1,3 @@
-import { RLP } from "@ethereumjs/rlp";
 import { TransactionFactory } from "@ethereumjs/tx";
 /**
  *
@@ -6,6 +5,5 @@ import { TransactionFactory } from "@ethereumjs/tx";
  * @returns an Ethereumjs TypedTransaction object
  */
 export function fromRLPTransaction(raw) {
-    let decodedRawTransaction = RLP.decode(raw);
-    return TransactionFactory.fromSerializedData(decodedRawTransaction);
+    return TransactionFactory.fromSerializedData(raw);
 }

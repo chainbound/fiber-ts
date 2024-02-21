@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import { Address } from "@ethereumjs/util";
+import { Address, bytesToHex } from "@ethereumjs/util";
 export class TxRawStream extends EventEmitter {
     constructor(_client, _md, _filter) {
         super();
@@ -23,8 +23,8 @@ export class TxRawStream extends EventEmitter {
         _txStream.on("end", () => this.emit("end"));
         _txStream.on("data", (data) => {
             let res = {
-                sender: Address.fromString(data.getSender()),
-                transaction: data.getRlpTransaction(),
+                sender: Address.fromString(bytesToHex(data.getSender())),
+                transaction: data.getRlpTransaction_asU8(),
             };
             this.emit("data", res);
         });

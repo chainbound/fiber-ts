@@ -1,9 +1,10 @@
 import EventEmitter from "events";
 import { APIClient } from "../../protobuf/api_grpc_pb.cjs";
-import { Address } from "@ethereumjs/util";
+import { Address, bytesToHex } from "@ethereumjs/util";
 import { Metadata } from "@grpc/grpc-js";
-import { TransactionWithSender, fromRLPTransaction } from "../types.js";
+import { TransactionWithSender } from "../types.js";
 import { TransactionWithSenderMsg, TxFilter } from "../../protobuf/api_pb.cjs";
+import { fromRLPTransaction } from "src/utils.js";
 
 export class TxStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata, _filter: TxFilter) {
@@ -29,8 +30,8 @@ export class TxStream extends EventEmitter {
     _txStream.on("end", () => this.emit("end"));
     _txStream.on("data", (data: TransactionWithSenderMsg) => {
       let res: TransactionWithSender = {
-        sender: Address.fromString(data.getSender() as string),
-        transaction: fromRLPTransaction(data.getRlpTransaction()),
+        sender: Address.fromString(bytesToHex(data.getSender() as Uint8Array)),
+        transaction: fromRLPTransaction(data.getRlpTransaction_asU8()),
       };
 
       this.emit("data", res);

@@ -1,5 +1,5 @@
 import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
-import { Address, Withdrawal } from "@ethereumjs/util";
+import { Address, Withdrawal, bytesToHex } from "@ethereumjs/util";
 import { Block, BlockHeader } from "@ethereumjs/block";
 import { EventEmitter } from "events";
 import { fromRLPTransaction } from "../types.js";
@@ -33,7 +33,7 @@ export class ExecutionPayloadStream extends EventEmitter {
     }
     handleExecutionPayload(block) {
         const version = block.getDataVersion();
-        const sszEncodedBeaconBlock = block.getSszPayload();
+        const sszEncodedBeaconBlock = block.getSszPayload_asU8();
         let header;
         let withdrawals;
         let transactions;
@@ -43,8 +43,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 const decoded = ssz.allForksExecution.bellatrix.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
                 header = BlockHeader.fromHeaderData({
                     parentHash: decoded.parentHash,
-                    uncleHash: Uint8Array.from([]),
-                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
@@ -67,8 +66,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 const decoded = ssz.allForksExecution.capella.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
                 header = BlockHeader.fromHeaderData({
                     parentHash: decoded.parentHash,
-                    uncleHash: Uint8Array.from([]),
-                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
@@ -86,7 +84,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
                 withdrawals = decoded.withdrawals.map((w) => {
-                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromPublicKey(w.address), w.amount);
+                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromString(bytesToHex(w.address)), w.amount);
                     return t;
                 });
                 break;
@@ -96,8 +94,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 const decoded = ssz.allForksExecution.deneb.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
                 header = BlockHeader.fromHeaderData({
                     parentHash: decoded.parentHash,
-                    uncleHash: Uint8Array.from([]),
-                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
@@ -118,7 +115,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
                 withdrawals = decoded.withdrawals.map((w) => {
-                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromPublicKey(w.address), w.amount);
+                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromString(bytesToHex(w.address)), w.amount);
                     return t;
                 });
                 break;
@@ -128,8 +125,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 const decoded = ssz.allForksExecution.capella.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
                 header = BlockHeader.fromHeaderData({
                     parentHash: decoded.parentHash,
-                    uncleHash: Uint8Array.from([]),
-                    coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+                    coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
                     transactionsTrie: undefined, // TODO: document that this will be always empty
                     receiptTrie: decoded.receiptsRoot,
@@ -147,7 +143,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
                 withdrawals = decoded.withdrawals.map((w) => {
-                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromPublicKey(w.address), w.amount);
+                    let t = new Withdrawal(BigInt(w.index), BigInt(w.validatorIndex), Address.fromString(bytesToHex(w.address)), w.amount);
                     return t;
                 });
                 break;

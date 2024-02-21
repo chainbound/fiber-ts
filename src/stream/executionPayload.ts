@@ -1,13 +1,13 @@
 import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
 import type { ExecutionPayloadMsg } from "../../protobuf/api_pb.cjs";
-import { Address, Withdrawal } from "@ethereumjs/util";
+import { Address, Withdrawal, bytesToHex } from "@ethereumjs/util";
 import { Block, BlockHeader } from "@ethereumjs/block";
 import { EventEmitter } from "events";
 import { Metadata } from "@grpc/grpc-js";
 import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
-import { fromRLPTransaction } from "../types.js";
 import { ssz } from "@lodestar/types";
+import { fromRLPTransaction } from "src/utils.js";
 
 export class ExecutionPayloadStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {
@@ -47,7 +47,7 @@ export class ExecutionPayloadStream extends EventEmitter {
 
   private handleExecutionPayload(block: ExecutionPayloadMsg): Block {
     const version = block.getDataVersion();
-    const sszEncodedBeaconBlock = block.getSszPayload() as Uint8Array;
+    const sszEncodedBeaconBlock = block.getSszPayload_asU8();
 
     let header: BlockHeader | undefined;
     let withdrawals: Withdrawal[] | undefined;
@@ -62,8 +62,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
-          uncleHash: Uint8Array.from([]),
-          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          coinbase: decoded.feeRecipient,
           stateRoot: decoded.stateRoot,
           transactionsTrie: undefined, // TODO: document that this will be always empty
           receiptTrie: decoded.receiptsRoot,
@@ -89,8 +88,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
-          uncleHash: Uint8Array.from([]),
-          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          coinbase: decoded.feeRecipient,
           stateRoot: decoded.stateRoot,
           transactionsTrie: undefined, // TODO: document that this will be always empty
           receiptTrie: decoded.receiptsRoot,
@@ -111,7 +109,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           let t = new Withdrawal(
             BigInt(w.index),
             BigInt(w.validatorIndex),
-            Address.fromPublicKey(w.address),
+            Address.fromString(bytesToHex(w.address)),
             w.amount
           );
           return t;
@@ -124,8 +122,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           ssz.allForksExecution.deneb.ExecutionPayload.deserialize(sszEncodedBeaconBlock);
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
-          uncleHash: Uint8Array.from([]),
-          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          coinbase: decoded.feeRecipient,
           stateRoot: decoded.stateRoot,
           transactionsTrie: undefined, // TODO: document that this will be always empty
           receiptTrie: decoded.receiptsRoot,
@@ -149,7 +146,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           let t = new Withdrawal(
             BigInt(w.index),
             BigInt(w.validatorIndex),
-            Address.fromPublicKey(w.address),
+            Address.fromString(bytesToHex(w.address)),
             w.amount
           );
           return t;
@@ -164,8 +161,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           );
         header = BlockHeader.fromHeaderData({
           parentHash: decoded.parentHash,
-          uncleHash: Uint8Array.from([]),
-          coinbase: Address.fromPublicKey(decoded.feeRecipient), // TODO: double check this
+          coinbase: decoded.feeRecipient,
           stateRoot: decoded.stateRoot,
           transactionsTrie: undefined, // TODO: document that this will be always empty
           receiptTrie: decoded.receiptsRoot,
@@ -186,7 +182,7 @@ export class ExecutionPayloadStream extends EventEmitter {
           let t = new Withdrawal(
             BigInt(w.index),
             BigInt(w.validatorIndex),
-            Address.fromPublicKey(w.address),
+            Address.fromString(bytesToHex(w.address)),
             w.amount
           );
           return t;
