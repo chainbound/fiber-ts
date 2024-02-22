@@ -118,6 +118,14 @@ sub.on("data", (block: ExecutionPayload) => {
 });
 ```
 
+NOTE
+
+The following block header fields are empty:
+
+- `transactionsTrie`
+- `withdrawalsRoot`
+- `parentBeaconBlockRoot`
+
 #### Beacon Blocks
 
 Beacon blocks have the type `@lodestar/types/allForks.BeaconBlock`. The
