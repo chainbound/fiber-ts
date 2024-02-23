@@ -5,6 +5,22 @@ import { SignedBeaconBlock } from "@lodestar/types/allForks";
 import { EventEmitter } from "events";
 import type { BeaconBlockMsg } from "../../protobuf/api_pb.cjs";
 import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
+import {
+  DataVersion,
+  SignedBeaconBlock as SignedBeaconBlockVersioned,
+} from "../types.js";
+
+enum Fork {
+  BELLATRIX = "bellatrix",
+  CAPELLA = "capella",
+  DENEB = "deneb",
+}
+
+const DataVersionFork: Record<DataVersion, Fork> = {
+  3: Fork.BELLATRIX,
+  4: Fork.CAPELLA,
+  5: Fork.DENEB,
+} as const;
 
 export class BeaconBlockStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {
@@ -31,9 +47,13 @@ export class BeaconBlockStream extends EventEmitter {
     );
     _blockStream.on("close", () => this.emit("close"));
     _blockStream.on("end", () => this.emit("end"));
-    _blockStream.on("data", (data: BeaconBlockMsg) =>
-      this.emit("data", this.handleBeaconBlock(data))
-    );
+    _blockStream.on("data", (data: BeaconBlockMsg) => {
+      const dataVersion = data.getDataVersion() as DataVersion;
+      const { block, fork } = this.handleBeaconBlock(data);
+      const res: SignedBeaconBlockVersioned = { dataVersion, [fork]: block };
+
+      this.emit("data", res);
+    });
 
     _blockStream.on("error", async (err) => {
       console.error("transmission error", err);
@@ -41,24 +61,33 @@ export class BeaconBlockStream extends EventEmitter {
     });
   }
 
-  private handleBeaconBlock(block: BeaconBlockMsg): SignedBeaconBlock {
-    const version = block.getDataVersion();
+  private handleBeaconBlock(block: BeaconBlockMsg): {
+    block: SignedBeaconBlock;
+    fork: Fork;
+  } {
+    const version = block.getDataVersion() as DataVersion;
 
     const sszEncodedBeaconBlock = block.getSszBlock() as Uint8Array;
+    const fork = DataVersionFork[version];
+    let decodedBlock: SignedBeaconBlock;
     switch (version) {
       case 3: {
-        return this.decodeBellatrix(sszEncodedBeaconBlock);
+        decodedBlock = this.decodeBellatrix(sszEncodedBeaconBlock);
+        break;
       }
       case 4: {
-        return this.decodeCapella(sszEncodedBeaconBlock);
+        decodedBlock = this.decodeCapella(sszEncodedBeaconBlock);
+        break;
       }
       case 5: {
-        return this.decodeDeneb(sszEncodedBeaconBlock);
+        decodedBlock = this.decodeDeneb(sszEncodedBeaconBlock);
+        break;
       }
       default: {
-        return this.decodeCapella(sszEncodedBeaconBlock);
+        decodedBlock = this.decodeCapella(sszEncodedBeaconBlock);
       }
     }
+    return { block: decodedBlock, fork };
   }
 
   private decodeBellatrix(sszEncodedBeaconBlock: Uint8Array): SignedBeaconBlock {

@@ -1,6 +1,17 @@
 import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { ssz } from "@lodestar/types";
 import { EventEmitter } from "events";
+var Fork;
+(function (Fork) {
+    Fork["BELLATRIX"] = "bellatrix";
+    Fork["CAPELLA"] = "capella";
+    Fork["DENEB"] = "deneb";
+})(Fork || (Fork = {}));
+const DataVersionFork = {
+    3: Fork.BELLATRIX,
+    4: Fork.CAPELLA,
+    5: Fork.DENEB,
+};
 export class BeaconBlockStream extends EventEmitter {
     constructor(_client, _md) {
         super();
@@ -22,7 +33,12 @@ export class BeaconBlockStream extends EventEmitter {
         const _blockStream = _client.subscribeBeaconBlocksV2(new google_protobuf_empty_pb.Empty(), _md);
         _blockStream.on("close", () => this.emit("close"));
         _blockStream.on("end", () => this.emit("end"));
-        _blockStream.on("data", (data) => this.emit("data", this.handleBeaconBlock(data)));
+        _blockStream.on("data", (data) => {
+            const dataVersion = data.getDataVersion();
+            const { block, fork } = this.handleBeaconBlock(data);
+            const res = { dataVersion, [fork]: block };
+            this.emit("data", res);
+        });
         _blockStream.on("error", async (err) => {
             console.error("transmission error", err);
             this.retry(_client, _md);
@@ -31,20 +47,26 @@ export class BeaconBlockStream extends EventEmitter {
     handleBeaconBlock(block) {
         const version = block.getDataVersion();
         const sszEncodedBeaconBlock = block.getSszBlock();
+        const fork = DataVersionFork[version];
+        let decodedBlock;
         switch (version) {
             case 3: {
-                return this.decodeBellatrix(sszEncodedBeaconBlock);
+                decodedBlock = this.decodeBellatrix(sszEncodedBeaconBlock);
+                break;
             }
             case 4: {
-                return this.decodeCapella(sszEncodedBeaconBlock);
+                decodedBlock = this.decodeCapella(sszEncodedBeaconBlock);
+                break;
             }
             case 5: {
-                return this.decodeDeneb(sszEncodedBeaconBlock);
+                decodedBlock = this.decodeDeneb(sszEncodedBeaconBlock);
+                break;
             }
             default: {
-                return this.decodeCapella(sszEncodedBeaconBlock);
+                decodedBlock = this.decodeCapella(sszEncodedBeaconBlock);
             }
         }
+        return { block: decodedBlock, fork };
     }
     decodeBellatrix(sszEncodedBeaconBlock) {
         const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
