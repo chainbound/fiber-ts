@@ -1,6 +1,6 @@
 {
   "name": "fiber-ts",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "Client package for connecting to Fiber Network",
   "repository": {
     "url": "https://github.com/chainbound/fiber-ts"
@@ -39,6 +39,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc --build",
     "clean": "rm -rf dist && tsc --build --clean",
+    "prepublishOnly": "tsc --build",
     "proto": "bash ./build.sh",
     "test": "yarn build && node dist/test/index.js"
   }
