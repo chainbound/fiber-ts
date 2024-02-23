@@ -48,14 +48,14 @@ export class BeaconBlockStream extends EventEmitter {
     }
     decodeBellatrix(sszEncodedBeaconBlock) {
         const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
-        return decoded.message;
+        return decoded;
     }
     decodeCapella(sszEncodedBeaconBlock) {
         const decoded = ssz.allForks.capella.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
-        return decoded.message;
+        return decoded;
     }
     decodeDeneb(sszEncodedBeaconBlock) {
         const decoded = ssz.allForks.deneb.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
-        return decoded.message;
+        return decoded;
     }
 }

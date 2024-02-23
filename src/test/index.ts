@@ -5,7 +5,7 @@ import { Client } from "../client.js";
 import { FilterBuilder, or, to } from "../filter.js";
 import { ethers } from "ethers";
 import { ExecutionPayload } from "@ethereumjs/block";
-import { BeaconBlock } from "@lodestar/types/allForks";
+import { SignedBeaconBlock } from "@lodestar/types/allForks";
 
 const PRIVATE_KEY = process.env["PRIVATE_KEY"]!;
 const FIBER_TARGET = process.env["FIBER_TARGET"]!;
@@ -55,7 +55,7 @@ async function main() {
   console.log("Subscribing new beacon blocks");
   let subBeaconBlocks = client.subscribeNewBeaconBlocks();
 
-  subBeaconBlocks.on("data", (block: BeaconBlock) => {
+  subBeaconBlocks.on("data", (block: SignedBeaconBlock) => {
     console.log(`New beacon block received: ${block}`);
   });
 
