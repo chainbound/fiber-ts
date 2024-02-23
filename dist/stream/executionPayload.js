@@ -46,7 +46,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     parentHash: decoded.parentHash,
                     coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
-                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    transactionsTrie: undefined,
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
                     difficulty: TOTAL_TERMINAL_DIFFICULTY,
@@ -56,7 +56,6 @@ export class ExecutionPayloadStream extends EventEmitter {
                     timestamp: BigInt(decoded.timestamp),
                     extraData: decoded.extraData,
                     mixHash: decoded.prevRandao,
-                    nonce: undefined, // TODO: document that this will be always empty (post merge)
                     baseFeePerGas: decoded.baseFeePerGas,
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
@@ -69,7 +68,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     parentHash: decoded.parentHash,
                     coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
-                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    transactionsTrie: undefined,
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
                     difficulty: TOTAL_TERMINAL_DIFFICULTY,
@@ -79,9 +78,8 @@ export class ExecutionPayloadStream extends EventEmitter {
                     timestamp: BigInt(decoded.timestamp),
                     extraData: decoded.extraData,
                     mixHash: decoded.prevRandao,
-                    nonce: undefined, // TODO: document that this will be always empty (post merge)
                     baseFeePerGas: decoded.baseFeePerGas,
-                    withdrawalsRoot: undefined, // TODO: document that this will be always null
+                    withdrawalsRoot: undefined,
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
                 withdrawals = decoded.withdrawals.map((w) => {
@@ -97,7 +95,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     parentHash: decoded.parentHash,
                     coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
-                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    transactionsTrie: undefined,
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
                     difficulty: TOTAL_TERMINAL_DIFFICULTY,
@@ -107,12 +105,11 @@ export class ExecutionPayloadStream extends EventEmitter {
                     timestamp: BigInt(decoded.timestamp),
                     extraData: decoded.extraData,
                     mixHash: decoded.prevRandao,
-                    nonce: undefined, // TODO: document that this will be always empty (post merge)
                     baseFeePerGas: decoded.baseFeePerGas,
-                    withdrawalsRoot: undefined, // TODO: document that this will be always null
+                    withdrawalsRoot: undefined,
                     blobGasUsed: BigInt(decoded.blobGasUsed),
                     excessBlobGas: BigInt(decoded.excessBlobGas),
-                    parentBeaconBlockRoot: undefined, // TODO: document that this will be always empty
+                    parentBeaconBlockRoot: undefined,
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
                 withdrawals = decoded.withdrawals.map((w) => {
@@ -128,7 +125,7 @@ export class ExecutionPayloadStream extends EventEmitter {
                     parentHash: decoded.parentHash,
                     coinbase: decoded.feeRecipient,
                     stateRoot: decoded.stateRoot,
-                    transactionsTrie: undefined, // TODO: document that this will be always empty
+                    transactionsTrie: undefined,
                     receiptTrie: decoded.receiptsRoot,
                     logsBloom: decoded.logsBloom,
                     difficulty: TOTAL_TERMINAL_DIFFICULTY,
@@ -138,9 +135,8 @@ export class ExecutionPayloadStream extends EventEmitter {
                     timestamp: BigInt(decoded.timestamp),
                     extraData: decoded.extraData,
                     mixHash: decoded.prevRandao,
-                    nonce: undefined, // TODO: document that this will be always empty (post merge)
                     baseFeePerGas: decoded.baseFeePerGas,
-                    withdrawalsRoot: undefined, // TODO: document that this will be always null
+                    withdrawalsRoot: undefined,
                 });
                 transactions = decoded.transactions.map(fromRLPTransaction);
                 withdrawals = decoded.withdrawals.map((w) => {

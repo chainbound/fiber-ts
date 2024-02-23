@@ -1,4 +1,4 @@
-import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
+import { TypedTransaction } from "@ethereumjs/tx";
 import { TxStream, ExecutionPayloadStream, BeaconBlockStream, TxRawStream, BeaconBlockRawStream } from "./stream/index.js";
 import { FilterBuilder } from "./filter.js";
 import { TransactionResponse } from "./types.js";
@@ -10,28 +10,28 @@ export declare class Client {
     constructor(target: string, apiKey: string);
     waitForReady(seconds: number): Promise<void>;
     /**
-     * subscribes to the new transactions stream.
-     * @returns {TxStream} - emits new txs as events
+     * Subscribes to the new transactions stream.
+     * @returns {TxStream} emits new txs with sender of type `TransactionWithSender` as events
      */
     subscribeNewTxs(filter?: FilterBuilder): TxStream;
     /**
-     * subscribes to the new transactions stream.
-     * @returns {TxRawStream} - emits new raw txs as events
+     * Subscribes to the new transactions stream.
+     * @returns {TxRawStream} emits new raw txs with sender of type `TransactionRawWithSender` as events
      */
     subscribeNewRawTxs(filter?: FilterBuilder): TxRawStream;
     /**
-     * subscribes to the new execution payloads stream.
-     * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
+     * Subscribes to the new execution payloads stream.
+     * @returns {ExecutionPayloadStream} emits new blocks of type `Block` as events (with transactions)
      */
     subscribeNewExecutionPayloads(): ExecutionPayloadStream;
     /**
-     * subscribes to the new beacon blocks stream.
-     * @returns {BeaconBlockStream} - emits new beacon blocks as events
+     * Subscribes to the new beacon blocks stream.
+     * @returns {BeaconBlockStream} emits new beacon blocks of type `BeaconBlock` as events
      */
     subscribeNewBeaconBlocks(): BeaconBlockStream;
     /**
-     * subscribes to the new raw beacon blocks stream.
-     * @returns {BeaconBlockRawStream} - emits new raw beacon blocks as events
+     * Subscribes to the new raw beacon blocks stream.
+     * @returns {BeaconBlockRawStream} emits new raw ssz-encoded beacon blocks of type `Uint8Array` as events
      */
     subscribeNewRawBeaconBlocks(): BeaconBlockRawStream;
     /**

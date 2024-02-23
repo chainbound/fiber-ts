@@ -31,8 +31,8 @@ export class Client {
         });
     }
     /**
-     * subscribes to the new transactions stream.
-     * @returns {TxStream} - emits new txs as events
+     * Subscribes to the new transactions stream.
+     * @returns {TxStream} emits new txs with sender of type `TransactionWithSender` as events
      */
     subscribeNewTxs(filter) {
         const f = filter ? filter.build() : new Uint8Array();
@@ -41,8 +41,8 @@ export class Client {
         return new TxStream(this._client, this._md, protoFilter);
     }
     /**
-     * subscribes to the new transactions stream.
-     * @returns {TxRawStream} - emits new raw txs as events
+     * Subscribes to the new transactions stream.
+     * @returns {TxRawStream} emits new raw txs with sender of type `TransactionRawWithSender` as events
      */
     subscribeNewRawTxs(filter) {
         const f = filter ? filter.build() : new Uint8Array();
@@ -51,22 +51,22 @@ export class Client {
         return new TxRawStream(this._client, this._md, protoFilter);
     }
     /**
-     * subscribes to the new execution payloads stream.
-     * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
+     * Subscribes to the new execution payloads stream.
+     * @returns {ExecutionPayloadStream} emits new blocks of type `Block` as events (with transactions)
      */
     subscribeNewExecutionPayloads() {
         return new ExecutionPayloadStream(this._client, this._md);
     }
     /**
-     * subscribes to the new beacon blocks stream.
-     * @returns {BeaconBlockStream} - emits new beacon blocks as events
+     * Subscribes to the new beacon blocks stream.
+     * @returns {BeaconBlockStream} emits new beacon blocks of type `BeaconBlock` as events
      */
     subscribeNewBeaconBlocks() {
         return new BeaconBlockStream(this._client, this._md);
     }
     /**
-     * subscribes to the new raw beacon blocks stream.
-     * @returns {BeaconBlockRawStream} - emits new raw beacon blocks as events
+     * Subscribes to the new raw beacon blocks stream.
+     * @returns {BeaconBlockRawStream} emits new raw ssz-encoded beacon blocks of type `Uint8Array` as events
      */
     subscribeNewRawBeaconBlocks() {
         return new BeaconBlockRawStream(this._client, this._md);

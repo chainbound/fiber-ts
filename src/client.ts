@@ -1,5 +1,5 @@
 import { ClientDuplexStream, credentials, Metadata } from "@grpc/grpc-js";
-import { TypedTransaction as TypedTransaction } from "@ethereumjs/tx";
+import { TypedTransaction } from "@ethereumjs/tx";
 import { default as Package } from "../package.json" with { type: "json" };
 
 import type { APIClient } from "../protobuf/api_grpc_pb.cjs";
@@ -57,8 +57,8 @@ export class Client {
   }
 
   /**
-   * subscribes to the new transactions stream.
-   * @returns {TxStream} - emits new txs as events
+   * Subscribes to the new transactions stream.
+   * @returns {TxStream} emits new txs with sender of type `TransactionWithSender` as events
    */
   subscribeNewTxs(filter?: FilterBuilder): TxStream {
     const f = filter ? filter.build() : new Uint8Array();
@@ -69,8 +69,8 @@ export class Client {
   }
 
   /**
-   * subscribes to the new transactions stream.
-   * @returns {TxRawStream} - emits new raw txs as events
+   * Subscribes to the new transactions stream.
+   * @returns {TxRawStream} emits new raw txs with sender of type `TransactionRawWithSender` as events
    */
   subscribeNewRawTxs(filter?: FilterBuilder): TxRawStream {
     const f = filter ? filter.build() : new Uint8Array();
@@ -81,24 +81,24 @@ export class Client {
   }
 
   /**
-   * subscribes to the new execution payloads stream.
-   * @returns {ExecutionPayloadStream} - emits new blocks as events (with transactions)
+   * Subscribes to the new execution payloads stream.
+   * @returns {ExecutionPayloadStream} emits new blocks of type `Block` as events (with transactions)
    */
   subscribeNewExecutionPayloads(): ExecutionPayloadStream {
     return new ExecutionPayloadStream(this._client, this._md);
   }
 
   /**
-   * subscribes to the new beacon blocks stream.
-   * @returns {BeaconBlockStream} - emits new beacon blocks as events
+   * Subscribes to the new beacon blocks stream.
+   * @returns {BeaconBlockStream} emits new beacon blocks of type `BeaconBlock` as events
    */
   subscribeNewBeaconBlocks(): BeaconBlockStream {
     return new BeaconBlockStream(this._client, this._md);
   }
 
   /**
-   * subscribes to the new raw beacon blocks stream.
-   * @returns {BeaconBlockRawStream} - emits new raw beacon blocks as events
+   * Subscribes to the new raw beacon blocks stream.
+   * @returns {BeaconBlockRawStream} emits new raw ssz-encoded beacon blocks of type `Uint8Array` as events
    */
   subscribeNewRawBeaconBlocks(): BeaconBlockRawStream {
     return new BeaconBlockRawStream(this._client, this._md);
