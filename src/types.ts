@@ -17,12 +17,19 @@ export type DataVersion = 3 | 4 | 5;
  * DataVersion is used to indicate which type of payload is contained in the struct:
  * 3: Bellatrix, 4: Capella, 5: Deneb
  */
-export type SignedBeaconBlock = {
-  dataVersion: DataVersion;
-  bellatrix?: bellatrix.SignedBeaconBlock;
-  capella?: capella.SignedBeaconBlock;
-  deneb?: deneb.SignedBeaconBlock;
-};
+export type SignedBeaconBlock =
+  | {
+      dataVersion: 3;
+      block: bellatrix.SignedBeaconBlock;
+    }
+  | {
+      dataVersion: 4;
+      block: capella.SignedBeaconBlock;
+    }
+  | {
+      dataVersion: 5;
+      block: deneb.SignedBeaconBlock;
+    };
 
 /**
  * Re-exported from `@ethereumjs/tx`

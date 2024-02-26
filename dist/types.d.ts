@@ -13,10 +13,14 @@ export type DataVersion = 3 | 4 | 5;
  * 3: Bellatrix, 4: Capella, 5: Deneb
  */
 export type SignedBeaconBlock = {
-    dataVersion: DataVersion;
-    bellatrix?: bellatrix.SignedBeaconBlock;
-    capella?: capella.SignedBeaconBlock;
-    deneb?: deneb.SignedBeaconBlock;
+    dataVersion: 3;
+    block: bellatrix.SignedBeaconBlock;
+} | {
+    dataVersion: 4;
+    block: capella.SignedBeaconBlock;
+} | {
+    dataVersion: 5;
+    block: deneb.SignedBeaconBlock;
 };
 /**
  * Re-exported from `@ethereumjs/tx`

@@ -1,17 +1,6 @@
 import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { ssz } from "@lodestar/types";
 import { EventEmitter } from "events";
-var Fork;
-(function (Fork) {
-    Fork["BELLATRIX"] = "bellatrix";
-    Fork["CAPELLA"] = "capella";
-    Fork["DENEB"] = "deneb";
-})(Fork || (Fork = {}));
-const DataVersionFork = {
-    3: Fork.BELLATRIX,
-    4: Fork.CAPELLA,
-    5: Fork.DENEB,
-};
 export class BeaconBlockStream extends EventEmitter {
     constructor(_client, _md) {
         super();
@@ -35,8 +24,8 @@ export class BeaconBlockStream extends EventEmitter {
         _blockStream.on("end", () => this.emit("end"));
         _blockStream.on("data", (data) => {
             const dataVersion = data.getDataVersion();
-            const { block, fork } = this.handleBeaconBlock(data);
-            const res = { dataVersion, [fork]: block };
+            const block = this.handleBeaconBlock(data);
+            const res = { dataVersion, block };
             this.emit("data", res);
         });
         _blockStream.on("error", async (err) => {
@@ -47,7 +36,6 @@ export class BeaconBlockStream extends EventEmitter {
     handleBeaconBlock(block) {
         const version = block.getDataVersion();
         const sszEncodedBeaconBlock = block.getSszBlock();
-        const fork = DataVersionFork[version];
         let decodedBlock;
         switch (version) {
             case 3: {
@@ -66,7 +54,7 @@ export class BeaconBlockStream extends EventEmitter {
                 decodedBlock = this.decodeCapella(sszEncodedBeaconBlock);
             }
         }
-        return { block: decodedBlock, fork };
+        return decodedBlock;
     }
     decodeBellatrix(sszEncodedBeaconBlock) {
         const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);

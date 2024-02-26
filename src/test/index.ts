@@ -60,8 +60,8 @@ async function main() {
   console.log("Subscribing new beacon blocks");
   let subBeaconBlocks = client.subscribeNewBeaconBlocks();
 
-  subBeaconBlocks.on("data", (block: SignedBeaconBlock) => {
-    console.log(`New beacon block received: ${block.capella?.message.slot}`);
+  subBeaconBlocks.on("data", (data: SignedBeaconBlock) => {
+    console.log(`New beacon block received: ${data.block.message.slot}`);
   });
 
   console.log("Subscribing new raw beacon blocks");

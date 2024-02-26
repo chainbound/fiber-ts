@@ -10,18 +10,6 @@ import {
   SignedBeaconBlock as SignedBeaconBlockVersioned,
 } from "../types.js";
 
-enum Fork {
-  BELLATRIX = "bellatrix",
-  CAPELLA = "capella",
-  DENEB = "deneb",
-}
-
-const DataVersionFork: Record<DataVersion, Fork> = {
-  3: Fork.BELLATRIX,
-  4: Fork.CAPELLA,
-  5: Fork.DENEB,
-} as const;
-
 export class BeaconBlockStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {
     super();
@@ -49,8 +37,8 @@ export class BeaconBlockStream extends EventEmitter {
     _blockStream.on("end", () => this.emit("end"));
     _blockStream.on("data", (data: BeaconBlockMsg) => {
       const dataVersion = data.getDataVersion() as DataVersion;
-      const { block, fork } = this.handleBeaconBlock(data);
-      const res: SignedBeaconBlockVersioned = { dataVersion, [fork]: block };
+      const block = this.handleBeaconBlock(data);
+      const res = { dataVersion, block };
 
       this.emit("data", res);
     });
@@ -61,14 +49,10 @@ export class BeaconBlockStream extends EventEmitter {
     });
   }
 
-  private handleBeaconBlock(block: BeaconBlockMsg): {
-    block: SignedBeaconBlock;
-    fork: Fork;
-  } {
+  private handleBeaconBlock(block: BeaconBlockMsg): SignedBeaconBlock {
     const version = block.getDataVersion() as DataVersion;
 
     const sszEncodedBeaconBlock = block.getSszBlock() as Uint8Array;
-    const fork = DataVersionFork[version];
     let decodedBlock: SignedBeaconBlock;
     switch (version) {
       case 3: {
@@ -87,7 +71,7 @@ export class BeaconBlockStream extends EventEmitter {
         decodedBlock = this.decodeCapella(sszEncodedBeaconBlock);
       }
     }
-    return { block: decodedBlock, fork };
+    return decodedBlock;
   }
 
   private decodeBellatrix(sszEncodedBeaconBlock: Uint8Array): SignedBeaconBlock {
