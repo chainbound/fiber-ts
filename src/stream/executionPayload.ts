@@ -9,8 +9,6 @@ import { TypedTransaction } from "@ethereumjs/tx";
 import { ssz } from "@lodestar/types";
 import { fromRLPTransaction } from "../utils.js";
 
-const TOTAL_TERMINAL_DIFFICULTY = BigInt("58750003716598352816469");
-
 export class ExecutionPayloadStream extends EventEmitter {
   constructor(_client: APIClient, _md: Metadata) {
     super();
@@ -69,7 +67,6 @@ export class ExecutionPayloadStream extends EventEmitter {
           transactionsTrie: undefined,
           receiptTrie: decoded.receiptsRoot,
           logsBloom: decoded.logsBloom,
-          difficulty: TOTAL_TERMINAL_DIFFICULTY,
           number: BigInt(decoded.blockNumber),
           gasLimit: BigInt(decoded.gasLimit),
           gasUsed: BigInt(decoded.gasUsed),
@@ -94,7 +91,6 @@ export class ExecutionPayloadStream extends EventEmitter {
           transactionsTrie: undefined,
           receiptTrie: decoded.receiptsRoot,
           logsBloom: decoded.logsBloom,
-          difficulty: TOTAL_TERMINAL_DIFFICULTY,
           number: BigInt(decoded.blockNumber),
           gasLimit: BigInt(decoded.gasLimit),
           gasUsed: BigInt(decoded.gasUsed),
@@ -127,7 +123,6 @@ export class ExecutionPayloadStream extends EventEmitter {
           transactionsTrie: undefined,
           receiptTrie: decoded.receiptsRoot,
           logsBloom: decoded.logsBloom,
-          difficulty: TOTAL_TERMINAL_DIFFICULTY,
           number: BigInt(decoded.blockNumber),
           gasLimit: BigInt(decoded.gasLimit),
           gasUsed: BigInt(decoded.gasUsed),
@@ -165,7 +160,6 @@ export class ExecutionPayloadStream extends EventEmitter {
           transactionsTrie: undefined,
           receiptTrie: decoded.receiptsRoot,
           logsBloom: decoded.logsBloom,
-          difficulty: TOTAL_TERMINAL_DIFFICULTY,
           number: BigInt(decoded.blockNumber),
           gasLimit: BigInt(decoded.gasLimit),
           gasUsed: BigInt(decoded.gasUsed),
