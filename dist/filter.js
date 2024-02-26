@@ -1,13 +1,10 @@
-"use strict";
 //! Module responsible for building the `Filter` object used in the Transaction stream.
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FilterBuilder = exports.from = exports.to = exports.and = exports.or = void 0;
 var Operator;
 (function (Operator) {
     Operator[Operator["AND"] = 1] = "AND";
     Operator[Operator["OR"] = 2] = "OR";
 })(Operator || (Operator = {}));
-function or(...ops) {
+export function or(...ops) {
     return function (f, n) {
         let newNode = {
             Operator: Operator.OR,
@@ -28,8 +25,7 @@ function or(...ops) {
         }
     };
 }
-exports.or = or;
-function and(...ops) {
+export function and(...ops) {
     return function (f, n) {
         let newNode = {
             Operator: Operator.AND,
@@ -50,8 +46,7 @@ function and(...ops) {
         }
     };
 }
-exports.and = and;
-function to(to) {
+export function to(to) {
     return function (f, n) {
         let newNode = {
             Operand: {
@@ -72,8 +67,7 @@ function to(to) {
         }
     };
 }
-exports.to = to;
-function from(from) {
+export function from(from) {
     return function (f, n) {
         let newNode = {
             Operand: {
@@ -94,8 +88,10 @@ function from(from) {
         }
     };
 }
-exports.from = from;
-class FilterBuilder {
+export class FilterBuilder {
+    _filter;
+    _next;
+    _last;
     constructor(rootOp) {
         let f = {};
         rootOp(f, undefined);
@@ -196,7 +192,6 @@ class FilterBuilder {
         return new Uint8Array(Buffer.from(JSON.stringify(this._filter)));
     }
 }
-exports.FilterBuilder = FilterBuilder;
 function hexToBase64(str) {
     if (str.substring(0, 2) == "0x") {
         str = str.slice(2);

@@ -1,4 +1,5 @@
 # Fiber TypeScript Client
+
 [![Version](https://img.shields.io/npm/v/fiber-ts.svg)](https://www.npmjs.com/package/fiber-ts)
 
 This package contains a JS/TS client for connecting to the Fiber Network.
@@ -33,17 +34,28 @@ await client.waitForReady(10);
 The client exposes 2 subscriptions: **transactions** and **blocks**.
 They are implemented as event emitters which you can listen to.
 
+#### Types
+
+`fiber-ts` works with `ethereumjs` and `lodestar` types internally. The types
+are re-exported for convenience.
+
 #### Transactions
 
 `fiber-ts` works with [ethereumjs](https://github.com/ethereumjs/ethereumjs-monorepo) internally,
 and transactions are implemented as `@ethereumjs/tx.TypedTransaction`.
 This is for a couple reasons, but most importantly performance.
 
-Filtering functionality is currently a work in progress. The filter object passed to SubscribeNewTxs is a simple **OR** filter, so if a transaction matches either to `to`, `from` or `methodid` field, it will be sent on the stream.
+The transactions are returned as `Transaction(Raw)WithSender`s, which is a
+wrapper type around `@ethereumjs/tx.TypedTransaction` that includes the signer
+of the transaction.
+
+Filtering functionality is currently a work in progress. The filter object
+passed to `subscribeNewTxs` is a simple **OR** filter, so if a transaction
+matches either to `to`, `from` or `methodid` field, it will be sent on the
+stream.
 
 ```ts
-import { Client, FilterBuilder, or, to } from "fiber-ts";
-import { TypedTransaction } from "@ethereumjs/tx";
+import { Client, FilterBuilder, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
@@ -59,37 +71,42 @@ let filter = new FilterBuilder(
 
 const sub = client.subscribeNewTxs(filter);
 
-sub.on("data", (tx: TypedTransaction) => {
+sub.on("data", (tx: Types.TransactionWithSender) => {
   handleTx(tx);
 });
 ```
 
-#### Execution Headers (new block headers without transactions)
-
-Headers have their own type: `fiber-ts.ExecutionPayloadHeader`. 
+It is also possible to subscribe to stream of raw transactions, which for every
+transaction returns its signer and the RLP encoded data.
 
 ```ts
-import { Client, Block } from "fiber-ts";
+import { Client, FilterBuilder, or, to, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
 // Wait 10 seconds for the client to connect.
 await client.waitForReady(10);
 
-const sub = client.subscribeNewExecutionHeaders();
+let filter = new FilterBuilder(
+  or(
+    to("0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45"),
+    to("0x7a250d5630B4cF539739dF2C5dAcb4c659F2488d")
+  )
+);
 
-sub.on("data", (block: ExecutionPayloadHeader) => {
-  handleBlockHeader(block);
+const sub = client.subscribeNewRawTxs(filter);
+
+sub.on("data", (tx: TransactionRawWithSender) => {
+  handleTx(tx);
 });
 ```
 
 #### Execution Payloads (new blocks with transactions)
 
-Payloads have their own type: `fiber-ts.ExecutionPayload`. 
-The list of transactions are once again `TypedTransaction`s.
+Payloads have the type: `@ethereumjs/block`.
 
 ```ts
-import { Client, Block } from "fiber-ts";
+import { Client, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
@@ -98,19 +115,27 @@ await client.waitForReady(10);
 
 const sub = client.subscribeNewExecutionPayloads();
 
-sub.on("data", (block: ExecutionPayload) => {
+sub.on("data", (block: Types.ExecutionPayload) => {
   handleBlock(block);
 });
 ```
 
+NOTE
+
+The following block header fields are empty:
+
+- `transactionsTrie`
+- `withdrawalsRoot`
+- `parentBeaconBlockRoot`
+
 #### Beacon Blocks
 
-Beacon blocks follow the [Consensus specs](https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/beacon-chain.md#beaconblock) have their own type: `fiber-ts.BeaconBlock`. 
-The execution payload is not included to provide a faster stream, use the `SubscribeNewExecutionPayloads` stream 
-if you need it.
+Beacon blocks have the `fiber-ts` wrapper type `SignedBeaconBlock`,
+which uses `@lodestar/types` internally and provides a `dataVersion`
+property to discriminate between different forks.
 
 ```ts
-import { Client, Block } from "fiber-ts";
+import { Client, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
@@ -119,8 +144,26 @@ await client.waitForReady(10);
 
 const sub = client.subscribeNewBeaconBlocks();
 
-sub.on("data", (block: BeaconBlock) => {
+sub.on("data", (block: Types.SignedBeaconBlock) => {
   handleBeaconBlock(block);
+});
+```
+
+It is also possible to subscribe to stream of raw beacon blocks, which for every
+block returns its SSZ encoded data as `Uint8Array`.
+
+```ts
+import { Client } from "fiber-ts";
+
+const client = new Client("fiber.example.io", "YOUR_API_KEY");
+
+// Wait 10 seconds for the client to connect.
+await client.waitForReady(10);
+
+const sub = client.subscribeNewRawBeaconBlocks();
+
+sub.on("data", (data: Uint8Array) => {
+  handleBeaconBlock(data);
 });
 ```
 
@@ -129,18 +172,21 @@ sub.on("data", (block: BeaconBlock) => {
 `fiber-ts` has 4 endpoints for sending transactions:
 
 - `client.sendTransaction` for just sending a normal transaction.
-- `client.sendRawTransaction` for sending a raw transaction (signed with ethers or web3.js).
-- `client.sendTransactionSequence` for sending a sequence of normal transactions in a row. Please remember that the ordering is not guaranteed on-chain, as the final ordering is determined by the block producer.
-- `client.sendRawTransactionSequence` for sending a sequence of raw transactions (signed with ethers or web3.js)
+- `client.sendRawTransaction` for sending a raw transaction (signed with
+  `ethers` or `web3.js`).
+- `client.sendTransactionSequence` for sending a sequence of normal
+  transactions in a row. Please remember that the ordering is not guaranteed
+  on-chain, as the final ordering is determined by the block producer.
+- `client.sendRawTransactionSequence` for sending a sequence of raw
+  transactions (signed with ethers or `web3.js`)
 
-For constructing transactions, we recommend using `TransactionFactory`. This will automatically
-create a typed transaction from the given transaction data.
+For constructing transactions, we recommend using `TransactionFactory`. This
+will automatically create a typed transaction from the given transaction data.
 
 #### `sendTransaction`
 
 ```ts
-import { Client, TransactionResponse } from "fiber-ts";
-import { TypedTransaction, TransactionFactory } from "@ethereumjs/tx";
+import { Client, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
@@ -150,7 +196,7 @@ await client.waitForReady(10);
 const pk = Buffer.from("PRIVATE_KEY", "hex");
 
 // Build an EIP1559 TypedTransaction with ethereumjs
-const tx = TransactionFactory.fromTxData({
+const tx = Types.TransactionFactory.fromTxData({
   chainId: 1,
   type: 2,
   to: "0x...",
@@ -165,7 +211,7 @@ const tx = TransactionFactory.fromTxData({
 const signed = tx.sign(pk);
 
 // Result contains the timestamp (unix microseconds) and hash of the transaction
-const result: TransactionResponse = await client.sendTransaction(signed);
+const result: Types.TransactionResponse = await client.sendTransaction(signed);
 ```
 
 #### `sendRawTransaction`
@@ -197,8 +243,7 @@ This endpoint is built to send an array of transactions to land on the same bloc
 It takes an array of transactions as input, and makes sure these transactions are propagated in a bundle. Assuming the gas price of these transactions is the same, the backrun transaction will never arrive before the target transaction at a block producer.
 
 ```ts
-import { Client, TransactionResponse } from "fiber-ts";
-import { TypedTransaction, TransactionFactory } from "@ethereumjs/tx";
+import { Client, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
@@ -210,7 +255,7 @@ const pk = Buffer.from("PRIVATE_KEY", "hex");
 const txToBackrun = "0xdeadbeef...";
 
 // Build a TypedTransaction with ethereumjs
-const tx = TransactionFactory.fromTxData({
+const tx = Types.TransactionFactory.fromTxData({
   chainId: 1,
   type: 2,
   to: "0x...",
@@ -224,7 +269,7 @@ const tx = TransactionFactory.fromTxData({
 const signed = tx.sign(pk);
 
 // Result contains the timestamp (unix microseconds) and hash of the transaction
-const result: TransactionResponse = await client.sendTransactionSequence([
+const result: Types.TransactionResponse = await client.sendTransactionSequence([
   txToBackrun,
   signed,
 ]);

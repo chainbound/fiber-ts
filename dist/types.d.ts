@@ -1,119 +1,60 @@
-import { ethers } from "ethers";
-import { TypedTransaction } from "@ethereumjs/tx";
-import eth from "../protobuf/eth_pb";
+import { TypedTransaction as TypedTransactionLib, TransactionFactory as TransactionFactoryLib } from "@ethereumjs/tx";
+import { bellatrix, capella, deneb } from "@lodestar/types";
+import { Block as BlockLib } from "@ethereumjs/block";
+import { Address as AddressLib } from "@ethereumjs/util";
+export type DataVersion = 3 | 4 | 5;
+/**
+ * Helper type that wraps a signed beacon block from any of the supported hard-forks.
+ *
+ * This type will either contain a Bellatrix, Capella, or Deneb signed beacon block,
+ * using the `@lodestar/types` types.
+ *
+ * DataVersion is used to indicate which type of payload is contained in the struct:
+ * 3: Bellatrix, 4: Capella, 5: Deneb
+ */
+export type SignedBeaconBlock = {
+    dataVersion: 3;
+    block: bellatrix.SignedBeaconBlock;
+} | {
+    dataVersion: 4;
+    block: capella.SignedBeaconBlock;
+} | {
+    dataVersion: 5;
+    block: deneb.SignedBeaconBlock;
+};
+/**
+ * Re-exported from `@ethereumjs/tx`
+ */
+export type TypedTransaction = TypedTransactionLib;
+/**
+ * Re-exported from `@ethereumjs/tx`
+ */
+export type TransactionFactory = TransactionFactoryLib;
+/**
+ * Re-exported from `@ethereumjs/block`
+ */
+export type Block = BlockLib;
+/**
+ * Re-exported from `@ethereumjs/util`
+ */
+export type Address = AddressLib;
+/**
+ * A wrapper type around `TypedTransaction` that includes the
+ * ec-recovered sender's address for performance reasons.
+ */
+export interface TransactionWithSender {
+    sender: Address;
+    transaction: TypedTransaction;
+}
+/**
+ * Includes the rlp-encoded transaction and the ec-recovered
+ * sender's address for performance reasons.
+ */
+export interface TransactionRawWithSender {
+    sender: Address;
+    transaction: Uint8Array;
+}
 export interface TransactionResponse {
     hash: string;
     timestamp: number;
 }
-export interface ExecutionPayloadHeader {
-    number: number;
-    hash: string;
-    parentHash: string;
-    prevRandao: string;
-    stateRoot: string;
-    receiptRoot: string;
-    feeRecipient: string;
-    extraData: string;
-    gasLimit: ethers.BigNumber;
-    gasUsed: ethers.BigNumber;
-    timestamp: number;
-    logsBloom: string;
-    baseFeePerGas: ethers.BigNumber;
-}
-export interface ExecutionPayload {
-    header: ExecutionPayloadHeader;
-    transactions: TypedTransaction[];
-}
-export interface BeaconBlock {
-    slot: number;
-    proposerIndex: number;
-    parentRoot: Uint8Array | string;
-    stateRoot: Uint8Array | string;
-    body?: {
-        randaoReveal: Uint8Array | string;
-        eth1Data?: {
-            depositRoot: Uint8Array | string;
-            depositCount: number;
-            blockHash: Uint8Array | string;
-        };
-        graffiti: Uint8Array | string;
-        proposerSlashingsList: Array<ProposerSlashing>;
-        attesterSlashingsList: Array<AttesterSlashing>;
-        attestationsList: Array<{
-            aggregationBits: Uint8Array | string;
-            data?: AttestationData;
-            signature: Uint8Array | string;
-        }>;
-        depositsList: Array<Deposit>;
-        voluntaryExitsList: Array<{
-            message?: {
-                epoch: number;
-                validatorIndex: number;
-            };
-            signature: Uint8Array | string;
-        }>;
-        syncAggregate?: {
-            syncCommitteeBits: Uint8Array | string;
-            syncCommitteeSignature: Uint8Array | string;
-        };
-        blsToExecutionChangesList: Array<{
-            message?: {
-                validatorIndex: number;
-                fromBlsPubkey: Uint8Array | string;
-                toExecutionAddress: Uint8Array | string;
-            };
-            signature: Uint8Array | string;
-        }>;
-    };
-}
-interface ProposerSlashing {
-    header1?: SignedBeaconBlockHeader;
-    header2?: SignedBeaconBlockHeader;
-}
-interface SignedBeaconBlockHeader {
-    message?: BeaconBlockHeader;
-    signature: Uint8Array | string;
-}
-interface BeaconBlockHeader {
-    slot: number;
-    proposerIndex: number;
-    parentRoot: Uint8Array | string;
-    stateRoot: Uint8Array | string;
-    bodyRoot: Uint8Array | string;
-}
-interface AttesterSlashing {
-    attestation1?: IndexedAttestation;
-    attestation2?: IndexedAttestation;
-}
-interface IndexedAttestation {
-    attestingIndicesList: Array<number>;
-    data?: AttestationData;
-    signature: Uint8Array | string;
-}
-interface AttestationData {
-    slot: number;
-    index: number;
-    beaconBlockRoot: Uint8Array | string;
-    source?: Checkpoint;
-    target?: Checkpoint;
-}
-interface Checkpoint {
-    epoch: number;
-    root: Uint8Array | string;
-}
-interface Deposit {
-    proofList: Array<Uint8Array | string>;
-    data?: {
-        pubkey: Uint8Array | string;
-        withdrawalCredentials: Uint8Array | string;
-        amount: number;
-        signature: Uint8Array | string;
-    };
-}
-export declare function bytesToHex(b: string | Uint8Array): string;
-export declare function hexToBytes(str: string): Uint8Array;
-export declare function fromProtoTx(tx: eth.Transaction): TypedTransaction;
-export declare function toProtoTx(tx: TypedTransaction): eth.Transaction;
-export declare function fromProtoExecutionHeader(block: eth.ExecutionPayloadHeader): ExecutionPayloadHeader;
-export declare function fromProtoBeaconBlock(block: eth.CompactBeaconBlock): BeaconBlock;
-export {};

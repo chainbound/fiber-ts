@@ -1,10 +1,11 @@
 {
   "name": "fiber-ts",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "Client package for connecting to Fiber Network",
   "repository": {
     "url": "https://github.com/chainbound/fiber-ts"
   },
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "mempirate",
@@ -15,27 +16,31 @@
     "networking"
   ],
   "license": "MIT",
+  "devDependencies": {
+    "@types/google-protobuf": "^3.15.6",
+    "@types/node": "^20.11.19",
+    "dotenv": "^16.4.5",
+    "grpc-tools": "^1.11.2",
+    "grpc_tools_node_protoc_ts": "^5.3.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
   "dependencies": {
+    "@ethereumjs/block": "^5.1.1",
     "@ethereumjs/common": "^4.0.0",
-    "@ethereumjs/tx": "^5.0.0",
+    "@ethereumjs/rlp": "^5.0.2",
+    "@ethereumjs/tx": "^5.2.1",
     "@ethereumjs/util": "^9.0.0",
     "@grpc/grpc-js": "^1.6.12",
+    "@lodestar/types": "^1.15.1",
     "ethers": "^5.7.0",
     "google-protobuf": "^3.21.0"
   },
-  "devDependencies": {
-    "@types/google-protobuf": "^3.15.6",
-    "grpc-tools": "^1.11.2",
-    "grpc_tools_node_protoc_ts": "^5.3.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
-  },
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "test": "ts-node src/test.ts",
+    "build": "rm -rf dist && tsc --build",
+    "clean": "rm -rf dist && tsc --build --clean",
+    "prepublishOnly": "tsc --build",
     "proto": "bash ./build.sh",
-    "build": "tsc --build",
-    "clean": "tsc --build --clean",
-    "prepublishOnly": "tsc --build"
+    "test": "yarn build && node dist/test/index.js"
   }
 }
