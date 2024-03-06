@@ -4,6 +4,7 @@ import {
   TransactionRawWithSender,
   TransactionWithSender,
   SignedBeaconBlock,
+  BlobTransactionWithSender,
 } from "../types.js";
 import { Client } from "../client.js";
 import { FilterBuilder, or, to } from "../filter.js";
@@ -45,6 +46,22 @@ async function main() {
   let subRawTxs = client.subscribeNewRawTxs();
 
   subRawTxs.on("data", (tx: TransactionRawWithSender) => {
+    console.log(
+      `New raw tx received: ${tx.transaction.slice(0, 10)}...${tx.transaction.slice(-10)}`
+    );
+  });
+
+  console.log("Subscribing to new blob txs");
+  let subBlobTxs = client.subscribeNewBlobTxs();
+
+  subBlobTxs.on("data", (tx: BlobTransactionWithSender) => {
+    console.log(`New blob tx received: ${tx.transaction.hash()}`);
+  });
+
+  console.log("Subscribing to new blob txs raw");
+  let subBlobRawTxs = client.subscribeNewBlobRawTxs();
+
+  subBlobRawTxs.on("data", (tx: TransactionRawWithSender) => {
     console.log(
       `New raw tx received: ${tx.transaction.slice(0, 10)}...${tx.transaction.slice(-10)}`
     );

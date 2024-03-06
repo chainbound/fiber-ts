@@ -23,6 +23,8 @@ import {
 } from "./stream/index.js";
 import { FilterBuilder } from "./filter.js";
 import { TransactionResponse } from "./types.js";
+import { BlobTxStream } from "./stream/blobTx.js";
+import { BlobTxRawStream } from "./stream/blobTxRaw.js";
 
 export class Client {
   private _client: APIClient;
@@ -78,6 +80,25 @@ export class Client {
     const protoFilter = new ProtobufApiPb.TxFilter();
     protoFilter.setEncoded(f);
     return new TxRawStream(this._client, this._md, protoFilter);
+  }
+
+  /**
+   * Subscribes to the new transactions stream.
+   * @returns {TxStream} emits new txs with sender of type `BlobTransactionWithSender` as events
+   */
+  subscribeNewBlobTxs(): TxStream {
+    return new BlobTxStream(this._client, this._md);
+  }
+
+  /**
+   * Subscribes to the new transactions stream.
+   * @returns {TxStream} emits new txs with sender of type `TransactionRawWithSender` as events
+   *
+   * Note: transactions are returned with the "raw format" `type || rlp([tx_payload_body, blobs,
+   * commitments, proofs])` compatible with the `eth_sendRawTransaction` RPC
+   */
+  subscribeNewBlobRawTxs(): TxStream {
+    return new BlobTxRawStream(this._client, this._md);
   }
 
   /**

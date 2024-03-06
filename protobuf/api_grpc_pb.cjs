@@ -25,9 +25,7 @@ function serialize_api_BlockSubmissionMsg(arg) {
 }
 
 function deserialize_api_BlockSubmissionMsg(buffer_arg) {
-  return api_pb.BlockSubmissionMsg.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return api_pb.BlockSubmissionMsg.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_BlockSubmissionResponse(arg) {
@@ -38,9 +36,7 @@ function serialize_api_BlockSubmissionResponse(arg) {
 }
 
 function deserialize_api_BlockSubmissionResponse(buffer_arg) {
-  return api_pb.BlockSubmissionResponse.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return api_pb.BlockSubmissionResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_ExecutionPayloadMsg(arg) {
@@ -51,9 +47,7 @@ function serialize_api_ExecutionPayloadMsg(arg) {
 }
 
 function deserialize_api_ExecutionPayloadMsg(buffer_arg) {
-  return api_pb.ExecutionPayloadMsg.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return api_pb.ExecutionPayloadMsg.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_RawTxMsg(arg) {
@@ -97,9 +91,7 @@ function serialize_api_TransactionResponse(arg) {
 }
 
 function deserialize_api_TransactionResponse(buffer_arg) {
-  return api_pb.TransactionResponse.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return api_pb.TransactionResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_TransactionWithSenderMsg(arg) {
@@ -110,9 +102,7 @@ function serialize_api_TransactionWithSenderMsg(arg) {
 }
 
 function deserialize_api_TransactionWithSenderMsg(buffer_arg) {
-  return api_pb.TransactionWithSenderMsg.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return api_pb.TransactionWithSenderMsg.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_api_TxFilter(arg) {
@@ -156,9 +146,7 @@ function serialize_api_TxSequenceResponse(arg) {
 }
 
 function deserialize_api_TxSequenceResponse(buffer_arg) {
-  return api_pb.TxSequenceResponse.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return api_pb.TxSequenceResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_eth_CompactBeaconBlock(arg) {
@@ -169,9 +157,7 @@ function serialize_eth_CompactBeaconBlock(arg) {
 }
 
 function deserialize_eth_CompactBeaconBlock(buffer_arg) {
-  return eth_pb.CompactBeaconBlock.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return eth_pb.CompactBeaconBlock.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_eth_ExecutionPayload(arg) {
@@ -193,9 +179,7 @@ function serialize_eth_ExecutionPayloadHeader(arg) {
 }
 
 function deserialize_eth_ExecutionPayloadHeader(buffer_arg) {
-  return eth_pb.ExecutionPayloadHeader.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return eth_pb.ExecutionPayloadHeader.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_eth_Transaction(arg) {
@@ -217,9 +201,7 @@ function serialize_google_protobuf_Empty(arg) {
 }
 
 function deserialize_google_protobuf_Empty(buffer_arg) {
-  return google_protobuf_empty_pb.Empty.deserializeBinary(
-    new Uint8Array(buffer_arg),
-  );
+  return google_protobuf_empty_pb.Empty.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 var APIService = (exports.APIService = {
@@ -245,6 +227,18 @@ var APIService = (exports.APIService = {
     responseType: api_pb.TransactionWithSenderMsg,
     requestSerialize: serialize_api_TxFilter,
     requestDeserialize: deserialize_api_TxFilter,
+    responseSerialize: serialize_api_TransactionWithSenderMsg,
+    responseDeserialize: deserialize_api_TransactionWithSenderMsg,
+  },
+  // Opens a new blob transaction stream with the given filter.
+  subscribeNewBlobTxs: {
+    path: "/api.API/SubscribeNewBlobTxs",
+    requestStream: false,
+    responseStream: true,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: api_pb.TransactionWithSenderMsg,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
     responseSerialize: serialize_api_TransactionWithSenderMsg,
     responseDeserialize: deserialize_api_TransactionWithSenderMsg,
   },

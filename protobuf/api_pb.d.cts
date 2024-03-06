@@ -18,9 +18,7 @@ export class TxSequenceMsg extends jspb.Message {
   toObject(includeInstance?: boolean): TxSequenceMsg.AsObject;
   static toObject(includeInstance: boolean, msg: TxSequenceMsg): TxSequenceMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(message: TxSequenceMsg, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): TxSequenceMsg;
   static deserializeBinaryFromReader(
@@ -50,9 +48,7 @@ export class TxSequenceMsgV2 extends jspb.Message {
     msg: TxSequenceMsgV2
   ): TxSequenceMsgV2.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: TxSequenceMsgV2,
     writer: jspb.BinaryWriter
@@ -85,9 +81,7 @@ export class RawTxSequenceMsg extends jspb.Message {
     msg: RawTxSequenceMsg
   ): RawTxSequenceMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: RawTxSequenceMsg,
     writer: jspb.BinaryWriter
@@ -118,9 +112,7 @@ export class TxSequenceResponse extends jspb.Message {
     msg: TxSequenceResponse
   ): TxSequenceResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: TxSequenceResponse,
     writer: jspb.BinaryWriter
@@ -148,9 +140,7 @@ export class TxFilter extends jspb.Message {
   toObject(includeInstance?: boolean): TxFilter.AsObject;
   static toObject(includeInstance: boolean, msg: TxFilter): TxFilter.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(message: TxFilter, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): TxFilter;
   static deserializeBinaryFromReader(
@@ -173,9 +163,7 @@ export class BlockFilter extends jspb.Message {
   toObject(includeInstance?: boolean): BlockFilter.AsObject;
   static toObject(includeInstance: boolean, msg: BlockFilter): BlockFilter.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(message: BlockFilter, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): BlockFilter;
   static deserializeBinaryFromReader(
@@ -200,9 +188,7 @@ export class RawTxMsg extends jspb.Message {
   toObject(includeInstance?: boolean): RawTxMsg.AsObject;
   static toObject(includeInstance: boolean, msg: RawTxMsg): RawTxMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(message: RawTxMsg, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): RawTxMsg;
   static deserializeBinaryFromReader(
@@ -230,9 +216,7 @@ export class BlockSubmissionMsg extends jspb.Message {
     msg: BlockSubmissionMsg
   ): BlockSubmissionMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: BlockSubmissionMsg,
     writer: jspb.BinaryWriter
@@ -260,9 +244,7 @@ export class TransactionMsg extends jspb.Message {
   toObject(includeInstance?: boolean): TransactionMsg.AsObject;
   static toObject(includeInstance: boolean, msg: TransactionMsg): TransactionMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: TransactionMsg,
     writer: jspb.BinaryWriter
@@ -297,9 +279,7 @@ export class TransactionWithSenderMsg extends jspb.Message {
     msg: TransactionWithSenderMsg
   ): TransactionWithSenderMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: TransactionWithSenderMsg,
     writer: jspb.BinaryWriter
@@ -333,9 +313,7 @@ export class ExecutionPayloadMsg extends jspb.Message {
     msg: ExecutionPayloadMsg
   ): ExecutionPayloadMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: ExecutionPayloadMsg,
     writer: jspb.BinaryWriter
@@ -366,9 +344,7 @@ export class BeaconBlockMsg extends jspb.Message {
   toObject(includeInstance?: boolean): BeaconBlockMsg.AsObject;
   static toObject(includeInstance: boolean, msg: BeaconBlockMsg): BeaconBlockMsg.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: BeaconBlockMsg,
     writer: jspb.BinaryWriter
@@ -404,9 +380,7 @@ export class BlockSubmissionResponse extends jspb.Message {
     msg: BlockSubmissionResponse
   ): BlockSubmissionResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: BlockSubmissionResponse,
     writer: jspb.BinaryWriter
@@ -439,9 +413,7 @@ export class TransactionResponse extends jspb.Message {
     msg: TransactionResponse
   ): TransactionResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
-  static extensionsBinary: {
-    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
-  };
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> };
   static serializeBinaryToWriter(
     message: TransactionResponse,
     writer: jspb.BinaryWriter

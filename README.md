@@ -55,7 +55,7 @@ matches either to `to`, `from` or `methodid` field, it will be sent on the
 stream.
 
 ```ts
-import { Client, FilterBuilder, Types } from "fiber-ts";
+import { Client, FilterBuilder, or, to, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
 
@@ -96,10 +96,56 @@ let filter = new FilterBuilder(
 
 const sub = client.subscribeNewRawTxs(filter);
 
-sub.on("data", (tx: TransactionRawWithSender) => {
+sub.on("data", (tx: Types.TransactionRawWithSender) => {
   handleTx(tx);
 });
 ```
+
+#### Blob transactions
+
+`fiber-ts` works with [ethereumjs](https://github.com/ethereumjs/ethereumjs-monorepo) internally,
+and transactions are implemented as `@ethereumjs/tx.BlobEIP4844Transaction`.
+This is for a couple reasons, but most importantly performance.
+
+The transactions are returned as `BlobTransaction(Raw)WithSender`s, which is a
+wrapper type around `@ethereumjs/tx.BlobEIP4844Transaction` that includes the signer
+of the transaction.
+
+Filtering functionality is not supported at the moment.
+
+```ts
+import { Client, Types } from "fiber-ts";
+
+const client = new Client("fiber.example.io", "YOUR_API_KEY");
+
+// Wait 10 seconds for the client to connect.
+await client.waitForReady(10);
+
+const sub = client.subscribeNewBlobTxs(filter);
+
+sub.on("data", (tx: Types.BlobTransactionWithSender) => {
+  handleTx(tx);
+});
+```
+
+It is also possible to subscribe to stream of raw blob transactions, which for
+every transaction returns its signer and the "raw format" `type ||
+rlp([tx_payload_body, blobs, commitments, proofs])` compatible with the
+`eth_sendRawTransaction` RPC method.
+
+````ts
+import { Client, Types } from "fiber-ts";
+
+const client = new Client("fiber.example.io", "YOUR_API_KEY");
+
+// Wait 10 seconds for the client to connect.
+await client.waitForReady(10);
+
+const sub = client.subscribeNewBlobRawTxs(filter);
+
+sub.on("data", (tx: Types.TransactionRawWithSender) => {
+  handleTx(tx);
+});
 
 #### Execution Payloads (new blocks with transactions)
 
@@ -118,7 +164,7 @@ const sub = client.subscribeNewExecutionPayloads();
 sub.on("data", (block: Types.ExecutionPayload) => {
   handleBlock(block);
 });
-```
+````
 
 NOTE
 

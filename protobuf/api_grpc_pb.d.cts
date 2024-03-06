@@ -12,6 +12,7 @@ import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty
 interface IAPIService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
   subscribeNewTxs: IAPIService_ISubscribeNewTxs;
   subscribeNewTxsV2: IAPIService_ISubscribeNewTxsV2;
+  subscribeNewBlobTxs: IAPIService_ISubscribeNewBlobTxs;
   sendTransaction: IAPIService_ISendTransaction;
   sendRawTransaction: IAPIService_ISendRawTransaction;
   sendTransactionV2: IAPIService_ISendTransactionV2;
@@ -43,6 +44,19 @@ interface IAPIService_ISubscribeNewTxsV2
   responseStream: true;
   requestSerialize: grpc.serialize<api_pb.TxFilter>;
   requestDeserialize: grpc.deserialize<api_pb.TxFilter>;
+  responseSerialize: grpc.serialize<api_pb.TransactionWithSenderMsg>;
+  responseDeserialize: grpc.deserialize<api_pb.TransactionWithSenderMsg>;
+}
+interface IAPIService_ISubscribeNewBlobTxs
+  extends grpc.MethodDefinition<
+    google_protobuf_empty_pb.Empty,
+    api_pb.TransactionWithSenderMsg
+  > {
+  path: "/api.API/SubscribeNewBlobTxs";
+  requestStream: false;
+  responseStream: true;
+  requestSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
+  requestDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
   responseSerialize: grpc.serialize<api_pb.TransactionWithSenderMsg>;
   responseDeserialize: grpc.deserialize<api_pb.TransactionWithSenderMsg>;
 }
@@ -187,6 +201,10 @@ export interface IAPIServer extends grpc.UntypedServiceImplementation {
     api_pb.TxFilter,
     api_pb.TransactionWithSenderMsg
   >;
+  subscribeNewBlobTxs: grpc.handleServerStreamingCall<
+    google_protobuf_empty_pb.Empty,
+    api_pb.TransactionWithSenderMsg
+  >;
   sendTransaction: grpc.handleBidiStreamingCall<
     eth_pb.Transaction,
     api_pb.TransactionResponse
@@ -253,6 +271,15 @@ export interface IAPIClient {
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
   subscribeNewTxsV2(
     request: api_pb.TxFilter,
+    metadata?: grpc.Metadata,
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
+  subscribeNewBlobTxs(
+    request: google_protobuf_empty_pb.Empty,
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
+  subscribeNewBlobTxs(
+    request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
     options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
@@ -401,6 +428,15 @@ export class APIClient extends grpc.Client implements IAPIClient {
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
   public subscribeNewTxsV2(
     request: api_pb.TxFilter,
+    metadata?: grpc.Metadata,
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
+  public subscribeNewBlobTxs(
+    request: google_protobuf_empty_pb.Empty,
+    options?: Partial<grpc.CallOptions>
+  ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;
+  public subscribeNewBlobTxs(
+    request: google_protobuf_empty_pb.Empty,
     metadata?: grpc.Metadata,
     options?: Partial<grpc.CallOptions>
   ): grpc.ClientReadableStream<api_pb.TransactionWithSenderMsg>;

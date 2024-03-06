@@ -3,6 +3,8 @@ import { default as Package } from "../package.json" with { type: "json" };
 const ProtobufApiGrpcPb = await import("../protobuf/api_grpc_pb.cjs");
 const ProtobufApiPb = (await import("../protobuf/api_pb.cjs")).default;
 import { TxStream, ExecutionPayloadStream, BeaconBlockStream, TxRawStream, BeaconBlockRawStream, } from "./stream/index.js";
+import { BlobTxStream } from "./stream/blobTx.js";
+import { BlobTxRawStream } from "./stream/blobTxRaw.js";
 export class Client {
     _client;
     _md;
@@ -49,6 +51,23 @@ export class Client {
         const protoFilter = new ProtobufApiPb.TxFilter();
         protoFilter.setEncoded(f);
         return new TxRawStream(this._client, this._md, protoFilter);
+    }
+    /**
+     * Subscribes to the new transactions stream.
+     * @returns {TxStream} emits new txs with sender of type `BlobTransactionWithSender` as events
+     */
+    subscribeNewBlobTxs() {
+        return new BlobTxStream(this._client, this._md);
+    }
+    /**
+     * Subscribes to the new transactions stream.
+     * @returns {TxStream} emits new txs with sender of type `TransactionRawWithSender` as events
+     *
+     * Note: transactions are returned with the "raw format" `type || rlp([tx_payload_body, blobs,
+     * commitments, proofs])` compatible with the `eth_sendRawTransaction` RPC
+     */
+    subscribeNewBlobRawTxs() {
+        return new BlobTxRawStream(this._client, this._md);
     }
     /**
      * Subscribes to the new execution payloads stream.
