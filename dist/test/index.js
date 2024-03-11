@@ -29,16 +29,21 @@ async function main() {
     subRawTxs.on("data", (tx) => {
         console.log(`New raw tx received: ${tx.transaction.slice(0, 10)}...${tx.transaction.slice(-10)}`);
     });
-    console.log("Subscribing to new blob txs");
-    let subBlobTxs = client.subscribeNewBlobTxs();
-    subBlobTxs.on("data", (tx) => {
-        console.log(`New blob tx received: ${tx.transaction.hash()}`);
-    });
-    console.log("Subscribing to new blob txs raw");
-    let subBlobRawTxs = client.subscribeNewBlobRawTxs();
-    subBlobRawTxs.on("data", (tx) => {
-        console.log(`New raw tx received: ${tx.transaction.slice(0, 10)}...${tx.transaction.slice(-10)}`);
-    });
+    // console.log("Subscribing to new blob txs");
+    // let subBlobTxs = client.subscribeNewBlobTxs();
+    //
+    // subBlobTxs.on("data", (tx: BlobTransactionWithSender) => {
+    //   console.log(`New blob tx received: ${tx.transaction.hash()}`);
+    // });
+    //
+    // console.log("Subscribing to new blob txs raw");
+    // let subBlobRawTxs = client.subscribeNewBlobRawTxs();
+    //
+    // subBlobRawTxs.on("data", (tx: TransactionRawWithSender) => {
+    //   console.log(
+    //     `New raw tx received: ${tx.transaction.slice(0, 10)}...${tx.transaction.slice(-10)}`
+    //   );
+    // });
     // console.log("Subscribing new execution payloads");
     // let subExecutionPayload = client.subscribeNewExecutionPayloads();
     //
