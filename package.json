@@ -1,6 +1,6 @@
 {
   "name": "fiber-ts",
-  "version": "1.10.1",
+  "version": "1.9.1",
   "description": "Client package for connecting to Fiber Network",
   "repository": {
     "url": "https://github.com/chainbound/fiber-ts"
@@ -27,14 +27,15 @@
   },
   "dependencies": {
     "@ethereumjs/block": "^5.1.1",
-    "@ethereumjs/common": "^4.0.0",
+    "@ethereumjs/common": "^4.2.0",
     "@ethereumjs/rlp": "^5.0.2",
     "@ethereumjs/tx": "^5.2.1",
-    "@ethereumjs/util": "^9.0.0",
+    "@ethereumjs/util": "^9.0.2",
     "@grpc/grpc-js": "^1.6.12",
     "@lodestar/types": "^1.15.1",
     "ethers": "^5.7.0",
-    "google-protobuf": "^3.21.0"
+    "google-protobuf": "^3.21.0",
+    "kzg-wasm": "^0.2.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build",
