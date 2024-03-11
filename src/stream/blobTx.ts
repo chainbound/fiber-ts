@@ -3,7 +3,7 @@ import { APIClient } from "../../protobuf/api_grpc_pb.cjs";
 import { Address, bytesToHex } from "@ethereumjs/util";
 import { Metadata } from "@grpc/grpc-js";
 import { BlobTransactionWithSender } from "../types.js";
-import { TransactionWithSenderMsg, TxFilter } from "../../protobuf/api_pb.cjs";
+import ApiPb from "../../protobuf/api_pb.cjs";
 import { BlobEIP4844Transaction } from "@ethereumjs/tx";
 
 export class BlobTxStream extends EventEmitter {
@@ -25,10 +25,10 @@ export class BlobTxStream extends EventEmitter {
       });
     });
 
-    const _txStream = _client.subscribeNewBlobTxs(new TxFilter(), _md);
+    const _txStream = _client.subscribeNewBlobTxs(new ApiPb.TxFilter(), _md);
     _txStream.on("close", () => this.emit("close"));
     _txStream.on("end", () => this.emit("end"));
-    _txStream.on("data", (data: TransactionWithSenderMsg) => {
+    _txStream.on("data", (data: ApiPb.TransactionWithSenderMsg) => {
       let res: BlobTransactionWithSender = {
         sender: Address.fromString(bytesToHex(data.getSender() as Uint8Array)),
         // Creates a transaction from the network encoding of a blob transaction (with blobs/commitments/proof)

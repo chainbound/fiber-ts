@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import { Address, bytesToHex } from "@ethereumjs/util";
-import { TxFilter } from "../../protobuf/api_pb.cjs";
+import ApiPb from "../../protobuf/api_pb.cjs";
 export class BlobTxRawStream extends EventEmitter {
     constructor(_client, _md) {
         super();
@@ -19,7 +19,7 @@ export class BlobTxRawStream extends EventEmitter {
                 }
             });
         });
-        const _txStream = _client.subscribeNewBlobTxs(new TxFilter(), _md);
+        const _txStream = _client.subscribeNewBlobTxs(new ApiPb.TxFilter(), _md);
         _txStream.on("close", () => this.emit("close"));
         _txStream.on("end", () => this.emit("end"));
         _txStream.on("data", (data) => {

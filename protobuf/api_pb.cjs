@@ -29,7 +29,7 @@ var global = function () {
   return Function("return this")();
 }.call(null);
 
-var eth_pb = require("./eth_pb.js");
+var eth_pb = require("./eth_pb.cjs");
 goog.object.extend(proto, eth_pb);
 var google_protobuf_empty_pb = require("google-protobuf/google/protobuf/empty_pb.js");
 goog.object.extend(proto, google_protobuf_empty_pb);
