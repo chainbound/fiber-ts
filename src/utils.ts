@@ -14,11 +14,33 @@ import { createKZG } from "kzg-wasm";
 const kzg = await createKZG();
 initKZG(kzg, "");
 
-const common = new Common({
+const CANCUN_TIMESTAMP_MS = 1710338135000;
+const currentHardfork =
+  new Date().getTime() < CANCUN_TIMESTAMP_MS ? Hardfork.Shanghai : Hardfork.Cancun;
+
+let common = new Common({
   chain: Chain.Mainnet,
-  hardfork: Hardfork.Cancun,
+  hardfork: currentHardfork,
   customCrypto: { kzg },
 });
+
+async function switchToCancun() {
+  if (currentHardfork === Hardfork.Cancun) return;
+
+  const now = new Date().getTime();
+  const cancunTimestampMs = 1710338135000;
+  const timeToCancun = cancunTimestampMs - now;
+
+  await new Promise<void>((resolve) => setTimeout(resolve, timeToCancun));
+
+  common = new Common({
+    chain: Chain.Mainnet,
+    hardfork: Hardfork.Cancun,
+    customCrypto: { kzg },
+  });
+}
+
+switchToCancun();
 
 /**
  *
