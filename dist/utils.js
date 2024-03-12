@@ -23,8 +23,7 @@ async function switchToCancun() {
     if (currentHardfork === Hardfork.Cancun)
         return;
     const now = new Date().getTime();
-    const cancunTimestampMs = 1710338135000;
-    const timeToCancun = cancunTimestampMs - now;
+    const timeToCancun = CANCUN_TIMESTAMP_MS - now;
     await new Promise((resolve) => setTimeout(resolve, timeToCancun));
     common = new Common({
         chain: Chain.Mainnet,
