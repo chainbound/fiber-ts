@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import { Address, bytesToHex } from "@ethereumjs/util";
-import ApiPb from "../../protobuf/api_pb.cjs";
+import EmptyPb from "google-protobuf/google/protobuf/empty_pb.js";
 export class BlobTxRawStream extends EventEmitter {
     constructor(_client, _md) {
         super();
@@ -19,7 +19,7 @@ export class BlobTxRawStream extends EventEmitter {
                 }
             });
         });
-        const _txStream = _client.subscribeNewBlobTxs(new ApiPb.TxFilter(), _md);
+        const _txStream = _client.subscribeNewBlobTxs(new EmptyPb.Empty(), _md);
         _txStream.on("close", () => this.emit("close"));
         _txStream.on("end", () => this.emit("end"));
         _txStream.on("data", (data) => {
