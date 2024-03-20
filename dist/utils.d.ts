@@ -1,4 +1,6 @@
 import { TypedTransaction } from "@ethereumjs/tx";
+import { Common } from "@ethereumjs/common";
+export declare let common: Common;
 /**
  *
  * @param raw a raw transaction in RLP format

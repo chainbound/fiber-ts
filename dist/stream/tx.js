@@ -1,6 +1,8 @@
 import EventEmitter from "events";
 import { Address, bytesToHex } from "@ethereumjs/util";
-import { fromRLPTransaction } from "../utils.js";
+import { common, fromRLPTransaction } from "../utils.js";
+import { RLP } from "@ethereumjs/rlp";
+import { BlobEIP4844Transaction, } from "@ethereumjs/tx";
 export class TxStream extends EventEmitter {
     constructor(_client, _md, _filter) {
         super();
@@ -23,9 +25,22 @@ export class TxStream extends EventEmitter {
         _txStream.on("close", () => this.emit("close"));
         _txStream.on("end", () => this.emit("end"));
         _txStream.on("data", (data) => {
+            let transaction;
+            try {
+                transaction = fromRLPTransaction(data.getRlpTransaction_asU8());
+            }
+            catch (e) {
+                // HOTFIX: Remove full blobs from the transaction which prevents deserialization
+                // using `fromRLPTransaction`
+                if (!e.message.includes("Invalid EIP-4844 transaction"))
+                    return;
+                const networkTxValues = RLP.decode(data.getRlpTransaction_asU8().subarray(1));
+                const [txValues, _blobs, _kzgCommitments, _kzgProofs] = networkTxValues;
+                transaction = BlobEIP4844Transaction.fromValuesArray(txValues, { common });
+            }
             let res = {
                 sender: Address.fromString(bytesToHex(data.getSender())),
-                transaction: fromRLPTransaction(data.getRlpTransaction_asU8()),
+                transaction,
             };
             this.emit("data", res);
         });

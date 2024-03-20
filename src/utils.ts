@@ -18,7 +18,7 @@ const CANCUN_TIMESTAMP_MS = 1710338135000;
 const currentHardfork =
   new Date().getTime() < CANCUN_TIMESTAMP_MS ? Hardfork.Shanghai : Hardfork.Cancun;
 
-let common = new Common({
+export let common = new Common({
   chain: Chain.Mainnet,
   hardfork: currentHardfork,
   customCrypto: { kzg },
