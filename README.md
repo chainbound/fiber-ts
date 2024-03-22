@@ -133,7 +133,7 @@ every transaction returns its signer and the "raw format" `type ||
 rlp([tx_payload_body, blobs, commitments, proofs])` compatible with the
 `eth_sendRawTransaction` RPC method.
 
-````ts
+```ts
 import { Client, Types } from "fiber-ts";
 
 const client = new Client("fiber.example.io", "YOUR_API_KEY");
@@ -146,6 +146,7 @@ const sub = client.subscribeNewBlobRawTxs(filter);
 sub.on("data", (tx: Types.TransactionRawWithSender) => {
   handleTx(tx);
 });
+```
 
 #### Execution Payloads (new blocks with transactions)
 
@@ -164,7 +165,7 @@ const sub = client.subscribeNewExecutionPayloads();
 sub.on("data", (block: Types.ExecutionPayload) => {
   handleBlock(block);
 });
-````
+```
 
 NOTE
 
