@@ -32,8 +32,10 @@ export class TxStream extends EventEmitter {
             catch (e) {
                 // HOTFIX: Remove full blobs from the transaction which prevents deserialization
                 // using `fromRLPTransaction`
-                if (!e.message.includes("Invalid EIP-4844 transaction"))
+                if (!e.message.includes("Invalid EIP-4844 transaction. Only expecting 11 values (for unsigned tx) or 14 values (for signed tx).")) {
+                    console.error("Unexpected error while decoding RLP", e);
                     return;
+                }
                 const networkTxValues = RLP.decode(data.getRlpTransaction_asU8().subarray(1));
                 const [txValues, _blobs, _kzgCommitments, _kzgProofs] = networkTxValues;
                 transaction = BlobEIP4844Transaction.fromValuesArray(txValues, { common });

@@ -1,4 +1,4 @@
-import { TypedTransaction as TypedTransactionLib, TransactionFactory as TransactionFactoryLib } from "@ethereumjs/tx";
+import { TypedTransaction as TypedTransactionLib, TransactionFactory as TransactionFactoryLib, BlobEIP4844Transaction as BlobEIP4844TransactionLib } from "@ethereumjs/tx";
 import { bellatrix, capella, deneb } from "@lodestar/types";
 import { Block as BlockLib } from "@ethereumjs/block";
 import { Address as AddressLib } from "@ethereumjs/util";
@@ -31,6 +31,10 @@ export type TypedTransaction = TypedTransactionLib;
  */
 export type TransactionFactory = TransactionFactoryLib;
 /**
+ * Re-exported from `@ethereumjs/tx`
+ */
+export type BlobEIP4844Transaction = BlobEIP4844TransactionLib;
+/**
  * Re-exported from `@ethereumjs/block`
  */
 export type Block = BlockLib;
@@ -53,6 +57,22 @@ export interface TransactionWithSender {
 export interface TransactionRawWithSender {
     sender: Address;
     transaction: Uint8Array;
+}
+/**
+ * A wrapper type around `BlobEIP4844Transaction` that includes the
+ * ec-recovered sender's address for performance reasons.
+ */
+export interface BlobTransactionWithSender {
+    sender: Address;
+    transaction: BlobEIP4844Transaction;
+}
+/**
+ * Includes the rlp-encoded blob transaction and the ec-recovered
+ * sender's address for performance reasons.
+ */
+export interface BlobTransactionWithSender {
+    sender: Address;
+    transaction: BlobEIP4844Transaction;
 }
 export interface TransactionResponse {
     hash: string;

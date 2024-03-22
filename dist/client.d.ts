@@ -20,6 +20,19 @@ export declare class Client {
      */
     subscribeNewRawTxs(filter?: FilterBuilder): TxRawStream;
     /**
+     * Subscribes to the new transactions stream.
+     * @returns {TxStream} emits new txs with sender of type `BlobTransactionWithSender` as events
+     */
+    subscribeNewBlobTxs(): TxStream;
+    /**
+     * Subscribes to the new transactions stream.
+     * @returns {TxStream} emits new txs with sender of type `TransactionRawWithSender` as events
+     *
+     * Note: transactions are returned with the "raw format" `type || rlp([tx_payload_body, blobs,
+     * commitments, proofs])` compatible with the `eth_sendRawTransaction` RPC
+     */
+    subscribeNewBlobRawTxs(): TxStream;
+    /**
      * Subscribes to the new execution payloads stream.
      * @returns {ExecutionPayloadStream} emits new blocks of type `Block` as events (with transactions)
      */
