@@ -57,15 +57,15 @@ export class BeaconBlockStream extends EventEmitter {
         return decodedBlock;
     }
     decodeBellatrix(sszEncodedBeaconBlock) {
-        const decoded = ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+        const decoded = ssz.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
         return decoded;
     }
     decodeCapella(sszEncodedBeaconBlock) {
-        const decoded = ssz.allForks.capella.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+        const decoded = ssz.capella.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
         return decoded;
     }
     decodeDeneb(sszEncodedBeaconBlock) {
-        const decoded = ssz.allForks.deneb.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+        const decoded = ssz.deneb.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
         return decoded;
     }
 }

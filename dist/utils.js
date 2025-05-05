@@ -1,7 +1,6 @@
-import { TransactionFactory } from "@ethereumjs/tx";
-import { Chain, Common, Hardfork } from "@ethereumjs/common";
-import { initKZG } from "@ethereumjs/util";
-import { createKZG } from "kzg-wasm";
+import { Common, getPresetChainConfig, Hardfork } from "@ethereumjs/common";
+import { KZG as microEthKZG } from "micro-eth-signer/kzg";
+import { trustedSetup } from "@paulmillr/trusted-setups/fast.js";
 /**
  * KZG setup, along with [`Common`] transaction options are needed
  * to support EIP-4844 type-3 transactions.
@@ -10,18 +9,9 @@ import { createKZG } from "kzg-wasm";
  *   - https://github.com/ethereumjs/ethereumjs-monorepo/tree/master/packages/tx#kzg-setup
  *   - https://github.com/ethereumjs/ethereumjs-monorepo/blob/7c500b70b5f593a8811fc214a3b86085188da755/packages/tx/examples/blobTx.ts
  */
-const kzg = await createKZG();
-initKZG(kzg, "");
+const kzg = new microEthKZG(trustedSetup);
 export let common = new Common({
-    chain: Chain.Mainnet,
-    hardfork: Hardfork.Cancun,
+    chain: getPresetChainConfig("mainnet"),
+    hardfork: Hardfork.Prague,
     customCrypto: { kzg },
 });
-/**
- *
- * @param raw a raw transaction in RLP format
- * @returns an Ethereumjs TypedTransaction object
- */
-export function fromRLPTransaction(raw) {
-    return TransactionFactory.fromSerializedData(raw, { common });
-}

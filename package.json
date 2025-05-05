@@ -17,25 +17,26 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/google-protobuf": "^3.15.6",
-    "@types/node": "^20.11.19",
-    "dotenv": "^16.4.5",
-    "grpc-tools": "^1.11.2",
-    "grpc_tools_node_protoc_ts": "^5.3.2",
+    "@types/google-protobuf": "^3.15.12",
+    "@types/node": "^22.15.3",
+    "dotenv": "^16.5.0",
+    "grpc-tools": "^1.13.0",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@ethereumjs/block": "^5.1.1",
-    "@ethereumjs/common": "^4.2.0",
-    "@ethereumjs/rlp": "^5.0.2",
-    "@ethereumjs/tx": "^5.2.1",
-    "@ethereumjs/util": "^9.0.2",
-    "@grpc/grpc-js": "^1.6.12",
-    "@lodestar/types": "^1.15.1",
-    "ethers": "^5.7.0",
-    "google-protobuf": "^3.21.0",
-    "kzg-wasm": "^0.2.0"
+    "@ethereumjs/block": "^10.0.0",
+    "@ethereumjs/common": "^10.0.0",
+    "@ethereumjs/rlp": "^10.0.0",
+    "@ethereumjs/tx": "^10.0.0",
+    "@ethereumjs/util": "^10.0.0",
+    "@grpc/grpc-js": "^1.13.3",
+    "@lodestar/types": "^1.29.0",
+    "@paulmillr/trusted-setups": "^0.1.2",
+    "ethers": "^6.13.7",
+    "google-protobuf": "^3.21.4",
+    "micro-eth-signer": "^0.14.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build",

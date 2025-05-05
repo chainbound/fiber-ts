@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import { Address, bytesToHex } from "@ethereumjs/util";
+import { bytesToHex, createAddressFromString } from "@ethereumjs/util";
 import EmptyPb from "google-protobuf/google/protobuf/empty_pb.js";
 export class BlobTxRawStream extends EventEmitter {
     constructor(_client, _md) {
@@ -24,7 +24,7 @@ export class BlobTxRawStream extends EventEmitter {
         _txStream.on("end", () => this.emit("end"));
         _txStream.on("data", (data) => {
             let res = {
-                sender: Address.fromString(bytesToHex(data.getSender())),
+                sender: createAddressFromString(bytesToHex(data.getSender())),
                 transaction: data.getRlpTransaction_asU8(),
             };
             this.emit("data", res);

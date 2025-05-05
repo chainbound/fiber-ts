@@ -1,15 +1,16 @@
 import EventEmitter from "events";
 import { APIClient } from "../../protobuf/api_grpc_pb.cjs";
-import { Address, bytesToHex } from "@ethereumjs/util";
+import { bytesToHex, createAddressFromString } from "@ethereumjs/util";
 import { Metadata } from "@grpc/grpc-js";
 import { TransactionWithSender } from "../types.js";
 import { TransactionWithSenderMsg, TxFilter } from "../../protobuf/api_pb.cjs";
-import { common, fromRLPTransaction } from "../utils.js";
+import { common } from "../utils.js";
 import { RLP } from "@ethereumjs/rlp";
 import {
   BlobEIP4844NetworkValuesArray,
-  BlobEIP4844Transaction,
   TypedTransaction,
+  createBlob4844TxFromBytesArray,
+  createTxFromRLP,
 } from "@ethereumjs/tx";
 
 export class TxStream extends EventEmitter {
@@ -38,7 +39,7 @@ export class TxStream extends EventEmitter {
       let transaction: TypedTransaction;
 
       try {
-        transaction = fromRLPTransaction(data.getRlpTransaction_asU8());
+        transaction = createTxFromRLP(data.getRlpTransaction_asU8(), { common });
       } catch (e: any) {
         // HOTFIX: Remove full blobs from the transaction which prevents deserialization
         // using `fromRLPTransaction`
@@ -55,11 +56,11 @@ export class TxStream extends EventEmitter {
         const networkTxValues = RLP.decode(data.getRlpTransaction_asU8().subarray(1));
         const [txValues, _blobs, _kzgCommitments, _kzgProofs] =
           networkTxValues as BlobEIP4844NetworkValuesArray;
-        transaction = BlobEIP4844Transaction.fromValuesArray(txValues, { common });
+        transaction = createBlob4844TxFromBytesArray(txValues, { common });
       }
 
       let res: TransactionWithSender = {
-        sender: Address.fromString(bytesToHex(data.getSender() as Uint8Array)),
+        sender: createAddressFromString(bytesToHex(data.getSender() as Uint8Array)),
         transaction,
       };
 
