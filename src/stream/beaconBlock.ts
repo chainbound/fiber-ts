@@ -1,7 +1,7 @@
 import { default as google_protobuf_empty_pb } from "google-protobuf/google/protobuf/empty_pb.js";
 import { Metadata } from "@grpc/grpc-js";
 import { ssz } from "@lodestar/types";
-import { SignedBeaconBlock } from "@lodestar/types/allForks";
+import { SignedBeaconBlock } from "@lodestar/types";
 import { EventEmitter } from "events";
 import type { BeaconBlockMsg } from "../../protobuf/api_pb.cjs";
 import type { APIClient } from "../../protobuf/api_grpc_pb.cjs";
@@ -75,20 +75,17 @@ export class BeaconBlockStream extends EventEmitter {
   }
 
   private decodeBellatrix(sszEncodedBeaconBlock: Uint8Array): SignedBeaconBlock {
-    const decoded =
-      ssz.allForks.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+    const decoded = ssz.bellatrix.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
     return decoded;
   }
 
   private decodeCapella(sszEncodedBeaconBlock: Uint8Array): SignedBeaconBlock {
-    const decoded =
-      ssz.allForks.capella.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+    const decoded = ssz.capella.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
     return decoded;
   }
 
   private decodeDeneb(sszEncodedBeaconBlock: Uint8Array): SignedBeaconBlock {
-    const decoded =
-      ssz.allForks.deneb.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
+    const decoded = ssz.deneb.SignedBeaconBlock.deserialize(sszEncodedBeaconBlock);
     return decoded;
   }
 }

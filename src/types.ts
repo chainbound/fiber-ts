@@ -1,11 +1,8 @@
-import {
-  TypedTransaction as TypedTransactionLib,
-  TransactionFactory as TransactionFactoryLib,
-  BlobEIP4844Transaction as BlobEIP4844TransactionLib,
-} from "@ethereumjs/tx";
+import { TypedTransaction as TypedTransactionLib } from "@ethereumjs/tx";
 import { bellatrix, capella, deneb } from "@lodestar/types";
 import { Block as BlockLib } from "@ethereumjs/block";
 import { Address as AddressLib } from "@ethereumjs/util";
+import { Blob4844Tx } from "node_modules/@ethereumjs/tx/dist/cjs/index.js";
 
 export type DataVersion = 3 | 4 | 5;
 
@@ -36,16 +33,6 @@ export type SignedBeaconBlock =
  * Re-exported from `@ethereumjs/tx`
  */
 export type TypedTransaction = TypedTransactionLib;
-
-/**
- * Re-exported from `@ethereumjs/tx`
- */
-export type TransactionFactory = TransactionFactoryLib;
-
-/**
- * Re-exported from `@ethereumjs/tx`
- */
-export type BlobEIP4844Transaction = BlobEIP4844TransactionLib;
 
 /**
  * Re-exported from `@ethereumjs/block`
@@ -81,16 +68,7 @@ export interface TransactionRawWithSender {
  */
 export interface BlobTransactionWithSender {
   sender: Address;
-  transaction: BlobEIP4844Transaction;
-}
-
-/**
- * Includes the rlp-encoded blob transaction and the ec-recovered
- * sender's address for performance reasons.
- */
-export interface BlobTransactionWithSender {
-  sender: Address;
-  transaction: BlobEIP4844Transaction;
+  transaction: TypedTransaction;
 }
 
 export interface TransactionResponse {

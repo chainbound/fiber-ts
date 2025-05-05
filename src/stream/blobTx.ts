@@ -1,10 +1,14 @@
 import EventEmitter from "events";
 import { APIClient } from "../../protobuf/api_grpc_pb.cjs";
-import { Address, bytesToHex } from "@ethereumjs/util";
+import { bytesToHex, createAddressFromString } from "@ethereumjs/util";
 import { Metadata } from "@grpc/grpc-js";
 import { BlobTransactionWithSender } from "../types.js";
 import ApiPb from "../../protobuf/api_pb.cjs";
-import { BlobEIP4844NetworkValuesArray, BlobEIP4844Transaction } from "@ethereumjs/tx";
+import {
+  BlobEIP4844NetworkValuesArray,
+  createBlob4844Tx,
+  createBlob4844TxFromBytesArray,
+} from "@ethereumjs/tx";
 import EmptyPb from "google-protobuf/google/protobuf/empty_pb.js";
 import { RLP } from "@ethereumjs/rlp";
 import { common } from "../utils.js";
@@ -37,11 +41,11 @@ export class BlobTxStream extends EventEmitter {
       ) as BlobEIP4844NetworkValuesArray;
       const [txValues, blobs, kzgCommitments, kzgProofs] = networkTxValues;
 
-      const transactionWithoutBlobs = BlobEIP4844Transaction.fromValuesArray(txValues, {
+      const transactionWithoutBlobs = createBlob4844TxFromBytesArray(txValues, {
         common,
       });
 
-      const transactionWithBlobs = new BlobEIP4844Transaction(
+      const transactionWithBlobs = createBlob4844Tx(
         {
           ...transactionWithoutBlobs,
           blobs,
@@ -52,7 +56,7 @@ export class BlobTxStream extends EventEmitter {
       );
 
       let res: BlobTransactionWithSender = {
-        sender: Address.fromString(bytesToHex(data.getSender() as Uint8Array)),
+        sender: createAddressFromString(bytesToHex(data.getSender() as Uint8Array)),
         transaction: transactionWithBlobs,
       };
 

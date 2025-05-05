@@ -1,6 +1,6 @@
 import EventEmitter from "events";
-import { Address, bytesToHex } from "@ethereumjs/util";
-import { BlobEIP4844Transaction } from "@ethereumjs/tx";
+import { bytesToHex, createAddressFromString } from "@ethereumjs/util";
+import { createBlob4844Tx, createBlob4844TxFromBytesArray, } from "@ethereumjs/tx";
 import EmptyPb from "google-protobuf/google/protobuf/empty_pb.js";
 import { RLP } from "@ethereumjs/rlp";
 import { common } from "../utils.js";
@@ -28,17 +28,17 @@ export class BlobTxStream extends EventEmitter {
         _txStream.on("data", (data) => {
             const networkTxValues = RLP.decode(data.getRlpTransaction_asU8().subarray(1));
             const [txValues, blobs, kzgCommitments, kzgProofs] = networkTxValues;
-            const transactionWithoutBlobs = BlobEIP4844Transaction.fromValuesArray(txValues, {
+            const transactionWithoutBlobs = createBlob4844TxFromBytesArray(txValues, {
                 common,
             });
-            const transactionWithBlobs = new BlobEIP4844Transaction({
+            const transactionWithBlobs = createBlob4844Tx({
                 ...transactionWithoutBlobs,
                 blobs,
                 kzgCommitments,
                 kzgProofs,
             }, { common });
             let res = {
-                sender: Address.fromString(bytesToHex(data.getSender())),
+                sender: createAddressFromString(bytesToHex(data.getSender())),
                 transaction: transactionWithBlobs,
             };
             this.emit("data", res);

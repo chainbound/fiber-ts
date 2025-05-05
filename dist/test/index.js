@@ -52,11 +52,12 @@ async function main() {
     });
     let wallet = new ethers.Wallet(PRIVATE_KEY);
     let tx = await wallet.signTransaction({
+        chainId: 1,
         nonce: 0,
         gasPrice: 1,
         gasLimit: 21000,
         to: "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
-        data: Buffer.from(""),
+        data: "",
         value: 1,
     });
     let txr = await client.sendRawTransaction(tx);

@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import { APIClient } from "../../protobuf/api_grpc_pb.cjs";
-import { Address, bytesToHex } from "@ethereumjs/util";
+import { Address, bytesToHex, createAddressFromString } from "@ethereumjs/util";
 import { Metadata } from "@grpc/grpc-js";
 import { TransactionRawWithSender } from "../types.js";
 import ApiPb from "../../protobuf/api_pb.cjs";
@@ -30,7 +30,7 @@ export class BlobTxRawStream extends EventEmitter {
     _txStream.on("end", () => this.emit("end"));
     _txStream.on("data", (data: ApiPb.TransactionWithSenderMsg) => {
       let res: TransactionRawWithSender = {
-        sender: Address.fromString(bytesToHex(data.getSender() as Uint8Array)),
+        sender: createAddressFromString(bytesToHex(data.getSender() as Uint8Array)),
         transaction: data.getRlpTransaction_asU8(),
       };
 
